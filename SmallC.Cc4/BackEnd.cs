@@ -94,9 +94,10 @@ dw 0").ConfigureAwait(false);
     /// Print any assembler stuff needed at the end.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task TrailerAsync()
+    public async Task TrailerAsync()
     {
-        _ = output;
-        throw new NotImplementedException();
+        await output.WriteAsync(@"DATA ENDS
+END
+").ConfigureAwait(false);
     }
 }
