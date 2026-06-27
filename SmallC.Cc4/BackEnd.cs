@@ -21,9 +21,9 @@ public class BackEnd(TextWriter output)
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task HeaderAsync()
     {
-        await output.WriteAsync(@"CODE SEGMENT PUBLIC
-ASSUME CS:CODE, SS:DATA, DS:DATA
-extrn __eq: near
+        await this.ToSegAsync(SegmentType.CodeSeg)
+            .ConfigureAwait(false);
+        await output.WriteAsync(@"extrn __eq: near
 extrn __ne: near
 extrn __le: near
 extrn __lt: near
@@ -36,9 +36,10 @@ extrn __ugt: near
 extrn __lneg: near
 extrn __switch: near
 dw 0
-CODE ENDS
-DATA SEGMENT PUBLIC
-dw 0").ConfigureAwait(false);
+").ConfigureAwait(false);
+        await this.ToSegAsync(SegmentType.DataSeg)
+            .ConfigureAwait(false);
+        await output.WriteLineAsync("dw 0").ConfigureAwait(false);
     }
 
     /// <summary>
@@ -96,8 +97,7 @@ dw 0").ConfigureAwait(false);
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TrailerAsync()
     {
-        await output.WriteAsync(@"DATA ENDS
-END
-").ConfigureAwait(false);
+        await this.ToSegAsync(SegmentType.Null).ConfigureAwait(false);
+        await output.WriteLineAsync("END").ConfigureAwait(false);
     }
 }
