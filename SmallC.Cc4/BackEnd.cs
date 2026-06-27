@@ -4,6 +4,9 @@
 
 namespace SmallC.Cc4;
 
+using SmallC.Cc;
+using System.ComponentModel;
+
 /// <summary>
 /// Back end.
 /// </summary>
@@ -34,5 +37,25 @@ dw 0
 CODE ENDS
 DATA SEGMENT PUBLIC
 dw 0").ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Change to a new segment.
+    /// </summary>
+    /// <param name="newSeg">Segment to change to.</param>
+    /// <remarks>
+    /// May be called with <see cref="SegmentType.Null"/>,
+    /// <see cref="SegmentType.CodeSeg"/>, or <see cref="SegmentType.DataSeg"/>.
+    /// </remarks>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task ToSegAsync(SegmentType newSeg)
+    {
+        if (!Enum.IsDefined(newSeg))
+        {
+            throw new InvalidEnumArgumentException(
+                nameof(newSeg), (int)newSeg, typeof(SegmentType));
+        }
+
+        await output.WriteAsync(string.Empty).ConfigureAwait(false);
     }
 }

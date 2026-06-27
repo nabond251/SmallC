@@ -31,8 +31,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SmallC.Cc\SmallC.Cc.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -4,6 +4,7 @@
 
 namespace SmallC.Cc4.Tests;
 
+using SmallC.Cc;
 using SmallC.Cc4;
 
 /// <summary>
@@ -16,7 +17,7 @@ public class BackEndTests
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Fact]
-    public async Task GeneratesHeader()
+    public async Task GeneratesHeaderAsync()
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
@@ -46,6 +47,27 @@ dw 0
 CODE ENDS
 DATA SEGMENT PUBLIC
 dw 0";
+        Assert.Equal(expected, actual);
+    }
+
+    /// <summary>
+    /// Tests that can transition between segments.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    [Fact]
+    public async Task TransitionsSegmentAsync()
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var sut = new BackEnd(output);
+
+        await sut.ToSegAsync(SegmentType.Null);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actual = await reader.ReadToEndAsync();
+
+        var expected = string.Empty;
         Assert.Equal(expected, actual);
     }
 }
