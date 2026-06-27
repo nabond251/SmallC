@@ -56,6 +56,19 @@ dw 0").ConfigureAwait(false);
                 nameof(newSeg), (int)newSeg, typeof(SegmentType));
         }
 
+        if (newSeg == SegmentType.CodeSeg)
+        {
+            await output.WriteLineAsync("CODE SEGMENT PUBLIC")
+                .ConfigureAwait(false);
+            await output.WriteLineAsync("ASSUME CS:CODE, SS:DATA, DS:DATA")
+                .ConfigureAwait(false);
+        }
+        else if (newSeg == SegmentType.DataSeg)
+        {
+            await output.WriteLineAsync("DATA SEGMENT PUBLIC")
+                .ConfigureAwait(false);
+        }
+
         await output.WriteAsync(string.Empty).ConfigureAwait(false);
     }
 }
