@@ -12,12 +12,10 @@ using SmallC.Cc4;
 /// </summary>
 public class BackEndTests
 {
-    private const string NullToData = @"DATA SEGMENT PUBLIC
-";
-
-    private const string NullToCode = @"CODE SEGMENT PUBLIC
-ASSUME CS:CODE, SS:DATA, DS:DATA
-";
+    private const string BeginData = "DATA SEGMENT PUBLIC\r\n";
+    private const string EndData = "DATA ENDS\r\n";
+    private const string BeginCode = "CODE SEGMENT PUBLIC\r\nASSUME CS:CODE, SS:DATA, DS:DATA\r\n";
+    private const string EndCode = "CODE ENDS\r\n";
 
     /// <summary>
     /// Tests that header is generated.
@@ -60,21 +58,24 @@ dw 0";
     /// <summary>
     /// Tests that can transition between segments.
     /// </summary>
+    /// <param name="oldSeg">Segment to change from.</param>
     /// <param name="newSeg">Segment to change to.</param>
     /// <param name="expected">Expected output.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Theory]
-    [InlineData(SegmentType.Null, "")]
-    [InlineData(SegmentType.DataSeg, NullToData)]
-    [InlineData(SegmentType.CodeSeg, NullToCode)]
+    [InlineData(SegmentType.Null, SegmentType.Null, "")]
+    [InlineData(SegmentType.DataSeg, SegmentType.CodeSeg, $"{BeginData}{EndData}{BeginCode}{EndCode}")]
+    [InlineData(SegmentType.CodeSeg, SegmentType.DataSeg, $"{BeginCode}{EndCode}{BeginData}{EndData}")]
     public async Task TransitionsSegmentAsync(
-        SegmentType newSeg, string expected)
+        SegmentType oldSeg, SegmentType newSeg, string expected)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var sut = new BackEnd(output);
 
+        await sut.ToSegAsync(oldSeg);
         await sut.ToSegAsync(newSeg);
+        await sut.ToSegAsync(SegmentType.Null);
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);
