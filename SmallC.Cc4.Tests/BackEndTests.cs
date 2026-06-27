@@ -34,9 +34,7 @@ public class BackEndTests
         using var reader = new StreamReader(outputStream);
         var actual = await reader.ReadToEndAsync();
 
-        var expected = @"CODE SEGMENT PUBLIC
-ASSUME CS:CODE, SS:DATA, DS:DATA
-extrn __eq: near
+        var expected = $@"{BeginCode}extrn __eq: near
 extrn __ne: near
 extrn __le: near
 extrn __lt: near
@@ -49,9 +47,8 @@ extrn __ugt: near
 extrn __lneg: near
 extrn __switch: near
 dw 0
-CODE ENDS
-DATA SEGMENT PUBLIC
-dw 0";
+{EndCode}{BeginData}dw 0
+";
         Assert.Equal(expected, actual);
     }
 
@@ -65,6 +62,7 @@ dw 0";
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var sut = new BackEnd(output);
+        await sut.ToSegAsync(SegmentType.DataSeg);
 
         await sut.TrailerAsync();
         await output.FlushAsync();
@@ -72,7 +70,7 @@ dw 0";
         using var reader = new StreamReader(outputStream);
         var actual = await reader.ReadToEndAsync();
 
-        var expected = "DATA ENDS\r\nEND\r\n";
+        var expected = $"{BeginData}{EndData}END\r\n";
         Assert.Equal(expected, actual);
     }
 
