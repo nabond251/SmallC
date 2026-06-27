@@ -12,10 +12,12 @@ using SmallC.Cc4;
 /// </summary>
 public class BackEndTests
 {
-    private const string NullToData = @"DATA SEGMENT PUBLIC";
+    private const string NullToData = @"DATA SEGMENT PUBLIC
+";
 
     private const string NullToCode = @"CODE SEGMENT PUBLIC
-ASSUME CS:CODE, SS:DATA, DS:DATA";
+ASSUME CS:CODE, SS:DATA, DS:DATA
+";
 
     /// <summary>
     /// Tests that header is generated.
