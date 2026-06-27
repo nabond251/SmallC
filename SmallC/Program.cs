@@ -4,7 +4,5 @@
 
 using SmallC.Cc4;
 
-Console.WriteLine("Hello, World!");
-
 var backend = new BackEnd(Console.Out);
-await backend.HeaderAsync();
+await backend.HeaderAsync().ConfigureAwait(true);

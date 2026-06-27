@@ -33,6 +33,6 @@ extrn __switch: near
 dw 0
 CODE ENDS
 DATA SEGMENT PUBLIC
-dw 0");
+dw 0").ConfigureAwait(false);
     }
 }

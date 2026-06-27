@@ -25,7 +25,7 @@ public class BackEndTests
         await sut.HeaderAsync();
         await output.FlushAsync();
         outputStream.Position = 0;
-        var reader = new StreamReader(outputStream);
+        using var reader = new StreamReader(outputStream);
         var actual = await reader.ReadToEndAsync();
 
         var expected = @"CODE SEGMENT PUBLIC
