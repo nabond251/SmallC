@@ -64,7 +64,9 @@ dw 0";
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Theory]
     [InlineData(SegmentType.Null, SegmentType.Null, "")]
+    [InlineData(SegmentType.DataSeg, SegmentType.DataSeg, $"{BeginData}{EndData}")]
     [InlineData(SegmentType.DataSeg, SegmentType.CodeSeg, $"{BeginData}{EndData}{BeginCode}{EndCode}")]
+    [InlineData(SegmentType.CodeSeg, SegmentType.CodeSeg, $"{BeginCode}{EndCode}")]
     [InlineData(SegmentType.CodeSeg, SegmentType.DataSeg, $"{BeginCode}{EndCode}{BeginData}{EndData}")]
     public async Task TransitionsSegmentAsync(
         SegmentType oldSeg, SegmentType newSeg, string expected)
