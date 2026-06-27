@@ -58,6 +58,11 @@ dw 0").ConfigureAwait(false);
                 nameof(newSeg), (int)newSeg, typeof(SegmentType));
         }
 
+        if (this.oldSeg == newSeg)
+        {
+            return;
+        }
+
         if (this.oldSeg == SegmentType.CodeSeg)
         {
             await output.WriteLineAsync("CODE ENDS")
