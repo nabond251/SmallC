@@ -12,6 +12,8 @@ using System.ComponentModel;
 /// </summary>
 public class BackEnd(TextWriter output)
 {
+    private SegmentType oldSeg = SegmentType.Null;
+
     /// <summary>
     /// Print all assembler info before any code is generated
     /// and ensure that the segments appear in the correct order.
@@ -56,6 +58,17 @@ dw 0").ConfigureAwait(false);
                 nameof(newSeg), (int)newSeg, typeof(SegmentType));
         }
 
+        if (this.oldSeg == SegmentType.CodeSeg)
+        {
+            await output.WriteLineAsync("CODE ENDS")
+                .ConfigureAwait(false);
+        }
+        else if (this.oldSeg == SegmentType.DataSeg)
+        {
+            await output.WriteLineAsync("DATA ENDS")
+                .ConfigureAwait(false);
+        }
+
         if (newSeg == SegmentType.CodeSeg)
         {
             await output.WriteLineAsync("CODE SEGMENT PUBLIC")
@@ -69,6 +82,6 @@ dw 0").ConfigureAwait(false);
                 .ConfigureAwait(false);
         }
 
-        await output.WriteAsync(string.Empty).ConfigureAwait(false);
+        this.oldSeg = newSeg;
     }
 }
