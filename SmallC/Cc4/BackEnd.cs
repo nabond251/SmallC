@@ -7,7 +7,7 @@ namespace SmallC.Cc4;
 /// <summary>
 /// Back end.
 /// </summary>
-public class BackEnd(StreamWriter output)
+public class BackEnd(TextWriter output)
 {
     /// <summary>
     /// Print all assembler info before any code is generated
