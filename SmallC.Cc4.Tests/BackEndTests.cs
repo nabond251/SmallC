@@ -18,8 +18,8 @@ public class BackEndTests
     [Fact]
     public async Task GeneratesHeader()
     {
-        var outputStream = new MemoryStream();
-        var output = new StreamWriter(outputStream);
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
         var sut = new BackEnd(output);
 
         await sut.HeaderAsync();
