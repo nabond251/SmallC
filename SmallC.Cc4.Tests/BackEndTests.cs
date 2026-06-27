@@ -12,6 +12,11 @@ using SmallC.Cc4;
 /// </summary>
 public class BackEndTests
 {
+    private const string NullToData = @"DATA SEGMENT PUBLIC";
+
+    private const string NullToCode = @"CODE SEGMENT PUBLIC
+ASSUME CS:CODE, SS:DATA, DS:DATA";
+
     /// <summary>
     /// Tests that header is generated.
     /// </summary>
@@ -53,21 +58,26 @@ dw 0";
     /// <summary>
     /// Tests that can transition between segments.
     /// </summary>
+    /// <param name="newSeg">Segment to change to.</param>
+    /// <param name="expected">Expected output.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    [Fact]
-    public async Task TransitionsSegmentAsync()
+    [Theory]
+    [InlineData(SegmentType.Null, "")]
+    [InlineData(SegmentType.DataSeg, NullToData)]
+    [InlineData(SegmentType.CodeSeg, NullToCode)]
+    public async Task TransitionsSegmentAsync(
+        SegmentType newSeg, string expected)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var sut = new BackEnd(output);
 
-        await sut.ToSegAsync(SegmentType.Null);
+        await sut.ToSegAsync(newSeg);
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);
         var actual = await reader.ReadToEndAsync();
 
-        var expected = string.Empty;
         Assert.Equal(expected, actual);
     }
 }
