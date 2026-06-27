@@ -21,25 +21,36 @@ public class BackEnd(TextWriter output)
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task HeaderAsync()
     {
-        await this.ToSegAsync(SegmentType.CodeSeg)
-            .ConfigureAwait(false);
-        await output.WriteAsync(@"extrn __eq: near
-extrn __ne: near
-extrn __le: near
-extrn __lt: near
-extrn __ge: near
-extrn __gt: near
-extrn __ule: near
-extrn __ult: near
-extrn __uge: near
-extrn __ugt: near
-extrn __lneg: near
-extrn __switch: near
-dw 0
-").ConfigureAwait(false);
-        await this.ToSegAsync(SegmentType.DataSeg)
-            .ConfigureAwait(false);
-        await output.WriteLineAsync("dw 0").ConfigureAwait(false);
+        await this.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(false);
+        await this.OutLineAsync("extrn __eq: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __ne: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __le: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __lt: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __ge: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __gt: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __ule: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __ult: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __uge: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __ugt: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __lneg: near").ConfigureAwait(false);
+        await this.OutLineAsync("extrn __switch: near").ConfigureAwait(false);
+
+        // Force non-zero code pointers, word alignment
+        await this.OutLineAsync("dw 0").ConfigureAwait(false);
+        await this.ToSegAsync(SegmentType.DataSeg).ConfigureAwait(false);
+
+        // Force non-zero data pointers, word alignment
+        await this.OutLineAsync("dw 0").ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Print any assembler stuff needed at the end.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task TrailerAsync()
+    {
+        await this.ToSegAsync(SegmentType.Null).ConfigureAwait(false);
+        await this.OutLineAsync("END").ConfigureAwait(false);
     }
 
     /// <summary>
@@ -66,38 +77,42 @@ dw 0
 
         if (this.oldSeg == SegmentType.CodeSeg)
         {
-            await output.WriteLineAsync("CODE ENDS")
-                .ConfigureAwait(false);
+            await this.OutLineAsync("CODE ENDS").ConfigureAwait(false);
         }
         else if (this.oldSeg == SegmentType.DataSeg)
         {
-            await output.WriteLineAsync("DATA ENDS")
-                .ConfigureAwait(false);
+            await this.OutLineAsync("DATA ENDS").ConfigureAwait(false);
         }
 
         if (newSeg == SegmentType.CodeSeg)
         {
-            await output.WriteLineAsync("CODE SEGMENT PUBLIC")
+            await this.OutLineAsync("CODE SEGMENT PUBLIC")
                 .ConfigureAwait(false);
-            await output.WriteLineAsync("ASSUME CS:CODE, SS:DATA, DS:DATA")
+            await this.OutLineAsync("ASSUME CS:CODE, SS:DATA, DS:DATA")
                 .ConfigureAwait(false);
         }
         else if (newSeg == SegmentType.DataSeg)
         {
-            await output.WriteLineAsync("DATA SEGMENT PUBLIC")
+            await this.OutLineAsync("DATA SEGMENT PUBLIC")
                 .ConfigureAwait(false);
         }
 
         this.oldSeg = newSeg;
     }
 
-    /// <summary>
-    /// Print any assembler stuff needed at the end.
-    /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task TrailerAsync()
+    private async Task NewLineAsync()
     {
-        await this.ToSegAsync(SegmentType.Null).ConfigureAwait(false);
-        await output.WriteLineAsync("END").ConfigureAwait(false);
+        await output.WriteLineAsync().ConfigureAwait(false);
+    }
+
+    private async Task OutLineAsync(string ptr)
+    {
+        await this.OutStrAsync(ptr).ConfigureAwait(false);
+        await this.NewLineAsync().ConfigureAwait(false);
+    }
+
+    private async Task OutStrAsync(string ptr)
+    {
+        await output.WriteAsync(ptr).ConfigureAwait(false);
     }
 }
