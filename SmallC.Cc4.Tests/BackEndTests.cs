@@ -56,6 +56,27 @@ dw 0";
     }
 
     /// <summary>
+    /// Tests that trailer is generated.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task GeneratesTrailerAsync()
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var sut = new BackEnd(output);
+
+        await sut.TrailerAsync();
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actual = await reader.ReadToEndAsync();
+
+        var expected = "DATA ENDS\r\nEND\r\n";
+        Assert.Equal(expected, actual);
+    }
+
+    /// <summary>
     /// Tests that can transition between segments.
     /// </summary>
     /// <param name="oldSeg">Segment to change from.</param>

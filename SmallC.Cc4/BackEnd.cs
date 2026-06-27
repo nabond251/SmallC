@@ -89,4 +89,14 @@ dw 0").ConfigureAwait(false);
 
         this.oldSeg = newSeg;
     }
+
+    /// <summary>
+    /// Print any assembler stuff needed at the end.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task TrailerAsync()
+    {
+        _ = output;
+        throw new NotImplementedException();
+    }
 }
