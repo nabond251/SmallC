@@ -55,22 +55,27 @@ dw 0
     /// <summary>
     /// Tests that trailer is generated.
     /// </summary>
+    /// <param name="oldSeg">Segment to change from.</param>
+    /// <param name="expectedPrefix">Expected output prefix.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [Fact]
-    public async Task GeneratesTrailerAsync()
+    [Theory]
+    [InlineData(SegmentType.DataSeg, $"{BeginData}{EndData}")]
+    [InlineData(SegmentType.CodeSeg, $"{BeginCode}{EndCode}")]
+    public async Task GeneratesTrailerAsync(
+        SegmentType oldSeg, string expectedPrefix)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var sut = new BackEnd(output);
-        await sut.ToSegAsync(SegmentType.DataSeg);
 
+        await sut.ToSegAsync(oldSeg);
         await sut.TrailerAsync();
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);
         var actual = await reader.ReadToEndAsync();
 
-        var expected = $"{BeginData}{EndData}END\r\n";
+        var expected = $"{expectedPrefix}END\r\n";
         Assert.Equal(expected, actual);
     }
 
