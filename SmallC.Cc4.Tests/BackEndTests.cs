@@ -2,7 +2,7 @@
 // Copyright (c) Soli Deo Gloria Apps. All rights reserved.
 // </copyright>
 
-namespace SmallC.Tests;
+namespace SmallC.Cc4.Tests;
 
 using SmallC.Cc4;
 
