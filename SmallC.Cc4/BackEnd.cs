@@ -5,6 +5,7 @@
 namespace SmallC.Cc4;
 
 using SmallC.Cc;
+using System.Globalization;
 
 /// <summary>
 /// Back end.
@@ -93,6 +94,62 @@ public class BackEnd(TextWriter output)
         this.oldSeg = newSeg;
     }
 
+    /// <summary>
+    /// Declare external reference.
+    /// </summary>
+    /// <param name="name">External name.</param>
+    /// <param name="size">External size.</param>
+    /// <param name="ident">External identity.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task ExternalAsync(
+        string name, int size, SymbolTableEntry.SymbolIdentity ident)
+    {
+        if (ident == SymbolTableEntry.SymbolIdentity.Function)
+        {
+            await this.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(false);
+        }
+        else
+        {
+            await this.ToSegAsync(SegmentType.DataSeg).ConfigureAwait(false);
+        }
+
+        await this.OutStrAsync("EXTRN ").ConfigureAwait(false);
+        await this.OutNameAsync(name).ConfigureAwait(false);
+        await this.ColonAsync().ConfigureAwait(false);
+        await this.OutSizeAsync(size, ident).ConfigureAwait(false);
+        await this.NewLineAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Output the size of the object pointed to.
+    /// </summary>
+    /// <param name="size">Object size.</param>
+    /// <param name="ident">Object identity.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task OutSizeAsync(
+        int size, SymbolTableEntry.SymbolIdentity ident)
+    {
+        if (size == 1
+            && ident != SymbolTableEntry.SymbolIdentity.Pointer
+            && ident != SymbolTableEntry.SymbolIdentity.Function)
+        {
+            await this.OutStrAsync("BYTE").ConfigureAwait(false);
+        }
+        else if (ident != SymbolTableEntry.SymbolIdentity.Function)
+        {
+            await this.OutStrAsync("WORD").ConfigureAwait(false);
+        }
+        else
+        {
+            await this.OutStrAsync("NEAR").ConfigureAwait(false);
+        }
+    }
+
+    private async Task ColonAsync()
+    {
+        await output.WriteAsync(':').ConfigureAwait(false);
+    }
+
     private async Task NewLineAsync()
     {
         await output.WriteLineAsync().ConfigureAwait(false);
@@ -104,8 +161,19 @@ public class BackEnd(TextWriter output)
         await this.NewLineAsync().ConfigureAwait(false);
     }
 
+    private async Task OutNameAsync(string ptr)
+    {
+        await this.OutStrAsync("_").ConfigureAwait(false);
+        await output.WriteAsync(
+            new string([.. ptr.TakeWhile(c => c >= ' ')])
+            .ToUpper(CultureInfo.InvariantCulture))
+            .ConfigureAwait(false);
+    }
+
     private async Task OutStrAsync(string ptr)
     {
-        await output.WriteAsync(ptr).ConfigureAwait(false);
+        await output.WriteAsync(
+            new string([.. ptr.TakeWhile(c => c >= ' ')]))
+            .ConfigureAwait(false);
     }
 }
