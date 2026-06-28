@@ -7,6 +7,7 @@ namespace SmallC.Cc4.Tests;
 using SmallC.Cc;
 using SmallC.Cc4;
 using System.Globalization;
+using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
 /// Tests the back end functions.
@@ -71,16 +72,16 @@ dw 0
         ArgumentNullException.ThrowIfNull(extFuncs);
         var funcs = extFuncs.Split(',', StringSplitOptions.RemoveEmptyEntries);
         var globals = funcs.Select(f => new SymbolTableEntry(
-            SymbolTableEntry.SymbolIdentity.Function,
-            SymbolTableEntry.SymbolType.Int,
-            SymbolTableEntry.SymbolClass.AutoExt,
+            SymbolIdentity.Function,
+            SymbolType.Int,
+            SymbolClass.AutoExt,
             0,
             null,
             f));
         var globalsAndAnyMain = hasMain ? globals.Append(new(
-            SymbolTableEntry.SymbolIdentity.Function,
-            SymbolTableEntry.SymbolType.Int,
-            SymbolTableEntry.SymbolClass.Static,
+            SymbolIdentity.Function,
+            SymbolType.Int,
+            SymbolClass.Static,
             0,
             null,
             "main")) : globals;

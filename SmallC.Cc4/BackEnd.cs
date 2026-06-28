@@ -6,6 +6,7 @@ namespace SmallC.Cc4;
 
 using SmallC.Cc;
 using System.Globalization;
+using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
 /// Back end.
@@ -54,20 +55,20 @@ public class BackEnd(
         var globals = storage.SymbolTable.Globals;
         foreach (var cptr in globals)
         {
-            if (cptr.Ident == SymbolTableEntry.SymbolIdentity.Function
-                && cptr.Class == SymbolTableEntry.SymbolClass.AutoExt)
+            if (cptr.Ident == SymbolIdentity.Function
+                && cptr.Class == SymbolClass.AutoExt)
             {
                 await this.ExternalAsync(
-                    cptr.Name, 0, SymbolTableEntry.SymbolIdentity.Function)
+                    cptr.Name, 0, SymbolIdentity.Function)
                     .ConfigureAwait(false);
             }
         }
 
         var cp = storage.SymbolTable.FindGlb("main");
-        if (cp?.Class == SymbolTableEntry.SymbolClass.Static)
+        if (cp?.Class == SymbolClass.Static)
         {
             await this.ExternalAsync(
-                "_main", 0, SymbolTableEntry.SymbolIdentity.Function)
+                "_main", 0, SymbolIdentity.Function)
                 .ConfigureAwait(false);
         }
 
@@ -124,9 +125,9 @@ public class BackEnd(
     /// <param name="ident">External identity.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task ExternalAsync(
-        string name, int size, SymbolTableEntry.SymbolIdentity ident)
+        string name, int size, SymbolIdentity ident)
     {
-        if (ident == SymbolTableEntry.SymbolIdentity.Function)
+        if (ident == SymbolIdentity.Function)
         {
             await this.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(false);
         }
@@ -149,15 +150,15 @@ public class BackEnd(
     /// <param name="ident">Object identity.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task OutSizeAsync(
-        int size, SymbolTableEntry.SymbolIdentity ident)
+        int size, SymbolIdentity ident)
     {
         if (size == 1
-            && ident != SymbolTableEntry.SymbolIdentity.Pointer
-            && ident != SymbolTableEntry.SymbolIdentity.Function)
+            && ident != SymbolIdentity.Pointer
+            && ident != SymbolIdentity.Function)
         {
             await this.OutStrAsync("BYTE").ConfigureAwait(false);
         }
-        else if (ident != SymbolTableEntry.SymbolIdentity.Function)
+        else if (ident != SymbolIdentity.Function)
         {
             await this.OutStrAsync("WORD").ConfigureAwait(false);
         }

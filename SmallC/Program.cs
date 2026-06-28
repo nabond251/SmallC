@@ -4,12 +4,13 @@
 
 using SmallC.Cc;
 using SmallC.Cc4;
+using static SmallC.Cc.SymbolTableEntry;
 
 var storage = new Storage(new(
     [],
     [
-        new(SymbolTableEntry.SymbolIdentity.Function, SymbolTableEntry.SymbolType.Int, SymbolTableEntry.SymbolClass.AutoExt, 2, null, "func"),
-        new(SymbolTableEntry.SymbolIdentity.Function, SymbolTableEntry.SymbolType.Int, SymbolTableEntry.SymbolClass.Static, 2, null, "main"),
+        new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "func"),
+        new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 2, null, "main"),
     ]));
 var backend = new BackEnd(storage, Console.Out);
 await backend.HeaderAsync().ConfigureAwait(true);

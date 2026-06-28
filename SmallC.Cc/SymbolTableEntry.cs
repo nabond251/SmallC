@@ -5,15 +5,16 @@
 namespace SmallC.Cc;
 
 using System.Diagnostics.CodeAnalysis;
+using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
 /// Symbol table entry.
 /// </summary>
 [SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "Literature")]
 public record class SymbolTableEntry(
-    SymbolTableEntry.SymbolIdentity Ident,
-    SymbolTableEntry.SymbolType Type,
-    SymbolTableEntry.SymbolClass Class,
+    SymbolIdentity Ident,
+    SymbolType Type,
+    SymbolClass Class,
     int Size,
     int? Offset,
     string Name)
