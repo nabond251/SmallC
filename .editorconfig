@@ -255,3 +255,11 @@ dotnet_diagnostic.IDE0130.severity = warning
 
 # IDE0060: Remove unused parameter
 dotnet_diagnostic.IDE0060.severity = warning
+
+# All files
+[*]
+guidelines = 80
+
+# C# or VB files
+[*.{cs,vb}]
+guidelines = 80, 120

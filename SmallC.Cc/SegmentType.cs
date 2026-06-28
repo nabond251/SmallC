@@ -10,11 +10,6 @@ namespace SmallC.Cc;
 public enum SegmentType
 {
     /// <summary>
-    /// No segement.
-    /// </summary>
-    Null,
-
-    /// <summary>
     /// Data segment.
     /// </summary>
     DataSeg,
