@@ -6,6 +6,7 @@ namespace SmallC.Cc4.Tests;
 
 using SmallC.Cc;
 using SmallC.Cc4;
+using System.Globalization;
 
 /// <summary>
 /// Tests the back end functions.
@@ -56,28 +57,50 @@ dw 0
     /// <summary>
     /// Tests that trailer is generated.
     /// </summary>
-    /// <param name="oldSeg">Segment to change from.</param>
-    /// <param name="expectedPrefix">Expected output prefix.</param>
+    /// <param name="extFuncs">Comma-separated list of external funcs.</param>
+    /// <param name="hasMain">A value indicating whether main exists.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData(SegmentType.DataSeg, $"{BeginData}{EndData}")]
-    [InlineData(SegmentType.CodeSeg, $"{BeginCode}{EndCode}")]
+    [InlineData("", false)]
+    [InlineData("foo,bar,baz", false)]
+    [InlineData("", true)]
     public async Task GeneratesTrailerAsync(
-        SegmentType oldSeg, string expectedPrefix)
+        string extFuncs,
+        bool hasMain)
     {
-        var storage = new Storage(new([], []));
+        ArgumentNullException.ThrowIfNull(extFuncs);
+        var funcs = extFuncs.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var globals = funcs.Select(f => new SymbolTableEntry(
+            SymbolTableEntry.SymbolIdentity.Function,
+            SymbolTableEntry.SymbolType.Int,
+            SymbolTableEntry.SymbolClass.AutoExt,
+            0,
+            null,
+            f));
+        var globalsAndAnyMain = hasMain ? globals.Append(new(
+            SymbolTableEntry.SymbolIdentity.Function,
+            SymbolTableEntry.SymbolType.Int,
+            SymbolTableEntry.SymbolClass.Static,
+            0,
+            null,
+            "main")) : globals;
+        var storage = new Storage(new([], [.. globalsAndAnyMain]));
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var sut = new BackEnd(storage, output);
 
-        await sut.ToSegAsync(oldSeg);
         await sut.TrailerAsync();
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);
         var actual = await reader.ReadToEndAsync();
 
-        var expected = $"{expectedPrefix}END\r\n";
+        var funcsAndAnyMain = hasMain ? funcs.Append("_main") : funcs;
+        var externs = string.Join("\r\n", funcsAndAnyMain.Select(
+            f => $"EXTRN _{f.ToUpper(CultureInfo.InvariantCulture)}:NEAR"));
+        var codeSeg = string.IsNullOrEmpty(externs) ? externs :
+            $"{BeginCode}{externs}\r\n{EndCode}";
+        var expected = $"{codeSeg}END\r\n";
         Assert.Equal(expected, actual);
     }
 
