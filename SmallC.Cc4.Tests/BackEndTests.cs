@@ -24,9 +24,10 @@ public class BackEndTests
     [Fact]
     public async Task GeneratesHeaderAsync()
     {
+        var storage = new Storage(new([], []));
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = new BackEnd(output);
+        var sut = new BackEnd(storage, output);
 
         await sut.HeaderAsync();
         await output.FlushAsync();
@@ -64,9 +65,10 @@ dw 0
     public async Task GeneratesTrailerAsync(
         SegmentType oldSeg, string expectedPrefix)
     {
+        var storage = new Storage(new([], []));
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = new BackEnd(output);
+        var sut = new BackEnd(storage, output);
 
         await sut.ToSegAsync(oldSeg);
         await sut.TrailerAsync();
@@ -95,9 +97,10 @@ dw 0
     public async Task TransitionsSegmentAsync(
         SegmentType? oldSeg, SegmentType? newSeg, string expected)
     {
+        var storage = new Storage(new([], []));
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = new BackEnd(output);
+        var sut = new BackEnd(storage, output);
 
         await sut.ToSegAsync(oldSeg);
         await sut.ToSegAsync(newSeg);

@@ -4,10 +4,8 @@
 
 namespace SmallC.Cc;
 
-using System.Collections.ObjectModel;
-
 /// <summary>
 /// Miscellaneous storage.
 /// </summary>
 public record class Storage(
-    Collection<SymbolTableEntry> SymbolTable);
+    SymbolTable SymbolTable);

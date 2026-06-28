@@ -10,7 +10,9 @@ using System.Globalization;
 /// <summary>
 /// Back end.
 /// </summary>
-public class BackEnd(TextWriter output)
+public class BackEnd(
+    Storage storage,
+    TextWriter output)
 {
     private SegmentType? oldSeg;
 
@@ -49,6 +51,26 @@ public class BackEnd(TextWriter output)
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TrailerAsync()
     {
+        var globals = storage.SymbolTable.Globals;
+        foreach (var cptr in globals)
+        {
+            if (cptr.Ident == SymbolTableEntry.SymbolIdentity.Function
+                && cptr.Class == SymbolTableEntry.SymbolClass.AutoExt)
+            {
+                await this.ExternalAsync(
+                    cptr.Name, 0, SymbolTableEntry.SymbolIdentity.Function)
+                    .ConfigureAwait(false);
+            }
+        }
+
+        var cp = storage.SymbolTable.FindGlb("main");
+        if (cp?.Class == SymbolTableEntry.SymbolClass.Static)
+        {
+            await this.ExternalAsync(
+                "_main", 0, SymbolTableEntry.SymbolIdentity.Function)
+                .ConfigureAwait(false);
+        }
+
         await this.ToSegAsync(null).ConfigureAwait(false);
         await this.OutLineAsync("END").ConfigureAwait(false);
     }
