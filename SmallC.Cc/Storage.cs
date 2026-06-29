@@ -8,8 +8,14 @@ namespace SmallC.Cc;
 /// Miscellaneous storage.
 /// </summary>
 public class Storage(
+    TextWriter output,
     SymbolTable symTable)
 {
+    /// <summary>
+    /// Gets fd for output file.
+    /// </summary>
+    public TextWriter Output { get; } = output;
+
     /// <summary>
     /// Gets symbol table.
     /// </summary>

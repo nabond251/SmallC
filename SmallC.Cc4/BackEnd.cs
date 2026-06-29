@@ -13,8 +13,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// Back end.
 /// </summary>
 public class BackEnd(
-    Storage storage,
-    TextWriter output)
+    Storage storage)
 {
     private SegmentType oldSeg = SegmentType.None;
 
@@ -177,12 +176,12 @@ public class BackEnd(
 
     private async Task ColonAsync()
     {
-        await output.WriteAsync(':').ConfigureAwait(false);
+        await storage.Output.WriteAsync(':').ConfigureAwait(false);
     }
 
     private async Task NewLineAsync()
     {
-        await output.WriteLineAsync().ConfigureAwait(false);
+        await storage.Output.WriteLineAsync().ConfigureAwait(false);
     }
 
     private async Task OutLineAsync(string ptr)
@@ -194,7 +193,7 @@ public class BackEnd(
     private async Task OutNameAsync(string ptr)
     {
         await this.OutStrAsync("_").ConfigureAwait(false);
-        await output.WriteAsync(
+        await storage.Output.WriteAsync(
             new string([.. ptr.TakeWhile(c => c >= ' ')])
             .ToUpper(CultureInfo.InvariantCulture))
             .ConfigureAwait(false);
@@ -202,7 +201,7 @@ public class BackEnd(
 
     private async Task OutStrAsync(string ptr)
     {
-        await output.WriteAsync(
+        await storage.Output.WriteAsync(
             new string([.. ptr.TakeWhile(c => c >= ' ')]))
             .ConfigureAwait(false);
     }
