@@ -5,6 +5,7 @@
 namespace SmallC.Cc4;
 
 using SmallC.Cc;
+using System.ComponentModel;
 using System.Globalization;
 using static SmallC.Cc.SymbolTableEntry;
 
@@ -15,7 +16,7 @@ public class BackEnd(
     Storage storage,
     TextWriter output)
 {
-    private SegmentType? oldSeg;
+    private SegmentType oldSeg = SegmentType.Null;
 
     /// <summary>
     /// Print all assembler info before any code is generated
@@ -72,7 +73,7 @@ public class BackEnd(
                 .ConfigureAwait(false);
         }
 
-        await this.ToSegAsync(null).ConfigureAwait(false);
+        await this.ToSegAsync(SegmentType.Null).ConfigureAwait(false);
         await this.OutLineAsync("END").ConfigureAwait(false);
     }
 
@@ -81,12 +82,18 @@ public class BackEnd(
     /// </summary>
     /// <param name="newSeg">Segment to change to.</param>
     /// <remarks>
-    /// May be called with <c>null</c>, <see cref="SegmentType.CodeSeg"/>,
-    /// or <see cref="SegmentType.DataSeg"/>.
+    /// May be called with <see cref="SegmentType.Null"/>,
+    /// <see cref="SegmentType.CodeSeg"/>, or <see cref="SegmentType.DataSeg"/>.
     /// </remarks>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task ToSegAsync(SegmentType? newSeg)
+    public async Task ToSegAsync(SegmentType newSeg)
     {
+        if (!Enum.IsDefined(newSeg))
+        {
+            throw new InvalidEnumArgumentException(
+                nameof(newSeg), (int)newSeg, typeof(SegmentType));
+        }
+
         if (this.oldSeg == newSeg)
         {
             return;

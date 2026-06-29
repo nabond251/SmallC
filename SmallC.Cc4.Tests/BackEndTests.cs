@@ -113,13 +113,13 @@ dw 0
     /// <param name="expected">Expected output.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Theory]
-    [InlineData(null, null, "")]
+    [InlineData(SegmentType.Null, SegmentType.Null, "")]
     [InlineData(SegmentType.DataSeg, SegmentType.DataSeg, $"{BeginData}{EndData}")]
     [InlineData(SegmentType.DataSeg, SegmentType.CodeSeg, $"{BeginData}{EndData}{BeginCode}{EndCode}")]
     [InlineData(SegmentType.CodeSeg, SegmentType.CodeSeg, $"{BeginCode}{EndCode}")]
     [InlineData(SegmentType.CodeSeg, SegmentType.DataSeg, $"{BeginCode}{EndCode}{BeginData}{EndData}")]
     public async Task TransitionsSegmentAsync(
-        SegmentType? oldSeg, SegmentType? newSeg, string expected)
+        SegmentType oldSeg, SegmentType newSeg, string expected)
     {
         var storage = new Storage(new([], []));
         using var outputStream = new MemoryStream();
@@ -128,7 +128,7 @@ dw 0
 
         await sut.ToSegAsync(oldSeg);
         await sut.ToSegAsync(newSeg);
-        await sut.ToSegAsync(null);
+        await sut.ToSegAsync(SegmentType.Null);
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);
