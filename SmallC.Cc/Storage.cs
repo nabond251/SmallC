@@ -9,12 +9,18 @@ namespace SmallC.Cc;
 /// </summary>
 public class Storage(
     TextWriter output,
+    SegmentType oldSeg,
     SymbolTable symTable)
 {
     /// <summary>
     /// Gets fd for output file.
     /// </summary>
     public TextWriter Output { get; } = output;
+
+    /// <summary>
+    /// Gets or sets current <see cref="SegmentType"/>.
+    /// </summary>
+    public SegmentType OldSeg { get; set; } = oldSeg;
 
     /// <summary>
     /// Gets symbol table.

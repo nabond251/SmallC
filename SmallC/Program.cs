@@ -8,6 +8,7 @@ using static SmallC.Cc.SymbolTableEntry;
 
 var storage = new Storage(
     Console.Out,
+    SegmentType.None,
     new(
         [],
         [

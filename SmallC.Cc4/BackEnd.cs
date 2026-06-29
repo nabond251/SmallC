@@ -15,8 +15,6 @@ using static SmallC.Cc.SymbolTableEntry;
 public class BackEnd(
     Storage storage)
 {
-    private SegmentType oldSeg = SegmentType.None;
-
     /// <summary>
     /// Print all assembler info before any code is generated
     /// and ensure that the segments appear in the correct order.
@@ -93,16 +91,16 @@ public class BackEnd(
                 nameof(newSeg), (int)newSeg, typeof(SegmentType));
         }
 
-        if (this.oldSeg == newSeg)
+        if (storage.OldSeg == newSeg)
         {
             return;
         }
 
-        if (this.oldSeg == SegmentType.CodeSeg)
+        if (storage.OldSeg == SegmentType.CodeSeg)
         {
             await this.OutLineAsync("CODE ENDS").ConfigureAwait(false);
         }
-        else if (this.oldSeg == SegmentType.DataSeg)
+        else if (storage.OldSeg == SegmentType.DataSeg)
         {
             await this.OutLineAsync("DATA ENDS").ConfigureAwait(false);
         }
@@ -120,7 +118,7 @@ public class BackEnd(
                 .ConfigureAwait(false);
         }
 
-        this.oldSeg = newSeg;
+        storage.OldSeg = newSeg;
     }
 
     /// <summary>
