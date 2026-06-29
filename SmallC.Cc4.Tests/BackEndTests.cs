@@ -115,21 +115,23 @@ dw 0
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Theory]
     [InlineData(SegmentType.None, SegmentType.None, "")]
-    [InlineData(SegmentType.DataSeg, SegmentType.DataSeg, $"{BeginData}{EndData}")]
-    [InlineData(SegmentType.DataSeg, SegmentType.CodeSeg, $"{BeginData}{EndData}{BeginCode}{EndCode}")]
-    [InlineData(SegmentType.CodeSeg, SegmentType.CodeSeg, $"{BeginCode}{EndCode}")]
-    [InlineData(SegmentType.CodeSeg, SegmentType.DataSeg, $"{BeginCode}{EndCode}{BeginData}{EndData}")]
+    [InlineData(SegmentType.None, SegmentType.DataSeg, BeginData)]
+    [InlineData(SegmentType.None, SegmentType.CodeSeg, BeginCode)]
+    [InlineData(SegmentType.DataSeg, SegmentType.None, EndData)]
+    [InlineData(SegmentType.DataSeg, SegmentType.DataSeg, "")]
+    [InlineData(SegmentType.DataSeg, SegmentType.CodeSeg, $"{EndData}{BeginCode}")]
+    [InlineData(SegmentType.CodeSeg, SegmentType.None, EndCode)]
+    [InlineData(SegmentType.CodeSeg, SegmentType.DataSeg, $"{EndCode}{BeginData}")]
+    [InlineData(SegmentType.CodeSeg, SegmentType.CodeSeg, "")]
     public async Task TransitionsSegmentAsync(
         SegmentType oldSeg, SegmentType newSeg, string expected)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(output, SegmentType.None, new([], []));
+        var storage = new Storage(output, oldSeg, new([], []));
         var sut = new BackEnd(storage);
 
-        await sut.ToSegAsync(oldSeg);
         await sut.ToSegAsync(newSeg);
-        await sut.ToSegAsync(SegmentType.None);
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);
