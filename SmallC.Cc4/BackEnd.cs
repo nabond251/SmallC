@@ -53,7 +53,7 @@ public class BackEnd(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TrailerAsync()
     {
-        var globals = storage.SymbolTable.Globals;
+        var globals = storage.SymTable.Globals;
         foreach (var cptr in globals)
         {
             if (cptr.Ident == SymbolIdentity.Function
@@ -65,7 +65,7 @@ public class BackEnd(
             }
         }
 
-        var cp = storage.SymbolTable.FindGlb("main");
+        var cp = storage.SymTable.FindGlb("main");
         if (cp?.Class == SymbolClass.Static)
         {
             await this.ExternalAsync(

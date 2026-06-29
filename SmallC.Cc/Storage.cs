@@ -7,5 +7,11 @@ namespace SmallC.Cc;
 /// <summary>
 /// Miscellaneous storage.
 /// </summary>
-public record class Storage(
-    SymbolTable SymbolTable);
+public class Storage(
+    SymbolTable symTable)
+{
+    /// <summary>
+    /// Gets symbol table.
+    /// </summary>
+    public SymbolTable SymTable { get; } = symTable;
+}
