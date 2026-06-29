@@ -12,7 +12,7 @@ public enum SegmentType
     /// <summary>
     /// No segement.
     /// </summary>
-    Null,
+    None,
 
     /// <summary>
     /// Data segment.

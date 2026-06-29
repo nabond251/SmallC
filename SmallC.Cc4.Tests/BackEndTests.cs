@@ -113,7 +113,7 @@ dw 0
     /// <param name="expected">Expected output.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [Theory]
-    [InlineData(SegmentType.Null, SegmentType.Null, "")]
+    [InlineData(SegmentType.None, SegmentType.None, "")]
     [InlineData(SegmentType.DataSeg, SegmentType.DataSeg, $"{BeginData}{EndData}")]
     [InlineData(SegmentType.DataSeg, SegmentType.CodeSeg, $"{BeginData}{EndData}{BeginCode}{EndCode}")]
     [InlineData(SegmentType.CodeSeg, SegmentType.CodeSeg, $"{BeginCode}{EndCode}")]
@@ -128,7 +128,7 @@ dw 0
 
         await sut.ToSegAsync(oldSeg);
         await sut.ToSegAsync(newSeg);
-        await sut.ToSegAsync(SegmentType.Null);
+        await sut.ToSegAsync(SegmentType.None);
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);

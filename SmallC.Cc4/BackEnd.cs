@@ -16,7 +16,7 @@ public class BackEnd(
     Storage storage,
     TextWriter output)
 {
-    private SegmentType oldSeg = SegmentType.Null;
+    private SegmentType oldSeg = SegmentType.None;
 
     /// <summary>
     /// Print all assembler info before any code is generated
@@ -73,7 +73,7 @@ public class BackEnd(
                 .ConfigureAwait(false);
         }
 
-        await this.ToSegAsync(SegmentType.Null).ConfigureAwait(false);
+        await this.ToSegAsync(SegmentType.None).ConfigureAwait(false);
         await this.OutLineAsync("END").ConfigureAwait(false);
     }
 
@@ -82,7 +82,7 @@ public class BackEnd(
     /// </summary>
     /// <param name="newSeg">Segment to change to.</param>
     /// <remarks>
-    /// May be called with <see cref="SegmentType.Null"/>,
+    /// May be called with <see cref="SegmentType.None"/>,
     /// <see cref="SegmentType.CodeSeg"/>, or <see cref="SegmentType.DataSeg"/>.
     /// </remarks>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
