@@ -139,4 +139,39 @@ dw 0
 
         Assert.Equal(expected, actual);
     }
+
+    /// <summary>
+    /// Tests that can declare entry point.
+    /// </summary>
+    /// <param name="ident">Identity code of object being defined.</param>
+    /// <param name="ssName">Static symbol name.</param>
+    /// <param name="expectedSeg">Expected segment beginning.</param>
+    /// <param name="expectedSuffix">Expected declaration suffix.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData(SymbolIdentity.Variable, "a", BeginData, "")]
+    [InlineData(SymbolIdentity.Function, "foo", BeginCode, ":\r\n")]
+    public async Task DeclaresEntryAsync(
+        SymbolIdentity ident,
+        string ssName,
+        string expectedSeg,
+        string expectedSuffix)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var storage = new Storage(
+            output, SegmentType.None, new([], []), ssName);
+        var sut = new BackEnd(storage);
+
+        await sut.PublicAsync(ident);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actual = await reader.ReadToEndAsync();
+
+        var outName = $"_{ssName?.ToUpperInvariant()}";
+        var expected = @$"{expectedSeg}PUBLIC {outName}
+{outName}{expectedSuffix}";
+        Assert.Equal(expected, actual);
+    }
 }
