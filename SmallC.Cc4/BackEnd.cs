@@ -275,6 +275,15 @@ public class BackEnd(
         }
     }
 
+    /// <summary>
+    /// Point to following object(s).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task PointAsync()
+    {
+        await this.OutLineAsync(" DW $+2").ConfigureAwait(false);
+    }
+
     private async Task ColonAsync()
     {
         await storage.Output.WriteAsync(':').ConfigureAwait(false);
