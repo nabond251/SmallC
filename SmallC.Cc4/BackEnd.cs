@@ -15,6 +15,72 @@ using static SmallC.Cc.SymbolTableEntry;
 public class BackEnd(
     Storage storage)
 {
+    // Optimizer command definitions
+
+    /*                                --     p-codes must not overlap these */
+
+    /*                                --     these digits are reserved for n */
+    private const int Go = /*..*/ 0x0100; // go n entries
+    private const int IfE = /*.*/ 0x0600; // if value == n do commands to next 0
+    private const int IfL = /*.*/ 0x0700; // if value <  n do commands to next 0
+    private const int Neg = /*.*/ 0x0500; // negate the value
+
+    private const int P1 = /*..*/ 0x0001; // plus 1
+    private const int P2 = /*..*/ 0x0001; // plus 2
+    private const int P3 = /*..*/ 0x0003; // plus 3
+    private const int M2 = /*..*/ 0x00FE; // minus 2
+
+    private const int HighSeq = 49;
+
+    /// <summary>
+    /// ADD21.
+    /// </summary>
+    private static readonly int[] Seq00 = [
+        0, (int)PCode.ADD12, (int)PCode.MOVE21, 0,
+        Go | P1, (int)PCode.ADD21, 0];
+
+    /// <summary>
+    /// rINC1 or rDEC1 ? .
+    /// </summary>
+    private static readonly int[] Seq01 = [
+        0, (int)PCode.ADD1n, 0,
+        IfL | M2, 0, IfL | 0, (int)PCode.rDEC1, Neg, 0, IfL | P3, (int)PCode.rINC1, 0, 0];
+
+    /// <summary>
+    /// rINC2 or rDEC2 ? .
+    /// </summary>
+    private static readonly int[] Seq02 = [
+        0, (int)PCode.ADD2n, 0,
+        IfL | M2, 0, IfL | 0, (int)PCode.rDEC2, Neg, 0, IfL | P3, (int)PCode.rINC2, 0, 0];
+
+    /// <summary>
+    /// SUBbpn or DECbp.
+    /// </summary>
+    private static readonly int[] Seq03 = [
+        0, (int)PCode.rDEC1, (int)PCode.PUTbp1, (int)PCode.rINC1, 0,
+        Go | P2, IfE | P1, (int)PCode.DECbp, 0, (int)PCode.SUBbpn, 0];
+
+    /// <summary>
+    /// SUBwpn or DECwp.
+    /// </summary>
+    private static readonly int[] Seq04 = [
+        0, (int)PCode.rDEC1, (int)PCode.PUTwp1, (int)PCode.rINC1, 0,
+        Go | P2, IfE | P1, (int)PCode.DECwp, 0, (int)PCode.SUBwpn, 0];
+
+    private readonly int[][] seq = new int[HighSeq + 1][];
+
+    /// <summary>
+    /// Set optimizer command lists.
+    /// </summary>
+    public void SetSeq()
+    {
+        this.seq[0] = Seq00;
+        this.seq[1] = Seq01;
+        this.seq[2] = Seq02;
+        this.seq[3] = Seq03;
+        this.seq[4] = Seq04;
+    }
+
     /// <summary>
     /// Print all assembler info before any code is generated
     /// and ensure that the segments appear in the correct order.
