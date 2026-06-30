@@ -112,6 +112,39 @@ dw 0
     }
 
     /// <summary>
+    /// Tests that can set stage.
+    /// </summary>
+    /// <param name="sNext">Current next index in stage.</param>
+    /// <param name="expectedSNext">Expected next index in stage.</param>
+    /// <param name="expectedBefore">
+    /// Expected new previous position in queue.
+    /// </param>
+    /// <param name="expectedStart">
+    /// Expected new starting position in queue.
+    /// </param>
+    [Theory]
+    [InlineData(null, 0, null, 0)]
+    [InlineData(0, 0, 0, 0)]
+    [InlineData(1, 1, 1, 1)]
+    public void SetsStage(
+        int? sNext, int? expectedSNext, int? expectedBefore, int? expectedStart)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var storage = new Storage(
+            output, sNext, SegmentType.None, new([], []), null);
+        var sut = new BackEnd(storage);
+
+        int? actualBefore = null;
+        int? actualStart = null;
+        sut.SetStage(ref actualBefore, ref actualStart);
+
+        Assert.Equal(expectedSNext, storage.SNext);
+        Assert.Equal(expectedBefore, actualBefore);
+        Assert.Equal(expectedStart, actualStart);
+    }
+
+    /// <summary>
     /// Tests that can transition between segments.
     /// </summary>
     /// <param name="oldSeg">Segment to change from.</param>
