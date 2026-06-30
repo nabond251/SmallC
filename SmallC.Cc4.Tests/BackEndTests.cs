@@ -174,4 +174,41 @@ dw 0
 {outName}{expectedSuffix}";
         Assert.Equal(expected, actual);
     }
+
+    /// <summary>
+    /// Tests that can declare external.
+    /// </summary>
+    /// <param name="name">Extern name.</param>
+    /// <param name="size">Extern size.</param>
+    /// <param name="ident">Identity code of object being defined.</param>
+    /// <param name="expectedSeg">Expected segment beginning.</param>
+    /// <param name="expectedSuffix">Expected declaration suffix.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("b", 1, SymbolIdentity.Variable, BeginData, "BYTE")]
+    [InlineData("w", 2, SymbolIdentity.Variable, BeginData, "WORD")]
+    [InlineData("foo", 0, SymbolIdentity.Function, BeginCode, "NEAR")]
+    public async Task DeclaresExternAsync(
+        string name,
+        int size,
+        SymbolIdentity ident,
+        string expectedSeg,
+        string expectedSuffix)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var storage = new Storage(
+            output, SegmentType.None, new([], []), null);
+        var sut = new BackEnd(storage);
+
+        await sut.ExternalAsync(name, size, ident);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actual = await reader.ReadToEndAsync();
+
+        var outName = $"_{name?.ToUpperInvariant()}";
+        var expected = $"{expectedSeg}EXTRN {outName}:{expectedSuffix}\r\n";
+        Assert.Equal(expected, actual);
+    }
 }
