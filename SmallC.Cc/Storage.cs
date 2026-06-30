@@ -10,7 +10,8 @@ namespace SmallC.Cc;
 public class Storage(
     TextWriter output,
     SegmentType oldSeg,
-    SymbolTable symTable)
+    SymbolTable symTable,
+    string? ssName)
 {
     /// <summary>
     /// Gets fd for output file.
@@ -26,4 +27,9 @@ public class Storage(
     /// Gets symbol table.
     /// </summary>
     public SymbolTable SymTable { get; } = symTable;
+
+    /// <summary>
+    /// Gets or sets static symbol name.
+    /// </summary>
+    public string? SsName { get; set; } = ssName;
 }

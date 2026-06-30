@@ -28,7 +28,7 @@ public class BackEndTests
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(output, SegmentType.None, new([], []));
+        var storage = new Storage(output, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.HeaderAsync();
@@ -88,7 +88,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, SegmentType.None, new([], [.. globalsAndAnyMain]));
+            output, SegmentType.None, new([], [.. globalsAndAnyMain]), null);
         var sut = new BackEnd(storage);
 
         await sut.TrailerAsync();
@@ -128,7 +128,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(output, oldSeg, new([], []));
+        var storage = new Storage(output, oldSeg, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.ToSegAsync(newSeg);

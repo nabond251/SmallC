@@ -198,6 +198,33 @@ public class BackEnd(
     }
 
     /// <summary>
+    /// Declare entry point.
+    /// </summary>
+    /// <param name="ident">Identity code of object being defined.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task PublicAsync(SymbolIdentity ident)
+    {
+        if (ident == SymbolIdentity.Function)
+        {
+            await this.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(false);
+        }
+        else
+        {
+            await this.ToSegAsync(SegmentType.DataSeg).ConfigureAwait(false);
+        }
+
+        await this.OutStrAsync("PUBLIC ").ConfigureAwait(false);
+        await this.OutNameAsync(storage.SsName).ConfigureAwait(false);
+        await this.NewLineAsync().ConfigureAwait(false);
+        await this.OutNameAsync(storage.SsName).ConfigureAwait(false);
+        if (ident == SymbolIdentity.Function)
+        {
+            await this.ColonAsync().ConfigureAwait(false);
+            await this.NewLineAsync().ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
     /// Declare external reference.
     /// </summary>
     /// <param name="name">External name.</param>
@@ -264,13 +291,11 @@ public class BackEnd(
         await this.NewLineAsync().ConfigureAwait(false);
     }
 
-    private async Task OutNameAsync(string ptr)
+    private async Task OutNameAsync(string? ptr)
     {
         await this.OutStrAsync("_").ConfigureAwait(false);
         await storage.Output.WriteAsync(
-            new string([.. ptr.TakeWhile(c => c >= ' ')])
-            .ToUpper(CultureInfo.InvariantCulture))
-            .ConfigureAwait(false);
+            ptr?.ToUpper(CultureInfo.InvariantCulture)).ConfigureAwait(false);
     }
 
     private async Task OutStrAsync(string ptr)

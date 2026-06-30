@@ -14,7 +14,8 @@ var storage = new Storage(
         [
             new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "func"),
             new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 2, null, "main"),
-        ]));
+        ]),
+    null);
 var backend = new BackEnd(storage);
 backend.SetSeq();
 await backend.HeaderAsync().ConfigureAwait(true);
