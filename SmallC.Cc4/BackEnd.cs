@@ -151,6 +151,22 @@ public class BackEnd(
     }
 
     /// <summary>
+    /// Remember where we are in the queue in case we have to back up.
+    /// </summary>
+    /// <param name="before">Previous position in queue.</param>
+    /// <param name="start">Starting position in queue.</param>
+    public void SetStage(ref int? before, ref int? start)
+    {
+        before = storage.SNext;
+        if (before == null)
+        {
+            storage.SNext = 0;
+        }
+
+        start = storage.SNext;
+    }
+
+    /// <summary>
     /// Change to a new segment.
     /// </summary>
     /// <param name="newSeg">Segment to change to.</param>

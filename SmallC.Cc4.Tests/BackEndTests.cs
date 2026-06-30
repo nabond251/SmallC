@@ -28,7 +28,8 @@ public class BackEndTests
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(output, SegmentType.None, new([], []), null);
+        var storage = new Storage(
+            output, null, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.HeaderAsync();
@@ -88,7 +89,11 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, SegmentType.None, new([], [.. globalsAndAnyMain]), null);
+            output,
+            null,
+            SegmentType.None,
+            new([], [.. globalsAndAnyMain]),
+            null);
         var sut = new BackEnd(storage);
 
         await sut.TrailerAsync();
@@ -128,7 +133,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(output, oldSeg, new([], []), null);
+        var storage = new Storage(output, null, oldSeg, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.ToSegAsync(newSeg);
@@ -160,7 +165,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, SegmentType.None, new([], []), ssName);
+            output, null, SegmentType.None, new([], []), ssName);
         var sut = new BackEnd(storage);
 
         await sut.PublicAsync(ident);
@@ -198,7 +203,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, SegmentType.None, new([], []), null);
+            output, null, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.ExternalAsync(name, size, ident);
@@ -222,7 +227,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, SegmentType.None, new([], []), null);
+            output, null, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.PointAsync();
