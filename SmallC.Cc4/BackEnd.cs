@@ -138,6 +138,16 @@ public class BackEnd(
 
         await this.ToSegAsync(SegmentType.None).ConfigureAwait(false);
         await this.OutLineAsync("END").ConfigureAwait(false);
+
+#if DISOPT
+        await Console.Out.WriteLineAsync(";opt   count").ConfigureAwait(false);
+        for (var i = -1; ++i <= HighSeq;)
+        {
+            var count = this.seq[i];
+            await Console.Out.WriteLineAsync(
+                $"; {i,2}   {count[0],5}").ConfigureAwait(false);
+        }
+#endif
     }
 
     /// <summary>
