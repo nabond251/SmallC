@@ -153,17 +153,20 @@ public class BackEnd(
     /// <summary>
     /// Remember where we are in the queue in case we have to back up.
     /// </summary>
-    /// <param name="before">Previous position in queue.</param>
-    /// <param name="start">Starting position in queue.</param>
-    public void SetStage(ref int? before, ref int? start)
+    /// <returns>
+    /// Tuple of previous position in queue, starting position in queue.
+    /// </returns>
+    public (int? Before, int? Start) SetStage()
     {
-        before = storage.SNext;
+        var before = storage.SNext;
         if (before == null)
         {
             storage.SNext = 0;
         }
 
-        start = storage.SNext;
+        var start = storage.SNext;
+
+        return (before, start);
     }
 
     /// <summary>

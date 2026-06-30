@@ -135,9 +135,7 @@ dw 0
             output, sNext, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
-        int? actualBefore = null;
-        int? actualStart = null;
-        sut.SetStage(ref actualBefore, ref actualStart);
+        var (actualBefore, actualStart) = sut.SetStage();
 
         Assert.Equal(expectedSNext, storage.SNext);
         Assert.Equal(expectedBefore, actualBefore);
