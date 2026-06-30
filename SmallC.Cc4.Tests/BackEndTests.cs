@@ -211,4 +211,27 @@ dw 0
         var expected = $"{expectedSeg}EXTRN {outName}:{expectedSuffix}\r\n";
         Assert.Equal(expected, actual);
     }
+
+    /// <summary>
+    /// Tests that can point to following object(s).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task PointsAsync()
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var storage = new Storage(
+            output, SegmentType.None, new([], []), null);
+        var sut = new BackEnd(storage);
+
+        await sut.PointAsync();
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actual = await reader.ReadToEndAsync();
+
+        var expected = " DW $+2\r\n";
+        Assert.Equal(expected, actual);
+    }
 }
