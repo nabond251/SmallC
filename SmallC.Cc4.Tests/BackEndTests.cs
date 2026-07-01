@@ -29,9 +29,7 @@ public class BackEndTests
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(
-            0, output, null, 0, SegmentType.None, new([], []), null);
-        var sut = new BackEnd(storage);
+        var sut = Arrange(output);
 
         await sut.HeaderAsync();
         await output.FlushAsync();
@@ -89,15 +87,9 @@ dw 0
             "main")) : globals;
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(
-            0,
+        var sut = Arrange(
             output,
-            null,
-            0,
-            SegmentType.None,
-            new([], [.. globalsAndAnyMain]),
-            null);
-        var sut = new BackEnd(storage);
+            symbolTable: new([], [.. globalsAndAnyMain]));
 
         await sut.TrailerAsync();
         await output.FlushAsync();
@@ -139,6 +131,7 @@ dw 0
         int? expectedBefore,
         int? expectedStart)
     {
+        // Arrange
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
@@ -147,12 +140,13 @@ dw 0
             stage.Add(new(pCode.Value, value.Value));
         }
 
-        var storage = new Storage(
-            0, output, stage, 0, SegmentType.None, new([], []), null);
+        var storage = ArrangeStorage(output, stage);
         var sut = new BackEnd(storage);
 
+        // Act
         var (actualBefore, actualStart) = sut.SetStage();
 
+        // Assert
         Assert.Equal(expectedSNext, storage.SNext);
         Assert.Equal(expectedBefore, actualBefore);
         Assert.Equal(expectedStart, actualStart);
@@ -180,9 +174,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(
-            0, output, null, 0, oldSeg, new([], []), null);
-        var sut = new BackEnd(storage);
+        var sut = Arrange(output, oldSeg: oldSeg);
 
         await sut.ToSegAsync(newSeg);
         await output.FlushAsync();
@@ -212,9 +204,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(
-            0, output, null, 0, SegmentType.None, new([], []), ssName);
-        var sut = new BackEnd(storage);
+        var sut = Arrange(output, ssName: ssName);
 
         await sut.PublicAsync(ident);
         await output.FlushAsync();
@@ -250,9 +240,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(
-            0, output, null, 0, SegmentType.None, new([], []), null);
-        var sut = new BackEnd(storage);
+        var sut = Arrange(output);
 
         await sut.ExternalAsync(name, size, ident);
         await output.FlushAsync();
@@ -274,9 +262,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(
-            0, output, null, 0, SegmentType.None, new([], []), null);
-        var sut = new BackEnd(storage);
+        var sut = Arrange(output);
 
         await sut.PointAsync();
         await output.FlushAsync();
@@ -286,5 +272,39 @@ dw 0
 
         var expected = " DW $+2\r\n";
         Assert.Equal(expected, actual);
+    }
+
+    private static BackEnd Arrange(
+        StreamWriter output,
+        Collection<KeyValuePair<PCode, int>>? stage = null,
+        SegmentType oldSeg = SegmentType.None,
+        SymbolTable? symbolTable = null,
+        string? ssName = null)
+    {
+        var storage = ArrangeStorage(
+            output,
+            stage,
+            oldSeg,
+            symbolTable ?? new([], []),
+            ssName);
+
+        return new BackEnd(storage);
+    }
+
+    private static Storage ArrangeStorage(
+        StreamWriter output,
+        Collection<KeyValuePair<PCode, int>>? stage = null,
+        SegmentType oldSeg = SegmentType.None,
+        SymbolTable? symbolTable = null,
+        string? ssName = null)
+    {
+        return new Storage(
+            0,
+            output,
+            stage,
+            0,
+            oldSeg,
+            symbolTable ?? new([], []),
+            ssName);
     }
 }
