@@ -6,6 +6,7 @@ namespace SmallC.Cc4.Tests;
 
 using SmallC.Cc;
 using SmallC.Cc4;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using static SmallC.Cc.SymbolTableEntry;
 
@@ -29,7 +30,7 @@ public class BackEndTests
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, null, SegmentType.None, new([], []), null);
+            0, output, null, 0, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.HeaderAsync();
@@ -89,8 +90,10 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
+            0,
             output,
             null,
+            0,
             SegmentType.None,
             new([], [.. globalsAndAnyMain]),
             null);
@@ -114,7 +117,9 @@ dw 0
     /// <summary>
     /// Tests that can set stage.
     /// </summary>
-    /// <param name="sNext">Current next index in stage.</param>
+    /// <param name="setStage">Whether to set stage.</param>
+    /// <param name="pCode">P-code to stage.</param>
+    /// <param name="value">Value to stage.</param>
     /// <param name="expectedSNext">Expected next index in stage.</param>
     /// <param name="expectedBefore">
     /// Expected new previous position in queue.
@@ -123,16 +128,27 @@ dw 0
     /// Expected new starting position in queue.
     /// </param>
     [Theory]
-    [InlineData(null, 0, null, 0)]
-    [InlineData(0, 0, 0, 0)]
-    [InlineData(1, 1, 1, 1)]
+    [InlineData(false, null, null, 0, null, 0)]
+    [InlineData(true, null, null, 0, 0, 0)]
+    [InlineData(true, PCode.ADD12, 0, 1, 1, 1)]
     public void SetsStage(
-        int? sNext, int? expectedSNext, int? expectedBefore, int? expectedStart)
+        bool setStage,
+        PCode? pCode,
+        int? value,
+        int? expectedSNext,
+        int? expectedBefore,
+        int? expectedStart)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
+        Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
+        if (stage is not null && pCode is not null && value is not null)
+        {
+            stage.Add(new(pCode.Value, value.Value));
+        }
+
         var storage = new Storage(
-            output, sNext, SegmentType.None, new([], []), null);
+            0, output, stage, 0, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         var (actualBefore, actualStart) = sut.SetStage();
@@ -164,7 +180,8 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var storage = new Storage(output, null, oldSeg, new([], []), null);
+        var storage = new Storage(
+            0, output, null, 0, oldSeg, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.ToSegAsync(newSeg);
@@ -196,7 +213,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, null, SegmentType.None, new([], []), ssName);
+            0, output, null, 0, SegmentType.None, new([], []), ssName);
         var sut = new BackEnd(storage);
 
         await sut.PublicAsync(ident);
@@ -234,7 +251,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, null, SegmentType.None, new([], []), null);
+            0, output, null, 0, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.ExternalAsync(name, size, ident);
@@ -258,7 +275,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         var storage = new Storage(
-            output, null, SegmentType.None, new([], []), null);
+            0, output, null, 0, SegmentType.None, new([], []), null);
         var sut = new BackEnd(storage);
 
         await sut.PointAsync();

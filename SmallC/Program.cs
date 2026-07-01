@@ -7,8 +7,10 @@ using SmallC.Cc4;
 using static SmallC.Cc.SymbolTableEntry;
 
 var storage = new Storage(
+    0,
     Console.Out,
     null,
+    0,
     SegmentType.None,
     new(
         [],

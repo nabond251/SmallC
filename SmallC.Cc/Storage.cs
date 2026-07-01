@@ -4,25 +4,45 @@
 
 namespace SmallC.Cc;
 
+using System.Collections.ObjectModel;
+
 /// <summary>
 /// Miscellaneous storage.
 /// </summary>
 public class Storage(
+    int csp,
     TextWriter output,
-    int? sNext,
+    Collection<KeyValuePair<PCode, int>>? stage,
+    int sLast,
     SegmentType oldSeg,
     SymbolTable symTable,
     string? ssName)
 {
+    /// <summary>
+    /// Gets or sets compiler relative stk ptr.
+    /// </summary>
+    public int Csp { get; set; } = csp;
+
     /// <summary>
     /// Gets fd for output file.
     /// </summary>
     public TextWriter Output { get; } = output;
 
     /// <summary>
-    /// Gets or sets next index in stage.
+    /// Gets staging buffer.
     /// </summary>
-    public int? SNext { get; set; } = sNext;
+    public Collection<KeyValuePair<PCode, int>>? Stage { get; private set; } =
+        stage;
+
+    /// <summary>
+    /// Gets next index in stage.
+    /// </summary>
+    public int? SNext => this.Stage?.Count;
+
+    /// <summary>
+    /// Gets last index in stage.
+    /// </summary>
+    public int? SLast { get; } = sLast;
 
     /// <summary>
     /// Gets or sets current <see cref="SegmentType"/>.
@@ -38,4 +58,12 @@ public class Storage(
     /// Gets or sets static symbol name.
     /// </summary>
     public string? SsName { get; set; } = ssName;
+
+    /// <summary>
+    /// Sets stage if not already active.
+    /// </summary>
+    public void SetStage()
+    {
+        this.Stage ??= [];
+    }
 }
