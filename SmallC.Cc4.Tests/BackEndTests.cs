@@ -158,16 +158,31 @@ dw 0
     /// <param name="setStage">Whether to set stage.</param>
     /// <param name="pCode">P-code to stage.</param>
     /// <param name="value">Value to stage.</param>
+    /// <param name="expectedCsp">Expected compiler relative stk ptr.</param>
     /// <param name="expectedSNext">Expected next index in stage.</param>
+    /// <param name="expectedFirstPCode">Expected first staged p-code.</param>
+    /// <param name="expectedFirstValue">Expected first staged value.</param>
+    /// <param name="expectedLastPCode">Expected last staged p-code.</param>
+    /// <param name="expectedLastValue">Expected last staged value.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData(false, PCode.ADD12, 0, null)]
-    [InlineData(true, PCode.ADD12, 0, 1)]
+    [InlineData(false, PCode.ADD12, 0, 2, null, null, null, null, null)]
+    [InlineData(true, PCode.ADD12, 0, 2, 1, PCode.ADD12, 0, PCode.ADD12, 0)]
+    [InlineData(true, PCode.GETb1pu, 0, 2, 2, PCode.MOVE21, 0, PCode.GETb1pu, 0)]
+    [InlineData(true, PCode.SUB12, 0, 2, 2, PCode.SWAP12, 0, PCode.SUB12, 0)]
+    [InlineData(true, PCode.PUSH1, 0, 0, 1, PCode.PUSH1, 0, PCode.PUSH1, 0)]
+    [InlineData(true, PCode.POP2, 0, 4, 1, PCode.POP2, 0, PCode.POP2, 0)]
+    [InlineData(true, PCode.ADDSP, 4, 4, 1, PCode.ADDSP, 2, PCode.ADDSP, 2)]
     public async Task GensAsync(
         bool setStage,
         PCode pCode,
         int value,
-        int? expectedSNext)
+        int expectedCsp,
+        int? expectedSNext,
+        PCode? expectedFirstPCode,
+        int? expectedFirstValue,
+        PCode? expectedLastPCode,
+        int? expectedLastValue)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
@@ -177,12 +192,16 @@ dw 0
 
         await sut.GenAsync(pCode, value);
 
+        Assert.Equal(expectedCsp, storage.Csp);
         Assert.Equal(expectedSNext, storage.SNext);
         if (setStage)
         {
-            var staged = storage.Stage?.FirstOrDefault();
-            Assert.Equal(pCode, staged?.Key);
-            Assert.Equal(value, staged?.Value);
+            var first = storage.Stage?.FirstOrDefault();
+            Assert.Equal(expectedFirstPCode, first?.Key);
+            Assert.Equal(expectedFirstValue, first?.Value);
+            var last = storage.Stage?.LastOrDefault();
+            Assert.Equal(expectedLastPCode, last?.Key);
+            Assert.Equal(expectedLastValue, last?.Value);
         }
     }
 
@@ -333,10 +352,10 @@ dw 0
         string? ssName = null)
     {
         return new Storage(
-            0,
+            Machine.Bpw,
             output,
             stage,
-            1,
+            Storage.StageSize,
             oldSeg,
             symbolTable ?? new([], []),
             ssName);

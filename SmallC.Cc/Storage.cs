@@ -19,6 +19,11 @@ public class Storage(
     string? ssName)
 {
     /// <summary>
+    /// Entries in staging buffer.
+    /// </summary>
+    public const int StageSize = 200;
+
+    /// <summary>
     /// Gets or sets compiler relative stk ptr.
     /// </summary>
     public int Csp { get; set; } = csp;
