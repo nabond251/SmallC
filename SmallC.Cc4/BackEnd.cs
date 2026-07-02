@@ -347,10 +347,42 @@ public class BackEnd(
     /// Dump the staging buffer.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DumpStageAsync()
+    public async Task DumpStageAsync()
     {
-        _ = storage;
-        return Task.CompletedTask;
+        int i;
+        while (storage.Stage?.Count > 0)
+        {
+            if (storage.Optimize)
+            {
+            restart:
+                i = -1;
+                while (++i <= HighSeq)
+                {
+                    if (this.Peep(this.seq[i]))
+                    {
+#if DISOPT
+                        var isATty =
+                            storage.Output == Console.Out ||
+                            storage.Output == Console.Error;
+                        if (isATty)
+                        {
+                            await Console.Error.WriteLineAsync(
+                                $"                   optimized {i,2}")
+                                .ConfigureAwait(false);
+                        }
+#endif
+                    }
+                }
+
+#pragma warning disable S907 // "goto" statement should not be used
+                goto restart;
+#pragma warning restore S907 // "goto" statement should not be used
+            }
+
+            var code = storage.Stage[0];
+            await this.OutCodeAsync(code.Key, code.Value).ConfigureAwait(false);
+            storage.Stage.RemoveAt(0);
+        }
     }
 
     /// <summary>
@@ -485,6 +517,13 @@ public class BackEnd(
     public async Task PointAsync()
     {
         await this.OutLineAsync(" DW $+2").ConfigureAwait(false);
+    }
+
+    private bool Peep(int[] seq)
+    {
+        _ = storage;
+        _ = seq;
+        return false;
     }
 
     private async Task ColonAsync()

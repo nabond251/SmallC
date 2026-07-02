@@ -400,6 +400,7 @@ dw 0
             stage,
             Storage.StageSize,
             oldSeg,
+            false,
             symbolTable ?? new([], []),
             ssName);
     }

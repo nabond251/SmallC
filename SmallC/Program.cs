@@ -12,6 +12,7 @@ var storage = new Storage(
     null,
     0,
     SegmentType.None,
+    false,
     new(
         [],
         [

@@ -15,6 +15,7 @@ public class Storage(
     Collection<KeyValuePair<PCode, int>>? stage,
     int sLast,
     SegmentType oldSeg,
+    bool optimize,
     SymbolTable symTable,
     string? ssName)
 {
@@ -53,6 +54,12 @@ public class Storage(
     /// Gets or sets current <see cref="SegmentType"/>.
     /// </summary>
     public SegmentType OldSeg { get; set; } = oldSeg;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to optimize output of staging
+    /// buffer.
+    /// </summary>
+    public bool Optimize { get; set; } = optimize;
 
     /// <summary>
     /// Gets symbol table.
