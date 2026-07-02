@@ -206,6 +206,49 @@ dw 0
     }
 
     /// <summary>
+    /// Tests that can clear stage.
+    /// </summary>
+    /// <param name="setStage">Whether to set stage.</param>
+    /// <param name="before">
+    /// New previous position in queue.
+    /// </param>
+    /// <param name="start">
+    /// New starting position in queue.
+    /// </param>
+    /// <param name="expectedSNext">Expected next index in stage.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData(false, null, null, null)]
+    [InlineData(false, null, 0, null)]
+    [InlineData(false, 0, null, null)]
+    [InlineData(false, 0, 0, null)]
+    [InlineData(true, null, null, null)]
+    [InlineData(true, null, 0, null)]
+    [InlineData(true, 0, null, 0)]
+    [InlineData(true, 0, 0, 0)]
+    public async Task ClearsStageAsync(
+        bool setStage,
+        int? before,
+        int? start,
+        int? expectedSNext)
+    {
+        // Arrange
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
+        stage?.Add(new(PCode.ADD12, 0));
+
+        var storage = ArrangeStorage(output, stage);
+        var sut = new BackEnd(storage);
+
+        // Act
+        await sut.ClearStageAsync(before, start);
+
+        // Assert
+        Assert.Equal(expectedSNext, storage.SNext);
+    }
+
+    /// <summary>
     /// Tests that can transition between segments.
     /// </summary>
     /// <param name="oldSeg">Segment to change from.</param>
