@@ -318,6 +318,42 @@ public class BackEnd(
     }
 
     /// <summary>
+    /// Dump the contents of the queue.
+    /// </summary>
+    /// <param name="before">If before != null, don't dump queue yet.</param>
+    /// <param name="start">If start = null, throw away contents.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task ClearStageAsync(int? before, int? start)
+    {
+        if (before is not null)
+        {
+            while (storage.SNext > before)
+            {
+                storage.Stage?.RemoveAt(before.Value);
+            }
+
+            return;
+        }
+
+        if (start is not null)
+        {
+            await this.DumpStageAsync().ConfigureAwait(false);
+        }
+
+        storage.ClearStage();
+    }
+
+    /// <summary>
+    /// Dump the staging buffer.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task DumpStageAsync()
+    {
+        _ = storage;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Change to a new segment.
     /// </summary>
     /// <param name="newSeg">Segment to change to.</param>

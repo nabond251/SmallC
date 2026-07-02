@@ -71,4 +71,12 @@ public class Storage(
     {
         this.Stage ??= [];
     }
+
+    /// <summary>
+    /// Clears stage.
+    /// </summary>
+    public void ClearStage()
+    {
+        this.Stage = null;
+    }
 }
