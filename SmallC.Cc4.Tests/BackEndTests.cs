@@ -153,6 +153,40 @@ dw 0
     }
 
     /// <summary>
+    /// Tests that can generate code.
+    /// </summary>
+    /// <param name="setStage">Whether to set stage.</param>
+    /// <param name="pCode">P-code to stage.</param>
+    /// <param name="value">Value to stage.</param>
+    /// <param name="expectedSNext">Expected next index in stage.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData(false, PCode.ADD12, 0, null)]
+    [InlineData(true, PCode.ADD12, 0, 1)]
+    public async Task GensAsync(
+        bool setStage,
+        PCode pCode,
+        int value,
+        int? expectedSNext)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
+        var storage = ArrangeStorage(output, stage);
+        var sut = new BackEnd(storage);
+
+        await sut.GenAsync(pCode, value);
+
+        Assert.Equal(expectedSNext, storage.SNext);
+        if (setStage)
+        {
+            var staged = storage.Stage?.FirstOrDefault();
+            Assert.Equal(pCode, staged?.Key);
+            Assert.Equal(value, staged?.Value);
+        }
+    }
+
+    /// <summary>
     /// Tests that can transition between segments.
     /// </summary>
     /// <param name="oldSeg">Segment to change from.</param>
@@ -302,7 +336,7 @@ dw 0
             0,
             output,
             stage,
-            0,
+            1,
             oldSeg,
             symbolTable ?? new([], []),
             ssName);
