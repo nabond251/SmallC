@@ -292,6 +292,39 @@ dw 0
     }
 
     /// <summary>
+    /// Tests that can dump zero.
+    /// </summary>
+    /// <param name="size">Size of zero to dump.</param>
+    /// <param name="count">Number of zeroes to dump.</param>
+    /// <param name="expectedPCode">Expected p-code.</param>
+    /// <param name="expectedValue">Expected value.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData(1, 0, null, null)]
+    [InlineData(1, 1, PCode.BYTEr0, 1)]
+    [InlineData(1, 2, PCode.BYTEr0, 2)]
+    [InlineData(2, 0, null, null)]
+    [InlineData(2, 1, PCode.WORDr0, 1)]
+    [InlineData(2, 2, PCode.WORDr0, 2)]
+    public async Task DumpsZeroAsync(
+        int size,
+        int count,
+        PCode? expectedPCode,
+        int? expectedValue)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        Collection<KeyValuePair<PCode, int>>? stage = [];
+        var storage = ArrangeStorage(output, stage);
+        var sut = new BackEnd(storage);
+
+        await sut.DumpZeroAsync(size, count);
+
+        Assert.Equal(expectedPCode, stage.Count > 0 ? stage[0].Key : null);
+        Assert.Equal(expectedValue, stage.Count > 0 ? stage[0].Value : null);
+    }
+
+    /// <summary>
     /// Tests that can transition between segments.
     /// </summary>
     /// <param name="oldSeg">Segment to change from.</param>
