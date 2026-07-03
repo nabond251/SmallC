@@ -91,6 +91,13 @@ public class BackEnd(
     {
         this.SetSeq();
         this.code[PCode.ADD12] = Code.Build("211", "ADD AX,BX\r\n");
+        this.code[PCode.ADD1n] = Code.Build("010", "?ADD AX,<n>\r\n??");
+        this.code[PCode.ADD21] = Code.Build("211", "ADD BX,AX\r\n");
+        this.code[PCode.ADD2n] = Code.Build("010", "?ADD BX,<n>\r\n??");
+        this.code[PCode.ADDbpn] = Code.Build("001", "ADD BYTE PTR [BX],<n>\r\n");
+        this.code[PCode.ADDwpn] = Code.Build("001", "ADD WORD PTR [BX],<n>\r\n");
+        this.code[PCode.ADDm_] = Code.Build("000", "ADD <m>");
+        this.code[PCode.ADDSP] = Code.Build("000", "?ADD SP,<n>\r\n??");
     }
 
     /// <summary>
