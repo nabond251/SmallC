@@ -98,6 +98,7 @@ public class BackEnd(
         this.code[PCode.ADDwpn] = Code.Build("001", "ADD WORD PTR [BX],<n>\r\n");
         this.code[PCode.ADDm_] = Code.Build("000", "ADD <m>");
         this.code[PCode.ADDSP] = Code.Build("000", "?ADD SP,<n>\r\n??");
+        this.code[PCode.rINC1] = Code.Build("010", "#INC AX\r\n#");
     }
 
     /// <summary>
@@ -625,7 +626,7 @@ public class BackEnd(
         int count;
         int cp;
         int? back;
-        back = 0;
+        back = null;
         count = 0;
         part = 0;
         skip = false;
