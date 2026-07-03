@@ -557,6 +557,27 @@ public class BackEnd(
         }
     }
 
+    /// <summary>
+    /// Dump zeroes for default initial values.
+    /// </summary>
+    /// <param name="size">Size of zero to dump.</param>
+    /// <param name="count">Number of zeroes to dump.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task DumpZeroAsync(int size, int count)
+    {
+        if (count > 0)
+        {
+            if (size == 1)
+            {
+                await this.GenAsync(PCode.BYTEr0, count).ConfigureAwait(false);
+            }
+            else
+            {
+                await this.GenAsync(PCode.WORDr0, count).ConfigureAwait(false);
+            }
+        }
+    }
+
     private bool Peep(int[] seq)
     {
         _ = storage;
