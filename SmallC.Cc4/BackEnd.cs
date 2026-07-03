@@ -98,6 +98,9 @@ public class BackEnd(
         this.code[PCode.ADDwpn] = Code.Build("001", "ADD WORD PTR [BX],<n>\r\n");
         this.code[PCode.ADDm_] = Code.Build("000", "ADD <m>");
         this.code[PCode.ADDSP] = Code.Build("000", "?ADD SP,<n>\r\n??");
+        this.code[PCode.AND12] = Code.Build("211", "AND AX,BX\r\n");
+        this.code[PCode.ANEG1] = Code.Build("010", "NEG AX\r\n");
+        this.code[PCode.ARGCNTn] = Code.Build("000", "?MOV CL,<n>?XOR CL,CL\r\n?");
         this.code[PCode.rINC1] = Code.Build("010", "#INC AX\r\n#");
     }
 
