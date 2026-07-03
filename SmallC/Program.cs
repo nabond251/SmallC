@@ -26,5 +26,5 @@ var backend = new BackEnd(storage);
 backend.SetCodes();
 await backend.HeaderAsync().ConfigureAwait(true);
 await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);
-await backend.GenAsync(PCode.GETb1p, 1).ConfigureAwait(true);
+await backend.GenAsync(PCode.POINT1l, 1).ConfigureAwait(true);
 await backend.TrailerAsync().ConfigureAwait(true);
