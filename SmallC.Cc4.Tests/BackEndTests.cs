@@ -402,6 +402,7 @@ dw 0
             oldSeg,
             false,
             symbolTable ?? new([], []),
+            [],
             ssName);
     }
 }

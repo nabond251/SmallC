@@ -174,8 +174,9 @@ public class BackEnd(
     /// <exception cref="InvalidOperationException">
     /// If staging buffer overflows.
     /// </exception>
-    public async Task GenAsync(PCode pCode, int value)
+    public async Task GenAsync(PCode pCode, int? value)
     {
+        var valueActual = value ?? 0;
         int newCsp;
         switch (pCode)
         {
@@ -199,8 +200,8 @@ public class BackEnd(
                 break;
             case PCode.ADDSP:
             case PCode.RETURN:
-                newCsp = value;
-                value -= storage.Csp;
+                newCsp = valueActual;
+                valueActual -= storage.Csp;
                 storage.Csp = newCsp;
                 break;
             case PCode.None:
@@ -305,7 +306,7 @@ public class BackEnd(
 
         if (storage.Stage is null)
         {
-            await this.OutCodeAsync(pCode, value).ConfigureAwait(false);
+            await this.OutCodeAsync(pCode, valueActual).ConfigureAwait(false);
             return;
         }
 
@@ -314,7 +315,7 @@ public class BackEnd(
             throw new InvalidOperationException("Staging buffer overflow");
         }
 
-        storage.Stage.Add(new KeyValuePair<PCode, int>(pCode, value));
+        storage.Stage.Add(new KeyValuePair<PCode, int>(pCode, valueActual));
     }
 
     /// <summary>
@@ -519,6 +520,43 @@ public class BackEnd(
         await this.OutLineAsync(" DW $+2").ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Dump the literal pool.
+    /// </summary>
+    /// <param name="size">Size of literals to dump.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task DumpLitsAsync(int size)
+    {
+        int j, k;
+        k = 0;
+        while (k < storage.LitPtr)
+        {
+            if (size == 1)
+            {
+                await this.GenAsync(PCode.BYTE_, null).ConfigureAwait(false);
+            }
+            else
+            {
+                await this.GenAsync(PCode.WORD_, null).ConfigureAwait(false);
+            }
+
+            j = 10;
+            while (j-- > 0)
+            {
+                await this.OutDecAsync(storage.GetInt(k, size))
+                    .ConfigureAwait(false);
+                k += size;
+                if (j == 0 || k >= storage.LitPtr)
+                {
+                    await this.NewLineAsync().ConfigureAwait(false);
+                    break;
+                }
+
+                await storage.Output.WriteAsync(',').ConfigureAwait(false);
+            }
+        }
+    }
+
     private bool Peep(int[] seq)
     {
         _ = storage;
@@ -545,6 +583,41 @@ public class BackEnd(
         _ = pCode;
         _ = value;
         return Task.CompletedTask;
+    }
+
+    private async Task OutDecAsync(int number)
+    {
+        int k, zs;
+        char c;
+        int q, r;
+        zs = 0;
+        k = 10000;
+        if (number < 0)
+        {
+            number = -number;
+            await storage.Output.WriteAsync('-').ConfigureAwait(false);
+        }
+
+        while (k >= 1)
+        {
+            q = 0;
+            r = number;
+            while (r >= k)
+            {
+                ++q;
+                r -= k;
+            }
+
+            c = (char)(q + '0');
+            if (c != '0' || k == 1 || zs != 0)
+            {
+                zs = 1;
+                await storage.Output.WriteAsync(c).ConfigureAwait(false);
+            }
+
+            number = r;
+            k /= 10;
+        }
     }
 
     private async Task OutLineAsync(string ptr)

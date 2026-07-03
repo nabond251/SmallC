@@ -17,6 +17,7 @@ public class Storage(
     SegmentType oldSeg,
     bool optimize,
     SymbolTable symTable,
+    Collection<byte> litQ,
     string? ssName)
 {
     /// <summary>
@@ -39,6 +40,11 @@ public class Storage(
     /// </summary>
     public Collection<KeyValuePair<PCode, int>>? Stage { get; private set; } =
         stage;
+
+    /// <summary>
+    /// Gets index to next <see cref="LitQ"/> entry.
+    /// </summary>
+    public int LitPtr => this.LitQ.Count;
 
     /// <summary>
     /// Gets next index in stage.
@@ -67,6 +73,11 @@ public class Storage(
     public SymbolTable SymTable { get; } = symTable;
 
     /// <summary>
+    /// Gets literal pool.
+    /// </summary>
+    public Collection<byte> LitQ { get; } = litQ;
+
+    /// <summary>
     /// Gets or sets static symbol name.
     /// </summary>
     public string? SsName { get; set; } = ssName;
@@ -85,5 +96,27 @@ public class Storage(
     public void ClearStage()
     {
         this.Stage = null;
+    }
+
+    /// <summary>
+    /// Get integer of length <paramref name="len"/> from address
+    /// <paramref name="addr"/> (byte sequence set by "putint").
+    /// </summary>
+    /// <param name="addr">Index into <see cref="LitQ"/>.</param>
+    /// <param name="len">Length of int to get.</param>
+    /// <returns>
+    /// Integer of length <paramref name="len"/> from address
+    /// <paramref name="addr"/>.
+    /// </returns>
+    public int GetInt(int addr, int len)
+    {
+        int i;
+        i = this.LitQ[addr + --len]; // high order sign byte extended
+        while (len-- != 0)
+        {
+            i = (i << 8) | (this.LitQ[addr + len] & 255);
+        }
+
+        return i;
     }
 }
