@@ -189,6 +189,7 @@ dw 0
         Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
         var storage = ArrangeStorage(output, stage);
         var sut = new BackEnd(storage);
+        sut.SetCodes();
 
         await sut.GenAsync(pCode, value);
 
@@ -238,6 +239,7 @@ dw 0
         stage?.Add(new(PCode.ADD12, 0));
         var storage = ArrangeStorage(output, stage);
         var sut = new BackEnd(storage);
+        sut.SetCodes();
 
         await sut.ClearStageAsync(before, start);
 
