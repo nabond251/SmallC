@@ -259,9 +259,12 @@ dw 0
     [InlineData(1, "1", PCode.BYTE_, "1\r\n")]
     [InlineData(1, "0,1,2,3,4,5,6,7,8,9,10,11", PCode.BYTE_, "0,1,2,3,4,5,6,7,8,9\r\n10,11\r\n")]
     [InlineData(2, "", null, "")]
+    [InlineData(2, "-1,-1", PCode.WORD_, "-1\r\n")]
     [InlineData(2, "0,0", PCode.WORD_, "0\r\n")]
     [InlineData(2, "1,0", PCode.WORD_, "1\r\n")]
+    [InlineData(2, "0,1", PCode.WORD_, "256\r\n")]
     [InlineData(2, "0,0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,9,0,10,0,11,0", PCode.WORD_, "0,1,2,3,4,5,6,7,8,9\r\n10,11\r\n")]
+    [InlineData(2, "0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1,8,1,9,1,10,1,11,1", PCode.WORD_, "256,257,258,259,260,261,262,263,264,265\r\n266,267\r\n")]
     public async Task DumpsLiteralsAsync(
         int size,
         string lits,
