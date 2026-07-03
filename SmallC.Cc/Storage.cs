@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 /// Miscellaneous storage.
 /// </summary>
 public class Storage(
+    int litLab,
     int csp,
     TextWriter output,
     Collection<KeyValuePair<PCode, int>>? stage,
@@ -24,6 +25,11 @@ public class Storage(
     /// Entries in staging buffer.
     /// </summary>
     public const int StageSize = 200;
+
+    /// <summary>
+    /// Gets or sets label # assigned to literal pool.
+    /// </summary>
+    public int LitLab { get; set; } = litLab;
 
     /// <summary>
     /// Gets or sets compiler relative stk ptr.

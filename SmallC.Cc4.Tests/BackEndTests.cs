@@ -474,6 +474,7 @@ dw 0
         string? ssName = null)
     {
         return new Storage(
+            0,
             Machine.Bpw,
             output,
             stage,

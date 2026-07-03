@@ -611,12 +611,119 @@ public class BackEnd(
     /// <summary>
     /// Output assembly code.
     /// </summary>
-    private Task OutCodeAsync(PCode pCode, int value)
+    private async Task OutCodeAsync(PCode pCode, int value)
     {
-        _ = storage;
-        _ = pCode;
-        _ = value;
-        return Task.CompletedTask;
+        int part;
+        bool skip;
+        int count;
+        int cp;
+        int? back;
+        back = 0;
+        count = 0;
+        part = 0;
+        skip = false;
+        var text = this.code[pCode].Text;
+        cp = 0;
+        while (cp < text.Length)
+        {
+            if (text[cp] == '<')
+            {
+                ++cp; // skip to action code
+                if (!skip)
+                {
+                    switch (text[cp])
+                    {
+                        // mem ref by label
+                        case 'm':
+                            await this.OutNameAsync(
+                                storage.SymTable[value].Name)
+                                .ConfigureAwait(false);
+                            break;
+
+                        // numeric constant
+                        case 'n':
+                            await this.OutDecAsync(value)
+                                .ConfigureAwait(false);
+                            break;
+
+                        // current literal label
+                        case 'l':
+                            await this.OutDecAsync(storage.LitLab)
+                                .ConfigureAwait(false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                cp += 2; // skip past >
+            }
+
+            // ?..if value...?...if not value...?
+            else if (text[cp] == '?')
+            {
+                switch (++part)
+                {
+                    case 1:
+                        if (value == 0)
+                        {
+                            skip = true;
+                        }
+
+                        break;
+                    case 2:
+                        skip = !skip;
+                        break;
+                    case 3:
+                        part = 0;
+                        skip = false;
+                        break;
+                    default:
+                        break;
+                }
+
+                ++cp; // skip past ?
+            }
+
+            // repeat #...# value times
+            else if (text[cp] == '#')
+            {
+                ++cp;
+                if (back is null)
+                {
+                    if ((count = value) < 1)
+                    {
+                        while (cp < text.Length && text[cp] != '#')
+                        {
+                            cp++;
+                        }
+
+                        continue;
+                    }
+
+                    back = cp;
+                    continue;
+                }
+
+                if (--count > 0)
+                {
+                    cp = back.Value;
+                }
+                else
+                {
+                    back = null;
+                }
+            }
+            else if (!skip)
+            {
+                await storage.Output.WriteAsync(text[cp++])
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                ++cp;
+            }
+        }
     }
 
     private async Task OutDecAsync(int number)
