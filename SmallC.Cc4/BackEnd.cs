@@ -69,6 +69,9 @@ public class BackEnd(
 
     private readonly int[][] seq = new int[HighSeq + 1][];
 
+    // Assembly-code strings
+    private readonly Dictionary<PCode, Code> code = [];
+
     /// <summary>
     /// Set optimizer command lists.
     /// </summary>
@@ -79,6 +82,15 @@ public class BackEnd(
         this.seq[2] = Seq02;
         this.seq[3] = Seq03;
         this.seq[4] = Seq04;
+    }
+
+    /// <summary>
+    /// Set assembly-code strings.
+    /// </summary>
+    public void SetCodes()
+    {
+        this.SetSeq();
+        this.code[PCode.ADD12] = Code.Build("211", "ADD AX,BX\r\n");
     }
 
     /// <summary>
@@ -380,8 +392,9 @@ public class BackEnd(
 #pragma warning restore S907 // "goto" statement should not be used
             }
 
-            var code = storage.Stage[0];
-            await this.OutCodeAsync(code.Key, code.Value).ConfigureAwait(false);
+            var staged = storage.Stage[0];
+            await this.OutCodeAsync(staged.Key, staged.Value)
+                .ConfigureAwait(false);
             storage.Stage.RemoveAt(0);
         }
     }

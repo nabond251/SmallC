@@ -22,6 +22,6 @@ var storage = new Storage(
     [],
     null);
 var backend = new BackEnd(storage);
-backend.SetSeq();
+backend.SetCodes();
 await backend.HeaderAsync().ConfigureAwait(true);
 await backend.TrailerAsync().ConfigureAwait(true);
