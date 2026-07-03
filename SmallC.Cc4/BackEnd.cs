@@ -101,7 +101,45 @@ public class BackEnd(
         this.code[PCode.AND12] = Code.Build("211", "AND AX,BX\r\n");
         this.code[PCode.ANEG1] = Code.Build("010", "NEG AX\r\n");
         this.code[PCode.ARGCNTn] = Code.Build("000", "?MOV CL,<n>?XOR CL,CL?\r\n");
+        this.code[PCode.ASL12] = Code.Build("011", "MOV CX,AX\r\nMOV AX,BX\r\nSAL AX,CL\r\n");
+        this.code[PCode.ASR12] = Code.Build("011", "MOV CX,AX\r\nMOV AX,BX\r\nSAR AX,CL\r\n");
+        this.code[PCode.CALL1] = Code.Build("010", "CALL AX\r\n");
+        this.code[PCode.CALLm] = Code.Build("020", "CALL <m>\r\n");
+        this.code[PCode.BYTE_] = Code.Build("000", " DB ");
+        this.code[PCode.BYTEn] = Code.Build("000", " DB <n>\r\n");
+        this.code[PCode.BYTEr0] = Code.Build("000", " DB <n> DUP(0)\r\n");
+        this.code[PCode.COM1] = Code.Build("010", "NOT AX\r\n");
+        this.code[PCode.COMMAn] = Code.Build("000", ",<n>\r\n");
+        this.code[PCode.DBL1] = Code.Build("010", "SHL AX,1\r\n");
+        this.code[PCode.DBL2] = Code.Build("001", "SHL BX,1\r\n");
+        this.code[PCode.DECbp] = Code.Build("001", "DEC BYTE PTR [BX],<n>\r\n");
+        this.code[PCode.DECwp] = Code.Build("001", "DEC WORD PTR [BX],<n>\r\n");
+        this.code[PCode.DIV12] = Code.Build("011", "CWD\r\nIDIV BX\r\n"); // see GenAsync()
+        this.code[PCode.DIV12u] = Code.Build("011", "XOR DX,DX\r\nDIV BX\r\n"); // see GenAsync()
+        this.code[PCode.ENTER] = Code.Build("100", "PUSH BP\r\nMOV BP,SP\r\n");
+        this.code[PCode.EQ10f] = Code.Build("010", "OR AX,AX\r\nJE $+5\r\nJMP _<n>\r\n");
+        this.code[PCode.EQ12] = Code.Build("211", "CALL __EQ\r\n");
+        this.code[PCode.GE10f] = Code.Build("010", "OR AX,AX\r\nJGE $+5\r\nJMP _<n>\r\n");
+        this.code[PCode.GE12] = Code.Build("011", "CALL __GE\r\n");
+        this.code[PCode.GE12u] = Code.Build("011", "CALL __UGE\r\n");
+        this.code[PCode.GETb1m] = Code.Build("020", "MOV AL,<m>\r\nCBW\r\n");
+        this.code[PCode.GETb1mu] = Code.Build("020", "MOV AL,<m>\r\nXOR AH,AH\r\n");
+        this.code[PCode.GETb1p] = Code.Build("021", "MOV AL,?<n>??[BX]\r\nCBW\r\n"); // see GenAsync()
+        this.code[PCode.GETb1pu] = Code.Build("021", "MOV AL,?<n>??[BX]\r\nXOR AH,AH\r\n"); // see GenAsync()
+        this.code[PCode.GETb1s] = Code.Build("020", "MOV AL,<n>[BP]\r\nCBW\r\n");
+        this.code[PCode.GETb1su] = Code.Build("020", "MOV AL,<n>[BP]\r\nXOR AH,AH\r\n");
+        this.code[PCode.GETw1m] = Code.Build("020", "MOV AX,<m>\r\n");
+        this.code[PCode.GETw1m_] = Code.Build("020", "MOV AX,<m>");
+        this.code[PCode.GETw1n] = Code.Build("020", "?MOV AX,<n>?XOR AX,AX?\r\n");
+        this.code[PCode.GETw1p] = Code.Build("021", "MOV AX,?<n>??[BX]\r\n"); // see GenAsync()
+        this.code[PCode.GETw1s] = Code.Build("020", "MOV AX,<n>[BP]\r\n");
+        this.code[PCode.GETw2m] = Code.Build("020", "MOV BX,<m>\r\n");
+        this.code[PCode.GETw2n] = Code.Build("002", "?MOV BX,<n>?XOR BX,BX?\r\n");
+        this.code[PCode.GETw2p] = Code.Build("021", "MOV BX,?<n>??[BX]\r\n");
+        this.code[PCode.GETw2s] = Code.Build("002", "MOV BX,<n>[BP]\r\n");
+        this.code[PCode.MOVE21] = Code.Build("012", "MOV BX,AX\r\n");
         this.code[PCode.rINC1] = Code.Build("010", "#INC AX\r\n#");
+        this.code[PCode.SWAP12] = Code.Build("011", "XCHG AX,BX\r\n");
     }
 
     /// <summary>
