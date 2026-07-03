@@ -232,20 +232,59 @@ dw 0
         int? start,
         int? expectedSNext)
     {
-        // Arrange
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
         stage?.Add(new(PCode.ADD12, 0));
-
         var storage = ArrangeStorage(output, stage);
         var sut = new BackEnd(storage);
 
-        // Act
         await sut.ClearStageAsync(before, start);
 
-        // Assert
         Assert.Equal(expectedSNext, storage.SNext);
+    }
+
+    /// <summary>
+    /// Tests that can dump literals.
+    /// </summary>
+    /// <param name="size">Literal size.</param>
+    /// <param name="lits">Literals to dump.</param>
+    /// <param name="expectedPCode">Expected p-code.</param>
+    /// <param name="expectedDump">Expected dumped literals.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData(1, "", null, "")]
+    [InlineData(1, "0", PCode.BYTE_, "0\r\n")]
+    [InlineData(1, "1", PCode.BYTE_, "1\r\n")]
+    [InlineData(1, "0,1,2,3,4,5,6,7,8,9,10,11", PCode.BYTE_, "0,1,2,3,4,5,6,7,8,9\r\n10,11\r\n")]
+    [InlineData(2, "", null, "")]
+    [InlineData(2, "0,0", PCode.WORD_, "0\r\n")]
+    [InlineData(2, "1,0", PCode.WORD_, "1\r\n")]
+    [InlineData(2, "0,0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,9,0,10,0,11,0", PCode.WORD_, "0,1,2,3,4,5,6,7,8,9\r\n10,11\r\n")]
+    public async Task DumpsLiteralsAsync(
+        int size,
+        string lits,
+        PCode? expectedPCode,
+        string expectedDump)
+    {
+        ArgumentNullException.ThrowIfNull(lits);
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        Collection<KeyValuePair<PCode, int>>? stage = [];
+        var litQ = lits
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(byte.Parse);
+        var storage = ArrangeStorage(output, stage, litQ: [.. litQ]);
+        var sut = new BackEnd(storage);
+
+        await sut.DumpLitsAsync(size);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actualDump = await reader.ReadToEndAsync();
+
+        Assert.Equal(expectedPCode, stage.Count > 0 ? stage[0].Key : null);
+        Assert.Equal(expectedDump, actualDump);
     }
 
     /// <summary>
@@ -375,6 +414,7 @@ dw 0
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
+        Collection<byte>? litQ = null,
         string? ssName = null)
     {
         var storage = ArrangeStorage(
@@ -382,6 +422,7 @@ dw 0
             stage,
             oldSeg,
             symbolTable ?? new([], []),
+            litQ,
             ssName);
 
         return new BackEnd(storage);
@@ -392,6 +433,7 @@ dw 0
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
+        Collection<byte>? litQ = null,
         string? ssName = null)
     {
         return new Storage(
@@ -402,7 +444,7 @@ dw 0
             oldSeg,
             false,
             symbolTable ?? new([], []),
-            [],
+            litQ ?? [],
             ssName);
     }
 }
