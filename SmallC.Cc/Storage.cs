@@ -17,7 +17,7 @@ public class Storage(
     SegmentType oldSeg,
     bool optimize,
     SymbolTable symTable,
-    Collection<byte> litQ,
+    Collection<sbyte> litQ,
     string? ssName)
 {
     /// <summary>
@@ -75,7 +75,7 @@ public class Storage(
     /// <summary>
     /// Gets literal pool.
     /// </summary>
-    public Collection<byte> LitQ { get; } = litQ;
+    public Collection<sbyte> LitQ { get; } = litQ;
 
     /// <summary>
     /// Gets or sets static symbol name.

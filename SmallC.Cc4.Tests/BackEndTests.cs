@@ -254,6 +254,7 @@ dw 0
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
     [InlineData(1, "", null, "")]
+    [InlineData(1, "-1", PCode.BYTE_, "-1\r\n")]
     [InlineData(1, "0", PCode.BYTE_, "0\r\n")]
     [InlineData(1, "1", PCode.BYTE_, "1\r\n")]
     [InlineData(1, "0,1,2,3,4,5,6,7,8,9,10,11", PCode.BYTE_, "0,1,2,3,4,5,6,7,8,9\r\n10,11\r\n")]
@@ -273,7 +274,7 @@ dw 0
         Collection<KeyValuePair<PCode, int>>? stage = [];
         var litQ = lits
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(byte.Parse);
+            .Select(sbyte.Parse);
         var storage = ArrangeStorage(output, stage, litQ: [.. litQ]);
         var sut = new BackEnd(storage);
 
@@ -414,7 +415,7 @@ dw 0
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
-        Collection<byte>? litQ = null,
+        Collection<sbyte>? litQ = null,
         string? ssName = null)
     {
         var storage = ArrangeStorage(
@@ -433,7 +434,7 @@ dw 0
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
-        Collection<byte>? litQ = null,
+        Collection<sbyte>? litQ = null,
         string? ssName = null)
     {
         return new Storage(
