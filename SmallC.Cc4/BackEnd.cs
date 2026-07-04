@@ -558,15 +558,10 @@ public class BackEnd(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task PublicAsync(SymbolIdentity ident)
     {
-        if (ident == SymbolIdentity.Function)
-        {
-            await this.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(false);
-        }
-        else
-        {
-            await this.ToSegAsync(SegmentType.DataSeg).ConfigureAwait(false);
-        }
+        var newSeg = ident == SymbolIdentity.Function ?
+            SegmentType.CodeSeg : SegmentType.DataSeg;
 
+        await this.ToSegAsync(newSeg).ConfigureAwait(false);
         await this.OutStrAsync("PUBLIC ").ConfigureAwait(false);
         await this.OutNameAsync(storage.SsName).ConfigureAwait(false);
         await this.NewLineAsync().ConfigureAwait(false);
@@ -588,15 +583,10 @@ public class BackEnd(
     public async Task ExternalAsync(
         string name, int size, SymbolIdentity ident)
     {
-        if (ident == SymbolIdentity.Function)
-        {
-            await this.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(false);
-        }
-        else
-        {
-            await this.ToSegAsync(SegmentType.DataSeg).ConfigureAwait(false);
-        }
+        var newSeg = ident == SymbolIdentity.Function ?
+            SegmentType.CodeSeg : SegmentType.DataSeg;
 
+        await this.ToSegAsync(newSeg).ConfigureAwait(false);
         await this.OutStrAsync("EXTRN ").ConfigureAwait(false);
         await this.OutNameAsync(name).ConfigureAwait(false);
         await this.ColonAsync().ConfigureAwait(false);
@@ -613,20 +603,17 @@ public class BackEnd(
     public async Task OutSizeAsync(
         int size, SymbolIdentity ident)
     {
-        if (size == 1
-            && ident != SymbolIdentity.Pointer
-            && ident != SymbolIdentity.Function)
+        var str = ident switch
         {
-            await this.OutStrAsync("BYTE").ConfigureAwait(false);
-        }
-        else if (ident != SymbolIdentity.Function)
-        {
-            await this.OutStrAsync("WORD").ConfigureAwait(false);
-        }
-        else
-        {
-            await this.OutStrAsync("NEAR").ConfigureAwait(false);
-        }
+            SymbolIdentity.Pointer => "WORD",
+            SymbolIdentity.Function => "NEAR",
+            SymbolIdentity.Label or
+            SymbolIdentity.Variable or
+            SymbolIdentity.Array or
+            _ => size == 1 ? "BYTE" : "WORD",
+        };
+
+        await this.OutStrAsync(str).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -700,13 +687,16 @@ public class BackEnd(
                 }
 
                 break;
+
             case 2:
                 skip = !skip;
                 break;
+
             case 3:
                 part = 0;
                 skip = false;
                 break;
+
             default:
                 break;
         }
