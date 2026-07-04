@@ -645,27 +645,30 @@ public class BackEnd(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task DumpLitsAsync(int size)
     {
-        int j, k;
-        k = 0;
-        while (k < storage.LitPtr)
+        var lits = new List<int>();
+        for (var k = 0; k < storage.LitPtr; k += size)
+        {
+            lits.Add(storage.GetInt(k, size));
+        }
+
+        var litLists = Enumerable
+            .Range(0, (int)Math.Ceiling(lits.Count / 10d))
+            .Select(i => lits.Skip(i * 10).Take(10)
+            .ToList());
+
+        foreach (var list in litLists)
         {
             var pCode = size == 1 ? PCode.BYTE_ : PCode.WORD_;
             await this.GenAsync(pCode, null).ConfigureAwait(false);
 
-            j = 10;
-            while (j-- > 0)
+            foreach (var lit in list.Take(list.Count - 1))
             {
-                await this.OutDecAsync(storage.GetInt(k, size))
-                    .ConfigureAwait(false);
-                k += size;
-                if (j == 0 || k >= storage.LitPtr)
-                {
-                    await this.NewLineAsync().ConfigureAwait(false);
-                    break;
-                }
-
+                await this.OutDecAsync(lit).ConfigureAwait(false);
                 await storage.Output.WriteAsync(',').ConfigureAwait(false);
             }
+
+            await this.OutDecAsync(list[^1]).ConfigureAwait(false);
+            await this.NewLineAsync().ConfigureAwait(false);
         }
     }
 
