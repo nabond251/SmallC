@@ -717,105 +717,111 @@ public class BackEnd(
         var text = this.code[pCode].Text;
         while (cp < text.Length)
         {
-            if (text[cp] == '<')
+            switch (text[cp])
             {
-                cp++; // skip to action code
-                if (!skip)
-                {
-                    switch (text[cp])
+                case '<':
+                    cp++; // skip to action code
+                    if (!skip)
                     {
-                        // mem ref by label
-                        case 'm':
-                            await this.OutNameAsync(
-                                storage.SymTable[value].Name)
-                                .ConfigureAwait(false);
-                            break;
+                        switch (text[cp])
+                        {
+                            // mem ref by label
+                            case 'm':
+                                await this.OutNameAsync(
+                                    storage.SymTable[value].Name)
+                                    .ConfigureAwait(false);
+                                break;
 
-                        // numeric constant
-                        case 'n':
-                            await this.OutDecAsync(value)
-                                .ConfigureAwait(false);
-                            break;
+                            // numeric constant
+                            case 'n':
+                                await this.OutDecAsync(value)
+                                    .ConfigureAwait(false);
+                                break;
 
-                        // current literal label
-                        case 'l':
-                            await this.OutDecAsync(storage.LitLab)
-                                .ConfigureAwait(false);
+                            // current literal label
+                            case 'l':
+                                await this.OutDecAsync(storage.LitLab)
+                                    .ConfigureAwait(false);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    cp += 2; // skip past >
+                    break;
+
+                // ?..if value...?...if not value...?
+                case '?':
+                    part++;
+                    switch (part)
+                    {
+                        case 1:
+                            if (value == 0)
+                            {
+                                skip = true;
+                            }
+
+                            break;
+                        case 2:
+                            skip = !skip;
+                            break;
+                        case 3:
+                            part = 0;
+                            skip = false;
                             break;
                         default:
                             break;
                     }
-                }
 
-                cp += 2; // skip past >
-            }
+                    cp++; // skip past ?
+                    break;
 
-            // ?..if value...?...if not value...?
-            else if (text[cp] == '?')
-            {
-                switch (++part)
-                {
-                    case 1:
-                        if (value == 0)
-                        {
-                            skip = true;
-                        }
-
-                        break;
-                    case 2:
-                        skip = !skip;
-                        break;
-                    case 3:
-                        part = 0;
-                        skip = false;
-                        break;
-                    default:
-                        break;
-                }
-
-                cp++; // skip past ?
-            }
-
-            // repeat #...# value times
-            else if (text[cp] == '#')
-            {
-                cp++;
-                if (back is null)
-                {
-                    count = value;
-                    if (count < 1)
+                // repeat #...# value times
+                case '#':
+                    cp++;
+                    if (back is null)
                     {
-                        while (cp < text.Length && text[cp] != '#')
+                        count = value;
+                        if (count < 1)
                         {
-                            cp++;
+                            while (cp < text.Length && text[cp] != '#')
+                            {
+                                cp++;
+                            }
+
+                            continue;
                         }
 
+                        back = cp;
                         continue;
                     }
 
-                    back = cp;
-                    continue;
-                }
+                    count--;
+                    if (count > 0)
+                    {
+                        cp = back.Value;
+                    }
+                    else
+                    {
+                        back = null;
+                    }
 
-                count--;
-                if (count > 0)
-                {
-                    cp = back.Value;
-                }
-                else
-                {
-                    back = null;
-                }
-            }
-            else if (!skip)
-            {
-                await storage.Output.WriteAsync(text[cp])
-                    .ConfigureAwait(false);
-                cp++;
-            }
-            else
-            {
-                cp++;
+                    break;
+
+                default:
+                    if (!skip)
+                    {
+                        await storage.Output.WriteAsync(text[cp])
+                            .ConfigureAwait(false);
+                        cp++;
+                    }
+                    else
+                    {
+                        cp++;
+                    }
+
+                    break;
             }
         }
     }
