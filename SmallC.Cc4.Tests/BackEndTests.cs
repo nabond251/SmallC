@@ -497,37 +497,34 @@ dw 0
     /// </summary>
     /// <param name="size">Literal size.</param>
     /// <param name="lits">Literals to dump.</param>
-    /// <param name="expectedPCode">Expected p-code.</param>
-    /// <param name="expectedDump">Expected dumped literals.</param>
+    /// <param name="expectedGen">Expected dumped literals.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData(1, "", null, "")]
-    [InlineData(1, "-1", PCode.BYTE_, "-1\r\n")]
-    [InlineData(1, "0", PCode.BYTE_, "0\r\n")]
-    [InlineData(1, "1", PCode.BYTE_, "1\r\n")]
-    [InlineData(1, "0,1,2,3,4,5,6,7,8,9,10,11", PCode.BYTE_, "0,1,2,3,4,5,6,7,8,9\r\n10,11\r\n")]
-    [InlineData(2, "", null, "")]
-    [InlineData(2, "-1,-1", PCode.WORD_, "-1\r\n")]
-    [InlineData(2, "0,0", PCode.WORD_, "0\r\n")]
-    [InlineData(2, "1,0", PCode.WORD_, "1\r\n")]
-    [InlineData(2, "0,1", PCode.WORD_, "256\r\n")]
-    [InlineData(2, "0,0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,9,0,10,0,11,0", PCode.WORD_, "0,1,2,3,4,5,6,7,8,9\r\n10,11\r\n")]
-    [InlineData(2, "0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1,8,1,9,1,10,1,11,1", PCode.WORD_, "256,257,258,259,260,261,262,263,264,265\r\n266,267\r\n")]
+    [InlineData(1, "", "")]
+    [InlineData(1, "-1", " DB -1\r\n")]
+    [InlineData(1, "0", " DB 0\r\n")]
+    [InlineData(1, "1", " DB 1\r\n")]
+    [InlineData(1, "0,1,2,3,4,5,6,7,8,9,10,11", " DB 0,1,2,3,4,5,6,7,8,9\r\n DB 10,11\r\n")]
+    [InlineData(2, "", "")]
+    [InlineData(2, "-1,-1", " DW -1\r\n")]
+    [InlineData(2, "0,0", " DW 0\r\n")]
+    [InlineData(2, "1,0", " DW 1\r\n")]
+    [InlineData(2, "0,1", " DW 256\r\n")]
+    [InlineData(2, "0,0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,9,0,10,0,11,0", " DW 0,1,2,3,4,5,6,7,8,9\r\n DW 10,11\r\n")]
+    [InlineData(2, "0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1,8,1,9,1,10,1,11,1", " DW 256,257,258,259,260,261,262,263,264,265\r\n DW 266,267\r\n")]
     public async Task DumpsLiteralsAsync(
         int size,
         string lits,
-        PCode? expectedPCode,
-        string expectedDump)
+        string expectedGen)
     {
         ArgumentNullException.ThrowIfNull(lits);
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        Collection<KeyValuePair<PCode, int>>? stage = [];
         var litQ = lits
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(sbyte.Parse);
-        var storage = ArrangeStorage(output, stage, litQ: [.. litQ]);
-        var sut = new BackEnd(storage);
+        var sut = Arrange(output, litQ: [.. litQ]);
+        sut.SetCodes();
 
         await sut.DumpLitsAsync(size);
         await output.FlushAsync();
@@ -535,8 +532,7 @@ dw 0
         using var reader = new StreamReader(outputStream);
         var actualDump = await reader.ReadToEndAsync();
 
-        Assert.Equal(expectedPCode, stage.Count > 0 ? stage[0].Key : null);
-        Assert.Equal(expectedDump, actualDump);
+        Assert.Equal(expectedGen, actualDump);
     }
 
     /// <summary>
