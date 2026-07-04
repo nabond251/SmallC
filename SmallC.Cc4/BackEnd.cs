@@ -720,109 +720,133 @@ public class BackEnd(
             switch (text[cp])
             {
                 case '<':
-                    cp++; // skip to action code
-                    if (!skip)
-                    {
-                        switch (text[cp])
-                        {
-                            // mem ref by label
-                            case 'm':
-                                await this.OutNameAsync(
-                                    storage.SymTable[value].Name)
-                                    .ConfigureAwait(false);
-                                break;
-
-                            // numeric constant
-                            case 'n':
-                                await this.OutDecAsync(value)
-                                    .ConfigureAwait(false);
-                                break;
-
-                            // current literal label
-                            case 'l':
-                                await this.OutDecAsync(storage.LitLab)
-                                    .ConfigureAwait(false);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    cp += 2; // skip past >
+                    cp = await OutPlaceholderAsync(value, skip, cp, text)
+                        .ConfigureAwait(false);
                     break;
 
                 // ?..if value...?...if not value...?
                 case '?':
-                    part++;
-                    switch (part)
-                    {
-                        case 1:
-                            if (value == 0)
-                            {
-                                skip = true;
-                            }
-
-                            break;
-                        case 2:
-                            skip = !skip;
-                            break;
-                        case 3:
-                            part = 0;
-                            skip = false;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    cp++; // skip past ?
+                    (part, skip, cp) = HandleBranch(value, part, skip, cp);
                     break;
 
                 // repeat #...# value times
                 case '#':
-                    cp++;
-                    if (back is null)
-                    {
-                        count = value;
-                        if (count < 1)
-                        {
-                            while (cp < text.Length && text[cp] != '#')
-                            {
-                                cp++;
-                            }
-
-                            continue;
-                        }
-
-                        back = cp;
-                        continue;
-                    }
-
-                    count--;
-                    if (count > 0)
-                    {
-                        cp = back.Value;
-                    }
-                    else
-                    {
-                        back = null;
-                    }
+                    (count, cp, back) = HandleRepeat(
+                        value, count, cp, back, text);
 
                     break;
 
                 default:
-                    if (!skip)
-                    {
-                        await storage.Output.WriteAsync(text[cp])
+                    cp = await OutCharAsync(skip, cp, text)
+                        .ConfigureAwait(false);
+                    break;
+            }
+        }
+
+        async Task<int> OutPlaceholderAsync(
+            int value, bool skip, int cp, string text)
+        {
+            cp++; // skip to action code
+            if (!skip)
+            {
+                switch (text[cp])
+                {
+                    // mem ref by label
+                    case 'm':
+                        await this.OutNameAsync(storage.SymTable[value].Name)
                             .ConfigureAwait(false);
-                        cp++;
-                    }
-                    else
+                        break;
+
+                    // numeric constant
+                    case 'n':
+                        await this.OutDecAsync(value).ConfigureAwait(false);
+                        break;
+
+                    // current literal label
+                    case 'l':
+                        await this.OutDecAsync(storage.LitLab)
+                            .ConfigureAwait(false);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            cp += 2; // skip past >
+            return cp;
+        }
+
+        static (int Part, bool Skip, int Cp) HandleBranch(
+            int value, int part, bool skip, int cp)
+        {
+            part++;
+            switch (part)
+            {
+                case 1:
+                    if (value == 0)
                     {
-                        cp++;
+                        skip = true;
                     }
 
                     break;
+                case 2:
+                    skip = !skip;
+                    break;
+                case 3:
+                    part = 0;
+                    skip = false;
+                    break;
+                default:
+                    break;
             }
+
+            cp++; // skip past ?
+            return (part, skip, cp);
+        }
+
+        static (int Count, int Cp, int? Back) HandleRepeat(
+            int value, int count, int cp, int? back, string text)
+        {
+            cp++;
+            if (back is null)
+            {
+                count = value;
+                if (count < 1)
+                {
+                    cp = text.IndexOf('#', cp) + 1;
+                }
+                else
+                {
+                    back = cp;
+                }
+            }
+            else
+            {
+                count--;
+                if (count > 0)
+                {
+                    cp = back.Value;
+                }
+                else
+                {
+                    back = null;
+                }
+            }
+
+            return (count, cp, back);
+        }
+
+        async Task<int> OutCharAsync(bool skip, int cp, string text)
+        {
+            if (!skip)
+            {
+                await storage.Output.WriteAsync(text[cp])
+                    .ConfigureAwait(false);
+            }
+
+            cp++;
+            return cp;
         }
     }
 
