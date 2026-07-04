@@ -164,15 +164,16 @@ dw 0
     /// <param name="expectedFirstValue">Expected first staged value.</param>
     /// <param name="expectedLastPCode">Expected last staged p-code.</param>
     /// <param name="expectedLastValue">Expected last staged value.</param>
+    /// <param name="expectedGen">Expected generated code.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData(false, PCode.ADD12, 0, 2, null, null, null, null, null)]
-    [InlineData(true, PCode.ADD12, 0, 2, 1, PCode.ADD12, 0, PCode.ADD12, 0)]
-    [InlineData(true, PCode.GETb1pu, 0, 2, 2, PCode.MOVE21, 0, PCode.GETb1pu, 0)]
-    [InlineData(true, PCode.SUB12, 0, 2, 2, PCode.SWAP12, 0, PCode.SUB12, 0)]
-    [InlineData(true, PCode.PUSH1, 0, 0, 1, PCode.PUSH1, 0, PCode.PUSH1, 0)]
-    [InlineData(true, PCode.POP2, 0, 4, 1, PCode.POP2, 0, PCode.POP2, 0)]
-    [InlineData(true, PCode.ADDSP, 4, 4, 1, PCode.ADDSP, 2, PCode.ADDSP, 2)]
+    [InlineData(false, PCode.ADD12, 0, 2, null, null, null, null, null, "ADD AX,BX\r\n")]
+    [InlineData(true, PCode.ADD12, 0, 2, 1, PCode.ADD12, 0, PCode.ADD12, 0, "")]
+    [InlineData(true, PCode.GETb1pu, 0, 2, 2, PCode.MOVE21, 0, PCode.GETb1pu, 0, "")]
+    [InlineData(true, PCode.SUB12, 0, 2, 2, PCode.SWAP12, 0, PCode.SUB12, 0, "")]
+    [InlineData(true, PCode.PUSH1, 0, 0, 1, PCode.PUSH1, 0, PCode.PUSH1, 0, "")]
+    [InlineData(true, PCode.POP2, 0, 4, 1, PCode.POP2, 0, PCode.POP2, 0, "")]
+    [InlineData(true, PCode.ADDSP, 4, 4, 1, PCode.ADDSP, 2, PCode.ADDSP, 2, "")]
     public async Task GensAsync(
         bool setStage,
         PCode pCode,
@@ -182,7 +183,8 @@ dw 0
         PCode? expectedFirstPCode,
         int? expectedFirstValue,
         PCode? expectedLastPCode,
-        int? expectedLastValue)
+        int? expectedLastValue,
+        string expectedGen)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
@@ -192,6 +194,10 @@ dw 0
         sut.SetCodes();
 
         await sut.GenAsync(pCode, value);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actualGen = await reader.ReadToEndAsync();
 
         Assert.Equal(expectedCsp, storage.Csp);
         Assert.Equal(expectedSNext, storage.SNext);
@@ -203,6 +209,10 @@ dw 0
             var last = storage.Stage?.LastOrDefault();
             Assert.Equal(expectedLastPCode, last?.Key);
             Assert.Equal(expectedLastValue, last?.Value);
+        }
+        else
+        {
+            Assert.Equal(expectedGen, actualGen);
         }
     }
 
