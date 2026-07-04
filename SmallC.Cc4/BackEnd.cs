@@ -649,14 +649,8 @@ public class BackEnd(
         k = 0;
         while (k < storage.LitPtr)
         {
-            if (size == 1)
-            {
-                await this.GenAsync(PCode.BYTE_, null).ConfigureAwait(false);
-            }
-            else
-            {
-                await this.GenAsync(PCode.WORD_, null).ConfigureAwait(false);
-            }
+            var pCode = size == 1 ? PCode.BYTE_ : PCode.WORD_;
+            await this.GenAsync(pCode, null).ConfigureAwait(false);
 
             j = 10;
             while (j-- > 0)
@@ -685,14 +679,8 @@ public class BackEnd(
     {
         if (count > 0)
         {
-            if (size == 1)
-            {
-                await this.GenAsync(PCode.BYTEr0, count).ConfigureAwait(false);
-            }
-            else
-            {
-                await this.GenAsync(PCode.WORDr0, count).ConfigureAwait(false);
-            }
+            var pCode = size == 1 ? PCode.BYTEr0 : PCode.WORDr0;
+            await this.GenAsync(pCode, count).ConfigureAwait(false);
         }
     }
 
@@ -718,22 +706,17 @@ public class BackEnd(
     /// </summary>
     private async Task OutCodeAsync(PCode pCode, int value)
     {
-        int part;
-        bool skip;
-        int count;
-        int cp;
-        int? back;
-        back = null;
-        count = 0;
-        part = 0;
-        skip = false;
+        var part = 0;
+        var skip = false;
+        var count = 0;
+        var cp = 0;
+        int? back = null;
         var text = this.code[pCode].Text;
-        cp = 0;
         while (cp < text.Length)
         {
             if (text[cp] == '<')
             {
-                ++cp; // skip to action code
+                cp++; // skip to action code
                 if (!skip)
                 {
                     switch (text[cp])
@@ -787,16 +770,17 @@ public class BackEnd(
                         break;
                 }
 
-                ++cp; // skip past ?
+                cp++; // skip past ?
             }
 
             // repeat #...# value times
             else if (text[cp] == '#')
             {
-                ++cp;
+                cp++;
                 if (back is null)
                 {
-                    if ((count = value) < 1)
+                    count = value;
+                    if (count < 1)
                     {
                         while (cp < text.Length && text[cp] != '#')
                         {
@@ -810,7 +794,8 @@ public class BackEnd(
                     continue;
                 }
 
-                if (--count > 0)
+                count--;
+                if (count > 0)
                 {
                     cp = back.Value;
                 }
@@ -821,49 +806,22 @@ public class BackEnd(
             }
             else if (!skip)
             {
-                await storage.Output.WriteAsync(text[cp++])
+                await storage.Output.WriteAsync(text[cp])
                     .ConfigureAwait(false);
+                cp++;
             }
             else
             {
-                ++cp;
+                cp++;
             }
         }
     }
 
     private async Task OutDecAsync(int number)
     {
-        int k, zs;
-        char c;
-        int q, r;
-        zs = 0;
-        k = 10000;
-        if (number < 0)
-        {
-            number = -number;
-            await storage.Output.WriteAsync('-').ConfigureAwait(false);
-        }
-
-        while (k >= 1)
-        {
-            q = 0;
-            r = number;
-            while (r >= k)
-            {
-                ++q;
-                r -= k;
-            }
-
-            c = (char)(q + '0');
-            if (c != '0' || k == 1 || zs != 0)
-            {
-                zs = 1;
-                await storage.Output.WriteAsync(c).ConfigureAwait(false);
-            }
-
-            number = r;
-            k /= 10;
-        }
+        await storage.Output.WriteAsync(
+            number.ToString(CultureInfo.InvariantCulture))
+            .ConfigureAwait(false);
     }
 
     private async Task OutLineAsync(string ptr)
@@ -881,8 +839,6 @@ public class BackEnd(
 
     private async Task OutStrAsync(string ptr)
     {
-        await storage.Output.WriteAsync(
-            new string([.. ptr.TakeWhile(c => c >= ' ')]))
-            .ConfigureAwait(false);
+        await storage.Output.WriteAsync(ptr).ConfigureAwait(false);
     }
 }
