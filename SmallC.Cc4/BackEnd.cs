@@ -112,8 +112,8 @@ public class BackEnd(
         this.code[PCode.COMMAn] = Code.Build("000", ",<n>\r\n");
         this.code[PCode.DBL1] = Code.Build("010", "SHL AX,1\r\n");
         this.code[PCode.DBL2] = Code.Build("001", "SHL BX,1\r\n");
-        this.code[PCode.DECbp] = Code.Build("001", "DEC BYTE PTR [BX],<n>\r\n");
-        this.code[PCode.DECwp] = Code.Build("001", "DEC WORD PTR [BX],<n>\r\n");
+        this.code[PCode.DECbp] = Code.Build("001", "DEC BYTE PTR [BX]\r\n");
+        this.code[PCode.DECwp] = Code.Build("001", "DEC WORD PTR [BX]\r\n");
         this.code[PCode.DIV12] = Code.Build("011", "CWD\r\nIDIV BX\r\n"); // see GenAsync()
         this.code[PCode.DIV12u] = Code.Build("011", "XOR DX,DX\r\nDIV BX\r\n"); // see GenAsync()
         this.code[PCode.ENTER] = Code.Build("100", "PUSH BP\r\nMOV BP,SP\r\n");
@@ -182,7 +182,7 @@ public class BackEnd(
         this.code[PCode.PUTwm1] = Code.Build("010", "MOV <m>,AX\r\n");
         this.code[PCode.PUTwp1] = Code.Build("011", "MOV [BX],AX\r\n");
         this.code[PCode.rDEC1] = Code.Build("010", "#DEC AX\r\n#");
-        this.code[PCode.rDEC1] = Code.Build("010", "#DEC BX\r\n#");
+        this.code[PCode.rDEC2] = Code.Build("010", "#DEC BX\r\n#");
         this.code[PCode.REFm] = Code.Build("000", "_<n>");
         this.code[PCode.RETURN] = Code.Build("000", "?MOV SP,BP\r\n??POP BP\r\nRET\r\n");
         this.code[PCode.rINC1] = Code.Build("010", "#INC AX\r\n#");
