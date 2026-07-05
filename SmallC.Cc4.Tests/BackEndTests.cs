@@ -703,8 +703,9 @@ dw 0
             symbolTable ?? new([], []),
             litQ ?? [],
             ssName);
+        var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
-        var sut = new BackEnd(utility, storage);
+        var sut = new BackEnd(symTabMgmt, utility, storage);
         sut.SetCodes();
 
         return (sut, storage);

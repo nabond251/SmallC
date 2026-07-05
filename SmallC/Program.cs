@@ -23,8 +23,9 @@ var storage = new Storage(
         ]),
     [],
     null);
+var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
-var backend = new BackEnd(utility, storage);
+var backend = new BackEnd(symTabMgmt, utility, storage);
 backend.SetCodes();
 await backend.HeaderAsync().ConfigureAwait(true);
 await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);

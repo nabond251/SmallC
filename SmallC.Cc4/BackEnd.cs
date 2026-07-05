@@ -14,6 +14,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// Back end.
 /// </summary>
 public class BackEnd(
+    SymbolTableUseCases symTabMgmt,
     UtilityUseCases utility,
     Storage storage)
 {
@@ -247,7 +248,7 @@ public class BackEnd(
             }
         }
 
-        var cp = storage.SymTable.FindGlb("main");
+        var cp = symTabMgmt.FindGlb("main");
         if (cp?.Class == SymbolClass.Static)
         {
             await this.ExternalAsync(
