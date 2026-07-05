@@ -5,6 +5,7 @@
 using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc4;
+using static SmallC.Cc.Storage;
 using static SmallC.Cc.SymbolTableEntry;
 
 var storage = new Storage(
@@ -12,6 +13,7 @@ var storage = new Storage(
     0,
     false,
     Console.Out,
+    null,
     null,
     null,
     0,
@@ -25,6 +27,9 @@ var storage = new Storage(
         ]),
     [],
     string.Empty,
+    string.Empty,
+    BufferLineType.None,
+    0,
     null);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);

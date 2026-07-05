@@ -9,7 +9,9 @@ using SmallC.Cc;
 /// <summary>
 /// Input use cases.
 /// </summary>
-public class InputUseCases(Storage storage)
+public class InputUseCases(
+    ScanningUseCases scanning,
+    Storage storage)
 {
     /// <summary>
     /// Preprocess.
@@ -53,6 +55,6 @@ public class InputUseCases(Storage storage)
             await this.PreprocessAsync().ConfigureAwait(false);
         }
 
-        return storage.Ch;
+        return scanning.Gch();
     }
 }

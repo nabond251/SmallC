@@ -16,18 +16,43 @@ public class Storage(
     TextWriter output,
     Collection<KeyValuePair<PCode, int>>? stage,
     char? ch,
+    char? nCh,
     int sLast,
     SegmentType oldSeg,
     bool optimize,
     SymbolTable symTable,
     Collection<sbyte> litQ,
     string pLine,
+    string mLine,
+    Storage.BufferLineType lineType,
+    int lPtr,
     string? ssName)
 {
     /// <summary>
     /// Entries in staging buffer.
     /// </summary>
     public const int StageSize = 200;
+
+    /// <summary>
+    /// <see cref="Line"/> type enumeration.
+    /// </summary>
+    public enum BufferLineType
+    {
+        /// <summary>
+        /// No buffer selected.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Parsing buffer.
+        /// </summary>
+        Parsing,
+
+        /// <summary>
+        /// Macro buffer.
+        /// </summary>
+        Macro,
+    }
 
     /// <summary>
     /// Gets or sets label # assigned to literal pool.
@@ -71,6 +96,11 @@ public class Storage(
     public char? Ch { get; set; } = ch;
 
     /// <summary>
+    /// Gets or sets next character of input line.
+    /// </summary>
+    public char? NCh { get; set; } = nCh;
+
+    /// <summary>
     /// Gets next index in stage.
     /// </summary>
     public int? SNext => this.Stage?.Count;
@@ -105,6 +135,34 @@ public class Storage(
     /// Gets or sets parsing buffer.
     /// </summary>
     public string PLine { get; set; } = pLine;
+
+    /// <summary>
+    /// Gets or sets macro buffer.
+    /// </summary>
+    public string MLine { get; set; } = mLine;
+
+    /// <summary>
+    /// Gets a value indicating whether <see cref="Line"/> points to
+    /// <see cref="PLine"/> or <see cref="MLine"/>.
+    /// </summary>
+    public BufferLineType LineType { get; } = lineType;
+
+    /// <summary>
+    /// Gets <see cref="PLine"/> or <see cref="MLine"/>, based on
+    /// <see cref="LineType"/>.
+    /// </summary>
+    public string? Line =>
+        this.LineType switch
+        {
+            BufferLineType.Parsing => this.PLine,
+            BufferLineType.Macro => this.MLine,
+            BufferLineType.None or _ => null,
+        };
+
+    /// <summary>
+    /// Gets or sets index to <see cref="Line"/>.
+    /// </summary>
+    public int LPtr { get; set; } = lPtr;
 
     /// <summary>
     /// Gets or sets static symbol name.
