@@ -12,6 +12,30 @@ using SmallC.Cc;
 public class UtilityUseCases(Storage storage)
 {
     /// <summary>
+    /// Test if <paramref name="c"/> is alphabetic.
+    /// </summary>
+    /// <param name="c">Character to test.</param>
+    /// <returns>
+    /// A value indicating whether <paramref name="c"/> is alphabetic.
+    /// </returns>
+    public static bool Alpha(char c)
+    {
+        return char.IsAsciiLetter(c) || c == '_';
+    }
+
+    /// <summary>
+    /// Test if given character is alphanumericc.
+    /// </summary>
+    /// <param name="c">Character to test.</param>
+    /// <returns>
+    /// A value indicating whether <paramref name="c"/> is alphanumeric.
+    /// </returns>
+    public static bool An(char c)
+    {
+        return Alpha(c) || char.IsDigit(c);
+    }
+
+    /// <summary>
     /// Get integer of length <paramref name="len"/> from address
     /// <paramref name="addr"/> (byte sequence set by "putint").
     /// </summary>
