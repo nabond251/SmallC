@@ -10,7 +10,9 @@ using static SmallC.Cc.SymbolTableEntry;
 var storage = new Storage(
     0,
     0,
+    false,
     Console.Out,
+    null,
     null,
     0,
     SegmentType.None,

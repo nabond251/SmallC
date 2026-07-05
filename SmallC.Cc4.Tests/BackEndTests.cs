@@ -695,8 +695,10 @@ dw 0
         var storage = new Storage(
             0,
             Machine.Bpw,
+            false,
             output,
             stage,
+            null,
             Storage.StageSize,
             oldSeg,
             false,

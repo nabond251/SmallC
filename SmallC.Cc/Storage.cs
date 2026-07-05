@@ -12,8 +12,10 @@ using System.Collections.ObjectModel;
 public class Storage(
     int litLab,
     int csp,
+    bool eof,
     TextWriter output,
     Collection<KeyValuePair<PCode, int>>? stage,
+    char? ch,
     int sLast,
     SegmentType oldSeg,
     bool optimize,
@@ -38,6 +40,11 @@ public class Storage(
     public int Csp { get; set; } = csp;
 
     /// <summary>
+    /// Gets or sets a value indicating whether end of input has been reached.
+    /// </summary>
+    public bool Eof { get; set; } = eof;
+
+    /// <summary>
     /// Gets fd for output file.
     /// </summary>
     public TextWriter Output { get; } = output;
@@ -57,6 +64,11 @@ public class Storage(
     /// Gets index to parsing buffer.
     /// </summary>
     public int PPtr => this.PLine.Length;
+
+    /// <summary>
+    /// Gets or sets current character of input line.
+    /// </summary>
+    public char? Ch { get; set; } = ch;
 
     /// <summary>
     /// Gets next index in stage.
