@@ -19,6 +19,7 @@ public class Storage(
     bool optimize,
     SymbolTable symTable,
     Collection<sbyte> litQ,
+    string pLine,
     string? ssName)
 {
     /// <summary>
@@ -53,6 +54,11 @@ public class Storage(
     public int LitPtr => this.LitQ.Count;
 
     /// <summary>
+    /// Gets index to parsing buffer.
+    /// </summary>
+    public int PPtr => this.PLine.Length;
+
+    /// <summary>
     /// Gets next index in stage.
     /// </summary>
     public int? SNext => this.Stage?.Count;
@@ -82,6 +88,11 @@ public class Storage(
     /// Gets literal pool.
     /// </summary>
     public Collection<sbyte> LitQ { get; } = litQ;
+
+    /// <summary>
+    /// Gets or sets parsing buffer.
+    /// </summary>
+    public string PLine { get; set; } = pLine;
 
     /// <summary>
     /// Gets or sets static symbol name.

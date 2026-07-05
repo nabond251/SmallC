@@ -702,6 +702,7 @@ dw 0
             false,
             symbolTable ?? new([], []),
             litQ ?? [],
+            string.Empty,
             ssName);
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);

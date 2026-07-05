@@ -22,6 +22,7 @@ var storage = new Storage(
             new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 2, null, "main"),
         ]),
     [],
+    string.Empty,
     null);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
