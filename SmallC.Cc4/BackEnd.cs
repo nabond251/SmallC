@@ -5,6 +5,7 @@
 namespace SmallC.Cc4;
 
 using SmallC.Cc;
+using SmallC.Cc2;
 using System.ComponentModel;
 using System.Globalization;
 using static SmallC.Cc.SymbolTableEntry;
@@ -13,6 +14,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// Back end.
 /// </summary>
 public class BackEnd(
+    UtilityUseCases utility,
     Storage storage)
 {
     // Optimizer command definitions
@@ -635,7 +637,7 @@ public class BackEnd(
         var lits = new List<int>();
         for (var k = 0; k < storage.LitPtr; k += size)
         {
-            lits.Add(storage.GetInt(k, size));
+            lits.Add(utility.GetInt(k, size));
         }
 
         var litLists = Enumerable

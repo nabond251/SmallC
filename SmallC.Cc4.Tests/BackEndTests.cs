@@ -5,6 +5,7 @@
 namespace SmallC.Cc4.Tests;
 
 using SmallC.Cc;
+using SmallC.Cc2;
 using SmallC.Cc4;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -141,7 +142,8 @@ dw 0
         }
 
         var storage = ArrangeStorage(output, stage);
-        var sut = new BackEnd(storage);
+        var utility = new UtilityUseCases(storage);
+        var sut = new BackEnd(utility, storage);
 
         // Act
         var (actualBefore, actualStart) = sut.SetStage();
@@ -426,7 +428,8 @@ dw 0
                 new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "baz"),
             ]);
         var storage = ArrangeStorage(output, stage, symbolTable: symbolTable);
-        var sut = new BackEnd(storage);
+        var utility = new UtilityUseCases(storage);
+        var sut = new BackEnd(utility, storage);
         sut.SetCodes();
 
         await sut.GenAsync(pCode, value);
@@ -484,7 +487,8 @@ dw 0
         Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
         stage?.Add(new(PCode.ADD12, 0));
         var storage = ArrangeStorage(output, stage);
-        var sut = new BackEnd(storage);
+        var utility = new UtilityUseCases(storage);
+        var sut = new BackEnd(utility, storage);
         sut.SetCodes();
 
         await sut.ClearStageAsync(before, start);
@@ -560,7 +564,8 @@ dw 0
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = [];
         var storage = ArrangeStorage(output, stage);
-        var sut = new BackEnd(storage);
+        var utility = new UtilityUseCases(storage);
+        var sut = new BackEnd(utility, storage);
 
         await sut.DumpZeroAsync(size, count);
 
@@ -706,7 +711,8 @@ dw 0
             litQ,
             ssName);
 
-        return new BackEnd(storage);
+        var utility = new UtilityUseCases(storage);
+        return new BackEnd(utility, storage);
     }
 
     private static Storage ArrangeStorage(

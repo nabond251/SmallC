@@ -3,6 +3,7 @@
 // </copyright>
 
 using SmallC.Cc;
+using SmallC.Cc2;
 using SmallC.Cc4;
 using static SmallC.Cc.SymbolTableEntry;
 
@@ -22,7 +23,8 @@ var storage = new Storage(
         ]),
     [],
     null);
-var backend = new BackEnd(storage);
+var utility = new UtilityUseCases(storage);
+var backend = new BackEnd(utility, storage);
 backend.SetCodes();
 await backend.HeaderAsync().ConfigureAwait(true);
 await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);

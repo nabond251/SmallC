@@ -103,26 +103,4 @@ public class Storage(
     {
         this.Stage = null;
     }
-
-    /// <summary>
-    /// Get integer of length <paramref name="len"/> from address
-    /// <paramref name="addr"/> (byte sequence set by "putint").
-    /// </summary>
-    /// <param name="addr">Index into <see cref="LitQ"/>.</param>
-    /// <param name="len">Length of int to get.</param>
-    /// <returns>
-    /// Integer of length <paramref name="len"/> from address
-    /// <paramref name="addr"/>.
-    /// </returns>
-    public int GetInt(int addr, int len)
-    {
-        int i;
-        i = this.LitQ[addr + --len]; // high order sign byte extended
-        while (len-- != 0)
-        {
-            i = (i << 8) | (this.LitQ[addr + len] & 255);
-        }
-
-        return i;
-    }
 }
