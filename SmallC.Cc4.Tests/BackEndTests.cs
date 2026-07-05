@@ -30,7 +30,7 @@ public class BackEndTests
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = Arrange(output);
+        var (sut, _) = Arrange(output);
 
         await sut.HeaderAsync();
         await output.FlushAsync();
@@ -88,7 +88,7 @@ dw 0
             "main")) : globals;
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = Arrange(
+        var (sut, _) = Arrange(
             output,
             symbolTable: new([], [.. globalsAndAnyMain]));
 
@@ -141,9 +141,7 @@ dw 0
             stage.Add(new(pCode.Value, value.Value));
         }
 
-        var storage = ArrangeStorage(output, stage);
-        var utility = new UtilityUseCases(storage);
-        var sut = new BackEnd(utility, storage);
+        var (sut, storage) = Arrange(output, stage);
 
         // Act
         var (actualBefore, actualStart) = sut.SetStage();
@@ -427,10 +425,7 @@ dw 0
                 new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "bar"),
                 new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "baz"),
             ]);
-        var storage = ArrangeStorage(output, stage, symbolTable: symbolTable);
-        var utility = new UtilityUseCases(storage);
-        var sut = new BackEnd(utility, storage);
-        sut.SetCodes();
+        var (sut, storage) = Arrange(output, stage, symbolTable: symbolTable);
 
         await sut.GenAsync(pCode, value);
         await output.FlushAsync();
@@ -486,10 +481,7 @@ dw 0
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
         stage?.Add(new(PCode.ADD12, 0));
-        var storage = ArrangeStorage(output, stage);
-        var utility = new UtilityUseCases(storage);
-        var sut = new BackEnd(utility, storage);
-        sut.SetCodes();
+        var (sut, storage) = Arrange(output, stage);
 
         await sut.ClearStageAsync(before, start);
 
@@ -527,8 +519,7 @@ dw 0
         var litQ = lits
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(sbyte.Parse);
-        var sut = Arrange(output, litQ: [.. litQ]);
-        sut.SetCodes();
+        var (sut, _) = Arrange(output, litQ: [.. litQ]);
 
         await sut.DumpLitsAsync(size);
         await output.FlushAsync();
@@ -563,9 +554,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = [];
-        var storage = ArrangeStorage(output, stage);
-        var utility = new UtilityUseCases(storage);
-        var sut = new BackEnd(utility, storage);
+        var (sut, _) = Arrange(output, stage);
 
         await sut.DumpZeroAsync(size, count);
 
@@ -595,7 +584,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = Arrange(output, oldSeg: oldSeg);
+        var (sut, _) = Arrange(output, oldSeg: oldSeg);
 
         await sut.ToSegAsync(newSeg);
         await output.FlushAsync();
@@ -625,7 +614,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = Arrange(output, ssName: ssName);
+        var (sut, _) = Arrange(output, ssName: ssName);
 
         await sut.PublicAsync(ident);
         await output.FlushAsync();
@@ -661,7 +650,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = Arrange(output);
+        var (sut, _) = Arrange(output);
 
         await sut.ExternalAsync(name, size, ident);
         await output.FlushAsync();
@@ -683,7 +672,7 @@ dw 0
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var sut = Arrange(output);
+        var (sut, _) = Arrange(output);
 
         await sut.PointAsync();
         await output.FlushAsync();
@@ -695,7 +684,7 @@ dw 0
         Assert.Equal(expected, actual);
     }
 
-    private static BackEnd Arrange(
+    private static (BackEnd Sut, Storage Storage) Arrange(
         StreamWriter output,
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
@@ -703,27 +692,7 @@ dw 0
         Collection<sbyte>? litQ = null,
         string? ssName = null)
     {
-        var storage = ArrangeStorage(
-            output,
-            stage,
-            oldSeg,
-            symbolTable ?? new([], []),
-            litQ,
-            ssName);
-
-        var utility = new UtilityUseCases(storage);
-        return new BackEnd(utility, storage);
-    }
-
-    private static Storage ArrangeStorage(
-        StreamWriter output,
-        Collection<KeyValuePair<PCode, int>>? stage = null,
-        SegmentType oldSeg = SegmentType.None,
-        SymbolTable? symbolTable = null,
-        Collection<sbyte>? litQ = null,
-        string? ssName = null)
-    {
-        return new Storage(
+        var storage = new Storage(
             0,
             Machine.Bpw,
             output,
@@ -734,5 +703,10 @@ dw 0
             symbolTable ?? new([], []),
             litQ ?? [],
             ssName);
+        var utility = new UtilityUseCases(storage);
+        var sut = new BackEnd(utility, storage);
+        sut.SetCodes();
+
+        return (sut, storage);
     }
 }
