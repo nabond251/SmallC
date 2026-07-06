@@ -14,6 +14,64 @@ public class ScanningUseCases(
     Storage storage)
 {
     /// <summary>
+    /// Indicates whether or not the current substring in the source line
+    /// (<paramref name="str1"/>) matches a literal string
+    /// (<paramref name="str2"/>).
+    /// </summary>
+    /// <param name="str1">Source line substring.</param>
+    /// <param name="str2">Literal to match.</param>
+    /// <returns>If match, length of <paramref name="str2"/>; else 0.</returns>
+    public static int StrEq(string str1, string str2)
+    {
+        ArgumentNullException.ThrowIfNull(str1);
+        ArgumentNullException.ThrowIfNull(str2);
+
+        return str1.StartsWith(str2, StringComparison.InvariantCulture) ?
+            str2.Length : 0;
+    }
+
+    /// <summary>
+    /// Indicates whether or not two alphanumeric strings or substrings match.
+    /// </summary>
+    /// <param name="str1">First string to match.</param>
+    /// <param name="str2">Second string to match.</param>
+    /// <param name="len">Max match length.</param>
+    /// <returns>
+    /// Length of match if first <paramref name="len"/> alphanumeric characters
+    /// of <paramref name="str1"/> and <paramref name="str2"/> match; else 0.
+    /// </returns>
+    public static int AStrEq(string str1, string str2, int len)
+    {
+        ArgumentNullException.ThrowIfNull(str1);
+        ArgumentNullException.ThrowIfNull(str2);
+
+        var k = 0;
+        while (k < len)
+        {
+            if (k == str1.Length)
+            {
+                break;
+            }
+
+            if (k == str2.Length)
+            {
+                break;
+            }
+
+            if (str1[k] != str2[k])
+            {
+                break;
+            }
+
+            k++;
+        }
+
+        return (k < str1.Length && UtilityUseCases.An(str1[k])) ||
+            (k < str2.Length && UtilityUseCases.An(str2[k]))
+            ? 0 : k;
+    }
+
+    /// <summary>
     /// Advances the input past white space to the beginning of the next token
     /// or until the end of the input is reached.
     /// </summary>
