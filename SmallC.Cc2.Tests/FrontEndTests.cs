@@ -23,6 +23,9 @@ public class FrontEndTests
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
     [InlineData("", "")]
+    [InlineData(" ", " ")]
+    [InlineData("  ", " ")]
+    [InlineData("\r\n", " ")]
     public async Task CanPreprocessAsync(string inputText, string? expected)
     {
         using var outputStream = new MemoryStream();
