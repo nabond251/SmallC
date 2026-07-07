@@ -276,7 +276,7 @@ public class FrontEnd(Storage storage)
         if (storage.Input is TextReader input &&
             await input.ReadLineAsync().ConfigureAwait(false) is string line)
         {
-            storage.Line = line;
+            storage.Line = $"{line}{Environment.NewLine}";
         }
         else
         {
