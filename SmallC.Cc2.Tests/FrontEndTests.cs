@@ -46,6 +46,43 @@ public class FrontEndTests
         Assert.Equal(expected, actual);
     }
 
+    /// <summary>
+    /// Tests that can match string literals.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="lit">String literal to match.</param>
+    /// <param name="expectedMatch">
+    /// A value indicating whether the next token matched.
+    /// </param>
+    /// <param name="expectedNext">Expected next input text.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("", "", true, "")]
+    [InlineData(";", ";", true, "")]
+    [InlineData("test", "test", true, "")]
+    [InlineData("foo()", "foo", true, "()")]
+    [InlineData(" bar", "bar", true, "")]
+    [InlineData("  baz;", "baz", true, ";")]
+    [InlineData("  foo_();", "foo_", true, "();")]
+    [InlineData(" _bar ", "_bar", true, " ")]
+    [InlineData("b4z ", "b4z", true, " ")]
+    public async Task CanMatchAsync(
+        string inputText, string lit, bool expectedMatch, string? expectedNext)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, storage) = Arrange(
+            output, input: input, lineType: BufferLineType.Parsing);
+
+        var actualMatch = await sut.MatchAsync(lit);
+
+        Assert.Equal(expectedMatch, actualMatch);
+        Assert.Equal(expectedNext, storage.Line[storage.LPtr..]);
+    }
+
     private static (FrontEnd Sut, Storage Storage) Arrange(
         StreamWriter output,
         StreamReader? input = null,
