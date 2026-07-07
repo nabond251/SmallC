@@ -17,6 +17,7 @@ public class Storage(
     bool eof,
     TextWriter output,
     TextReader input,
+    bool cCode,
     Collection<KeyValuePair<PCode, int>>? stage,
     char? ch,
     char? nCh,
@@ -25,10 +26,12 @@ public class Storage(
     bool optimize,
     SymbolTable symTable,
     Collection<sbyte> litQ,
+    Dictionary<string, string> mac,
     string pLine,
     string mLine,
     Storage.BufferLineType lineType,
     int lPtr,
+    string? msName,
     string? ssName)
 {
     /// <summary>
@@ -93,6 +96,11 @@ public class Storage(
     public TextReader? Input { get; set; } = input;
 
     /// <summary>
+    /// Gets or sets a value indicating whether parsing C code.
+    /// </summary>
+    public bool CCode { get; set; } = cCode;
+
+    /// <summary>
     /// Gets staging buffer.
     /// </summary>
     public Collection<KeyValuePair<PCode, int>>? Stage { get; private set; } =
@@ -150,6 +158,11 @@ public class Storage(
     public Collection<sbyte> LitQ { get; } = litQ;
 
     /// <summary>
+    /// Gets the macro buffer.
+    /// </summary>
+    public Dictionary<string, string> Mac { get; } = mac;
+
+    /// <summary>
     /// Gets or sets parsing buffer.
     /// </summary>
     public string PLine { get; set; } = pLine;
@@ -160,10 +173,10 @@ public class Storage(
     public string MLine { get; set; } = mLine;
 
     /// <summary>
-    /// Gets a value indicating whether <see cref="Line"/> points to
+    /// Gets or sets a value indicating whether <see cref="Line"/> points to
     /// <see cref="PLine"/> or <see cref="MLine"/>.
     /// </summary>
-    public BufferLineType LineType { get; } = lineType;
+    public BufferLineType LineType { get; set; } = lineType;
 
     /// <summary>
     /// Gets or sets <see cref="PLine"/> or <see cref="MLine"/>, based on
@@ -201,6 +214,11 @@ public class Storage(
     /// Gets or sets index to <see cref="Line"/>.
     /// </summary>
     public int LPtr { get; set; } = lPtr;
+
+    /// <summary>
+    /// Gets or sets macro symbol name.
+    /// </summary>
+    public string? MsName { get; set; } = msName;
 
     /// <summary>
     /// Gets or sets static symbol name.

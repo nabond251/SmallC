@@ -187,6 +187,7 @@ public class FrontEndTests
             false,
             output,
             input ?? TextReader.Null,
+            true,
             stage,
             null,
             null,
@@ -195,10 +196,12 @@ public class FrontEndTests
             false,
             symbolTable ?? new([], []),
             litQ ?? [],
+            [],
             string.Empty,
             string.Empty,
             lineType ?? BufferLineType.None,
             0,
+            null,
             ssName);
         var sut = new FrontEnd(storage);
 

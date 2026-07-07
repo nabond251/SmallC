@@ -85,16 +85,161 @@ public class FrontEnd(Storage storage)
     /// Preprocess.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+#pragma warning disable CA1508 // Avoid dead conditional code
     public async Task PreprocessAsync()
     {
-        await this.IfLineAsync().ConfigureAwait(false);
+        int k;
+        char c;
+        if (storage.CCode)
+        {
+            storage.LineType = BufferLineType.Macro;
+            await this.IfLineAsync().ConfigureAwait(false);
+            if (storage.Eof)
+            {
+                return;
+            }
+        }
+        else
+        {
+            await this.InLineAsync().ConfigureAwait(false);
+            return;
+        }
+
+        storage.PLine = string.Empty;
+        while (storage.Ch.ToString() != Environment.NewLine &&
+            storage.Ch.HasValue)
+        {
+            if (this.White())
+            {
+                this.KeepCh(' ');
+                while (this.White())
+                {
+                    _ = this.Gch();
+                }
+            }
+            else if (storage.Ch == '"')
+            {
+                this.KeepCh(storage.Ch);
+                _ = this.Gch();
+                while (storage.Ch != '"' || (
+                    storage.Line.ElementAtOrDefault(storage.LPtr - 1) == 92 &&
+                    storage.Line.ElementAtOrDefault(storage.LPtr - 2) != 92))
+                {
+                    if (!storage.Ch.HasValue)
+                    {
+                        throw new InvalidOperationException("no quote");
+                    }
+
+                    this.KeepCh(this.Gch());
+                }
+
+                _ = this.Gch();
+                this.KeepCh('"');
+            }
+            else if (storage.Ch == 39)
+            {
+                this.KeepCh((char)39);
+                _ = this.Gch();
+                while (storage.Ch != 39 || (
+                    storage.Line.ElementAtOrDefault(storage.LPtr - 1) == 92 &&
+                    storage.Line.ElementAtOrDefault(storage.LPtr - 2) != 92))
+                {
+                    if (!storage.Ch.HasValue)
+                    {
+                        throw new InvalidOperationException("no apostrophe");
+                    }
+
+                    this.KeepCh(this.Gch());
+                }
+
+                _ = this.Gch();
+                this.KeepCh((char)39);
+            }
+            else if (storage.Ch == '/' && storage.NCh == '*')
+            {
+                this.Bump(2);
+                while (!(storage.Ch == '*' && storage.NCh == '/'))
+                {
+                    if (storage.Ch.HasValue)
+                    {
+                        this.Bump(1);
+                    }
+                    else
+                    {
+                        await this.IfLineAsync().ConfigureAwait(false);
+                        if (storage.Eof)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                this.Bump(2);
+            }
+            else if (UtilityUseCases.An(storage.Ch))
+            {
+                var msName = new StringBuilder();
+                while (UtilityUseCases.An(storage.Ch) &&
+                    msName.Length < SymbolName.NameMax)
+                {
+                    _ = msName.Append(storage.Ch);
+                    _ = this.Gch();
+                }
+
+                storage.MsName = msName.ToString();
+                var macN = storage.MsName;
+                if (storage.Mac.TryGetValue(macN, out var macQ))
+                {
+                    k = 0;
+                    c = macQ.ElementAtOrDefault(k);
+                    k++;
+                    while (c != default)
+                    {
+                        this.KeepCh(c);
+                        c = macQ.ElementAtOrDefault(k);
+                        k++;
+                    }
+
+                    while (UtilityUseCases.An(storage.Ch))
+                    {
+                        _ = this.Gch();
+                    }
+                }
+                else
+                {
+                    k = 0;
+                    c = storage.MsName.ElementAtOrDefault(k);
+                    k++;
+                    while (c != default)
+                    {
+                        this.KeepCh(c);
+                        c = storage.MsName.ElementAtOrDefault(k);
+                        k++;
+                    }
+                }
+            }
+            else
+            {
+                this.KeepCh(this.Gch());
+            }
+        }
+
+        if (storage.PPtr >= InputLine.LineMax)
+        {
+            throw new InvalidOperationException("line too long");
+        }
+
+        this.KeepCh(null);
+        storage.LineType = BufferLineType.Parsing;
+        this.Bump(0);
     }
+#pragma warning restore CA1508 // Avoid dead conditional code
 
     /// <summary>
     /// Place character into parsing buffer.
     /// </summary>
     /// <param name="c">Character to keep.</param>
-    public void KeepCh(char c)
+    public void KeepCh(char? c)
     {
         if (storage.PPtr < InputLine.LineMax)
         {

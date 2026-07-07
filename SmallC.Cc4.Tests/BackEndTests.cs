@@ -703,6 +703,7 @@ dw 0
             false,
             output,
             input ?? StreamReader.Null,
+            true,
             stage,
             null,
             null,
@@ -711,10 +712,12 @@ dw 0
             false,
             symbolTable ?? new([], []),
             litQ ?? [],
+            [],
             string.Empty,
             string.Empty,
             BufferLineType.None,
             0,
+            null,
             ssName);
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);

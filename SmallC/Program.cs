@@ -16,6 +16,7 @@ var storage = new Storage(
     false,
     Console.Out,
     Console.In,
+    true,
     null,
     null,
     null,
@@ -29,10 +30,12 @@ var storage = new Storage(
             new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 2, null, "main"),
         ]),
     [],
+    [],
     string.Empty,
     string.Empty,
     BufferLineType.None,
     0,
+    null,
     null);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
