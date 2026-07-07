@@ -19,31 +19,37 @@ public class FrontEndTests
     /// Tests preprocessor.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
+    /// <param name="cCode">Whether parsing C code.</param>
     /// <param name="expected">Expected parsing line.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("", "")]
-    [InlineData(" ", " ")]
-    [InlineData("  ", " ")]
-    [InlineData("\r\n", " ")]
-    [InlineData("\r\n ", " ")]
-    [InlineData(" \r\n", " ")]
-    [InlineData("\r\n  ", " ")]
-    [InlineData(" \r\n ", " ")]
-    [InlineData("  \r\n", " ")]
-    [InlineData("\"\"", "\"\" ")]
-    [InlineData("\"test\"", "\"test\" ")]
-    [InlineData("\"test\"\r\n", "\"test\" ")]
-    [InlineData("''", "'' ")]
-    [InlineData("'t'", "'t' ")]
-    [InlineData("/**/", " ")]
-    [InlineData("/* test */", " ")]
-    [InlineData("foo/*bar*/baz", "foobaz ")]
-    [InlineData("foo/*bar*/baz\r\nquux", "foobaz ")]
-    [InlineData("foo/*bar\r\nbaz*/quux", "fooquux ")]
-    [InlineData("FOO", "BAR ")]
-    [InlineData("FOOBARBAZ", "QUUX ")]
-    public async Task CanPreprocessAsync(string inputText, string? expected)
+    [InlineData("", false, "")]
+    [InlineData(" ", false, " \r\n")]
+    [InlineData("TEST", false, "TEST\r\n")]
+    [InlineData("", true, "")]
+    [InlineData(" ", true, " ")]
+    [InlineData("  ", true, " ")]
+    [InlineData("\r\n", true, " ")]
+    [InlineData("\r\n ", true, " ")]
+    [InlineData(" \r\n", true, " ")]
+    [InlineData("\r\n  ", true, " ")]
+    [InlineData(" \r\n ", true, " ")]
+    [InlineData("  \r\n", true, " ")]
+    [InlineData("\"\"", true, "\"\" ")]
+    [InlineData("\"test\"", true, "\"test\" ")]
+    [InlineData("\"test\"\r\n", true, "\"test\" ")]
+    [InlineData("''", true, "'' ")]
+    [InlineData("'t'", true, "'t' ")]
+    [InlineData("/**/", true, " ")]
+    [InlineData("/* test */", true, " ")]
+    [InlineData("foo/*bar*/baz", true, "foobaz ")]
+    [InlineData("foo/*bar\r\nbaz\r\nquux", true, "foo")]
+    [InlineData("foo/*bar*/baz\r\nquux", true, "foobaz ")]
+    [InlineData("foo/*bar\r\nbaz*/quux", true, "fooquux ")]
+    [InlineData("FOO", true, "BAR ")]
+    [InlineData("FOOBARBAZ", true, "QUUX ")]
+    public async Task CanPreprocessAsync(
+        string inputText, bool cCode, string? expected)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
@@ -55,7 +61,8 @@ public class FrontEndTests
             { "FOO", "BAR" },
             { "FOOBARBA", "QUUX" },
         };
-        var (sut, storage) = Arrange(output, input: input, mac: mac);
+        var (sut, storage) = Arrange(
+            output, input: input, cCode: cCode, mac: mac);
 
         await sut.PreprocessAsync();
         var actual = storage.PLine;
@@ -74,6 +81,7 @@ public class FrontEndTests
     [InlineData("\"test", "no quote")]
     [InlineData("\'", "no apostrophe")]
     [InlineData("\'t", "no apostrophe")]
+    [InlineData("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789", "line too long")]
     public async Task CanFailPreprocessingAsync(string inputText, string? expected)
     {
         using var outputStream = new MemoryStream();
@@ -246,6 +254,7 @@ public class FrontEndTests
     private static (FrontEnd Sut, Storage Storage) Arrange(
         StreamWriter output,
         StreamReader? input = null,
+        bool cCode = true,
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
@@ -262,7 +271,7 @@ public class FrontEndTests
             false,
             output,
             input ?? TextReader.Null,
-            true,
+            cCode,
             stage,
             null,
             null,
@@ -274,7 +283,7 @@ public class FrontEndTests
             mac ?? [],
             string.Empty,
             string.Empty,
-            lineType ?? BufferLineType.None,
+            lineType ?? BufferLineType.Parsing,
             0,
             null,
             ssName);
