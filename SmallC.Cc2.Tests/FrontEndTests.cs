@@ -39,8 +39,10 @@ public class FrontEndTests
     [InlineData("/**/", " ")]
     [InlineData("/* test */", " ")]
     [InlineData("foo/*bar*/baz", "foobaz ")]
-    [InlineData("foo/*bar*/baz\r\nquuz", "foobaz ")]
-    [InlineData("foo/*bar\r\nbaz*/quuz", "fooquuz ")]
+    [InlineData("foo/*bar*/baz\r\nquux", "foobaz ")]
+    [InlineData("foo/*bar\r\nbaz*/quux", "fooquux ")]
+    [InlineData("FOO", "BAR ")]
+    [InlineData("FOOBARBAZ", "QUUX ")]
     public async Task CanPreprocessAsync(string inputText, string? expected)
     {
         using var outputStream = new MemoryStream();
@@ -48,7 +50,12 @@ public class FrontEndTests
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, storage) = Arrange(output, input: input);
+        var mac = new Dictionary<string, string>
+        {
+            { "FOO", "BAR" },
+            { "FOOBARBA", "QUUX" },
+        };
+        var (sut, storage) = Arrange(output, input: input, mac: mac);
 
         await sut.PreprocessAsync();
         var actual = storage.PLine;
@@ -243,6 +250,7 @@ public class FrontEndTests
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
         Collection<sbyte>? litQ = null,
+        Dictionary<string, string>? mac = null,
         BufferLineType? lineType = null,
         string? ssName = null)
     {
@@ -263,7 +271,7 @@ public class FrontEndTests
             false,
             symbolTable ?? new([], []),
             litQ ?? [],
-            [],
+            mac ?? [],
             string.Empty,
             string.Empty,
             lineType ?? BufferLineType.None,
