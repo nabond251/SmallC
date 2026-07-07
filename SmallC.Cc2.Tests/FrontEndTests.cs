@@ -23,7 +23,14 @@ public class FrontEndTests
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
     [InlineData("", null)]
+    [InlineData(";", null)]
     [InlineData("test", "test")]
+    [InlineData("foo()", "foo")]
+    [InlineData(" bar", "bar")]
+    [InlineData("  baz;", "baz")]
+    [InlineData("  foo_();", "foo_")]
+    [InlineData(" _bar ", "_bar")]
+    [InlineData("b4z ", "b4z")]
     public async Task CanTestSymNameAsync(string inputText, string? expected)
     {
         using var outputStream = new MemoryStream();
