@@ -1,4 +1,4 @@
-﻿// <copyright file="ScanningUseCases.cs" company="Soli Deo Gloria Apps">
+﻿// <copyright file="FrontEnd.cs" company="Soli Deo Gloria Apps">
 // Copyright (c) Soli Deo Gloria Apps. All rights reserved.
 // </copyright>
 
@@ -8,11 +8,9 @@ using SmallC.Cc;
 using System.Text;
 
 /// <summary>
-/// Scanning use cases.
+/// Front end.
 /// </summary>
-public class ScanningUseCases(
-    InputUseCases input,
-    Storage storage)
+public class FrontEnd(Storage storage)
 {
     /// <summary>
     /// Indicates whether or not the current substring in the source line
@@ -73,6 +71,51 @@ public class ScanningUseCases(
     }
 
     /// <summary>
+    /// Preprocess.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task PreprocessAsync()
+    {
+        _ = storage;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Place character into parsing buffer.
+    /// </summary>
+    /// <param name="c">Character to keep.</param>
+    public void KeepCh(char c)
+    {
+        if (storage.PPtr < InputLine.LineMax)
+        {
+            storage.PLine += c;
+        }
+    }
+
+    /// <summary>
+    /// Returns the current character of the input line after advancing to the
+    /// next one.
+    /// </summary>
+    /// <returns>
+    /// The current character of the input line, else null if the end of the
+    /// last input file has been reached.
+    /// </returns>
+    public async Task<char?> InByteAsync()
+    {
+        while (storage.Ch is null)
+        {
+            if (storage.Eof)
+            {
+                return null;
+            }
+
+            await this.PreprocessAsync().ConfigureAwait(false);
+        }
+
+        return this.Gch();
+    }
+
+    /// <summary>
     /// Test if next input string is legal symbol name.
     /// </summary>
     /// <returns>
@@ -124,7 +167,7 @@ public class ScanningUseCases(
                 return;
             }
 
-            await input.PreprocessAsync().ConfigureAwait(false);
+            await this.PreprocessAsync().ConfigureAwait(false);
             if (storage.Eof)
             {
                 break;
