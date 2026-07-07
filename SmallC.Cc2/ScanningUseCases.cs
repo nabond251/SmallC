@@ -5,6 +5,7 @@
 namespace SmallC.Cc2;
 
 using SmallC.Cc;
+using System.Text;
 
 /// <summary>
 /// Scanning use cases.
@@ -69,6 +70,32 @@ public class ScanningUseCases(
         return (k < str1.Length && UtilityUseCases.An(str1[k])) ||
             (k < str2.Length && UtilityUseCases.An(str2[k]))
             ? 0 : k;
+    }
+
+    /// <summary>
+    /// Test if next input string is legal symbol name.
+    /// </summary>
+    /// <returns>
+    /// Legal symbol name, if any; else null.
+    /// </returns>
+    public async Task<string?> SymNameAsync()
+    {
+        var sName = new StringBuilder();
+        await this.BlanksAsync().ConfigureAwait(false);
+        if (!UtilityUseCases.Alpha(storage.Ch))
+        {
+            return null;
+        }
+
+        while (UtilityUseCases.An(storage.Ch))
+        {
+            if (sName.Length < SymbolName.NameMax)
+            {
+                _ = sName.Append(this.Gch());
+            }
+        }
+
+        return sName.ToString();
     }
 
     /// <summary>

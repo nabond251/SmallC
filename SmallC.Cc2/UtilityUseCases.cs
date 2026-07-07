@@ -18,9 +18,9 @@ public class UtilityUseCases(Storage storage)
     /// <returns>
     /// A value indicating whether <paramref name="c"/> is alphabetic.
     /// </returns>
-    public static bool Alpha(char c)
+    public static bool Alpha(char? c)
     {
-        return char.IsAsciiLetter(c) || c == '_';
+        return (c.HasValue && char.IsAsciiLetter(c.Value)) || c == '_';
     }
 
     /// <summary>
@@ -30,9 +30,9 @@ public class UtilityUseCases(Storage storage)
     /// <returns>
     /// A value indicating whether <paramref name="c"/> is alphanumeric.
     /// </returns>
-    public static bool An(char c)
+    public static bool An(char? c)
     {
-        return Alpha(c) || char.IsDigit(c);
+        return Alpha(c) || (c.HasValue && char.IsDigit(c.Value));
     }
 
     /// <summary>
