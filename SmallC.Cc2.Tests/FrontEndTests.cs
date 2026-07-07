@@ -87,6 +87,42 @@ public class FrontEndTests
         Assert.Equal(expectedNext, storage.Line[storage.LPtr..]);
     }
 
+    /// <summary>
+    /// Tests that can match alphanumeric string literals.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="lit">String literal to match.</param>
+    /// <param name="expectedMatch">
+    /// A value indicating whether the next token matched.
+    /// </param>
+    /// <param name="expectedNext">Expected next input text.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("foo", "bar", false, "foo")]
+    [InlineData("test", "test", false, "test")]
+    [InlineData("foo()", "foo", true, "()")]
+    [InlineData(" bar", "bar", true, "")]
+    [InlineData("  _az;", "_az", true, ";")]
+    [InlineData("  foo_();", "foo_", false, "foo_();")]
+    [InlineData(" _bar ", "_bar", false, "_bar ")]
+    [InlineData("b4z ", "b4z", true, " ")]
+    public async Task CanAlphanumericMatchAsync(
+        string inputText, string lit, bool expectedMatch, string? expectedNext)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, storage) = Arrange(
+            output, input: input, lineType: BufferLineType.Parsing);
+
+        var actualMatch = await sut.AMatchAsync(lit, 3);
+
+        Assert.Equal(expectedMatch, actualMatch);
+        Assert.Equal(expectedNext, storage.Line[storage.LPtr..]);
+    }
+
     private static (FrontEnd Sut, Storage Storage) Arrange(
         StreamWriter output,
         StreamReader? input = null,
