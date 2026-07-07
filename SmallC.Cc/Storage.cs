@@ -76,9 +76,9 @@ public class Storage(
     public TextWriter Output { get; } = output;
 
     /// <summary>
-    /// Gets fd for input file.
+    /// Gets or sets fd for input file.
     /// </summary>
-    public TextReader Input { get; } = input;
+    public TextReader? Input { get; set; } = input;
 
     /// <summary>
     /// Gets staging buffer.

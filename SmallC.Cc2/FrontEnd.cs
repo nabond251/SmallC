@@ -72,6 +72,16 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Input and output file opens.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task OpenFileAsync()
+    {
+        storage.Eof = true;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Preprocess.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -108,15 +118,26 @@ public class FrontEnd(Storage storage)
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task InLineAsync()
     {
-        if (await storage.Input.ReadLineAsync()
-            .ConfigureAwait(false) is string line)
+        if (storage.Input is null)
+        {
+            await this.OpenFileAsync().ConfigureAwait(false);
+        }
+
+        if (storage.Eof)
+        {
+            return;
+        }
+
+        if (storage.Input is TextReader input &&
+            await input.ReadLineAsync().ConfigureAwait(false) is string line)
         {
             storage.Line = line;
         }
         else
         {
-            storage.Input.Close();
-            storage.Input.Dispose();
+            storage.Input?.Close();
+            storage.Input?.Dispose();
+            storage.Input = null;
             storage.Line = string.Empty;
         }
 
