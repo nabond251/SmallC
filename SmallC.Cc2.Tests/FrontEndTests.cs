@@ -26,6 +26,11 @@ public class FrontEndTests
     [InlineData(" ", " ")]
     [InlineData("  ", " ")]
     [InlineData("\r\n", " ")]
+    [InlineData("\r\n ", " ")]
+    [InlineData(" \r\n", " ")]
+    [InlineData("\r\n  ", " ")]
+    [InlineData(" \r\n ", " ")]
+    [InlineData("  \r\n", " ")]
     public async Task CanPreprocessAsync(string inputText, string? expected)
     {
         using var outputStream = new MemoryStream();
