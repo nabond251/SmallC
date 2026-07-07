@@ -194,6 +194,31 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Looks for a match between a literal string and the current token in the
+    /// input line.
+    /// </summary>
+    /// <param name="lit">Literal string to match.</param>
+    /// <returns>
+    /// <c>true</c> iff <paramref name="lit"/> matches current token.
+    /// </returns>
+    /// <remarks>
+    /// There is no verification that all of the token was matched.
+    /// </remarks>
+    public async Task<bool> MatchAsync(string lit)
+    {
+        int k;
+        await this.BlanksAsync().ConfigureAwait(false);
+        k = StrEq(storage.Line[storage.LitPtr..], lit);
+        if (k != 0)
+        {
+            this.Bump(k);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Advances the input past white space to the beginning of the next token
     /// or until the end of the input is reached.
     /// </summary>
