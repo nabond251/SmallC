@@ -31,6 +31,16 @@ public class FrontEndTests
     [InlineData("\r\n  ", " ")]
     [InlineData(" \r\n ", " ")]
     [InlineData("  \r\n", " ")]
+    [InlineData("\"\"", "\"\" ")]
+    [InlineData("\"test\"", "\"test\" ")]
+    [InlineData("\"test\"\r\n", "\"test\" ")]
+    [InlineData("''", "'' ")]
+    [InlineData("'t'", "'t' ")]
+    [InlineData("/**/", " ")]
+    [InlineData("/* test */", " ")]
+    [InlineData("foo/*bar*/baz", "foobaz ")]
+    [InlineData("foo/*bar*/baz\r\nquuz", "foobaz ")]
+    [InlineData("foo/*bar\r\nbaz*/quuz", "fooquuz ")]
     public async Task CanPreprocessAsync(string inputText, string? expected)
     {
         using var outputStream = new MemoryStream();
@@ -54,7 +64,9 @@ public class FrontEndTests
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
     [InlineData("\"", "no quote")]
+    [InlineData("\"test", "no quote")]
     [InlineData("\'", "no apostrophe")]
+    [InlineData("\'t", "no apostrophe")]
     public async Task CanFailPreprocessingAsync(string inputText, string? expected)
     {
         using var outputStream = new MemoryStream();
