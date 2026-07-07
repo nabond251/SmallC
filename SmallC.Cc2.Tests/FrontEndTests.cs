@@ -47,6 +47,30 @@ public class FrontEndTests
     }
 
     /// <summary>
+    /// Tests failing preprocessor.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expected">Expected error.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("\"", "no quote")]
+    [InlineData("\'", "no apostrophe")]
+    public async Task CanFailPreprocessingAsync(string inputText, string? expected)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, _) = Arrange(output, input: input);
+
+        var actual = (await Assert.ThrowsAsync<InvalidOperationException>(
+            sut.PreprocessAsync)).Message;
+
+        Assert.Equal(expected, actual);
+    }
+
+    /// <summary>
     /// Tests that can test for legal symbol names.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
