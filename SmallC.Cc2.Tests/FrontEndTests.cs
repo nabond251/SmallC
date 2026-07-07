@@ -28,7 +28,8 @@ public class FrontEndTests
         var byteArray = Encoding.ASCII.GetBytes(text);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, _) = Arrange(output, lineType: BufferLineType.Parsing);
+        var (sut, _) = Arrange(
+            output, input: input, lineType: BufferLineType.Parsing);
 
         var actual = await sut.SymNameAsync();
 

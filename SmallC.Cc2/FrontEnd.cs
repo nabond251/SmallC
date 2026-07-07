@@ -6,6 +6,7 @@ namespace SmallC.Cc2;
 
 using SmallC.Cc;
 using System.Text;
+using static SmallC.Cc.Storage;
 
 /// <summary>
 /// Front end.
@@ -116,6 +117,7 @@ public class FrontEnd(Storage storage)
         {
             storage.Input.Close();
             storage.Input.Dispose();
+            storage.Line = string.Empty;
         }
 
         this.Bump(0);
@@ -191,7 +193,7 @@ public class FrontEnd(Storage storage)
                 }
             }
 
-            if (storage.Line == storage.MLine)
+            if (storage.LineType == BufferLineType.Macro)
             {
                 return;
             }
@@ -255,11 +257,13 @@ public class FrontEnd(Storage storage)
             storage.LPtr = 0;
         }
 
-        storage.NCh = storage.Line[storage.LPtr];
+        storage.NCh = storage.LPtr < storage.Line.Length ?
+            storage.Line[storage.LPtr] : null;
         storage.Ch = storage.NCh;
         if (storage.Ch.HasValue)
         {
-            storage.NCh = storage.Line[storage.LPtr + 1];
+            storage.NCh = storage.LPtr + 1 < storage.Line.Length ?
+                storage.Line[storage.LPtr + 1] : null;
         }
     }
 }
