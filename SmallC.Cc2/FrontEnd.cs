@@ -219,6 +219,29 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Looks for a match between an alphanumeric literal string and the current
+    /// token in the input line.
+    /// </summary>
+    /// <param name="lit">Literal string to match.</param>
+    /// <param name="len">Max match length.</param>
+    /// <returns>
+    /// <c>true</c> iff <paramref name="lit"/> matches current token.
+    /// </returns>
+    public async Task<bool> AMatchAsync(string lit, int len)
+    {
+        int k;
+        await this.BlanksAsync().ConfigureAwait(false);
+        k = AStrEq(storage.Line[storage.LPtr..], lit, len);
+        if (k != 0)
+        {
+            this.Bump(k);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Advances the input past white space to the beginning of the next token
     /// or until the end of the input is reached.
     /// </summary>
