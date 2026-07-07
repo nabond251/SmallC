@@ -123,6 +123,52 @@ public class FrontEndTests
         Assert.Equal(expectedNext, storage.Line[storage.LPtr..]);
     }
 
+    /// <summary>
+    /// Tests that can match next operator.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="list">List of operators to match.</param>
+    /// <param name="expectedMatch">
+    /// A value indicating whether the next token matched.
+    /// </param>
+    /// <param name="expectedNext">Expected next input text.</param>
+    /// <param name="expectedOpIndex">Expected operator match index.</param>
+    /// <param name="expectedOpSize">Expected operator size.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("", "", false, "", 0, 0)]
+    [InlineData(" = ", "", false, "= ", 0, 0)]
+    [InlineData(" = ", "=", true, "= ", 0, 1)]
+    [InlineData(" = ", "==", false, "= ", 1, 0)]
+    [InlineData(" = ", "== =", true, "= ", 1, 1)]
+    [InlineData("< ", "<= =", false, "< ", 2, 0)]
+    [InlineData("<= ", "= <=", true, "<= ", 1, 2)]
+    public async Task CanMatchNextOpAsync(
+        string inputText,
+        string list,
+        bool expectedMatch,
+        string? expectedNext,
+        int expectedOpIndex,
+        int expectedOpSize)
+    {
+        ArgumentNullException.ThrowIfNull(list);
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, storage) = Arrange(
+            output, input: input, lineType: BufferLineType.Parsing);
+
+        var actualMatch = await sut.NextOpAsync(list.Split(
+            ' ', StringSplitOptions.RemoveEmptyEntries));
+
+        Assert.Equal(expectedMatch, actualMatch);
+        Assert.Equal(expectedNext, storage.Line[storage.LPtr..]);
+        Assert.Equal(expectedOpIndex, storage.OpIndex);
+        Assert.Equal(expectedOpSize, storage.OpSize);
+    }
+
     private static (FrontEnd Sut, Storage Storage) Arrange(
         StreamWriter output,
         StreamReader? input = null,

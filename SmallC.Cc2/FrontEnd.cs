@@ -260,7 +260,7 @@ public class FrontEnd(Storage storage)
         await this.BlanksAsync().ConfigureAwait(false);
         while (true)
         {
-            op = list[storage.OpIndex];
+            op = list.ElementAtOrDefault(storage.OpIndex) ?? string.Empty;
             storage.OpSize = StrEq(storage.Line[storage.LPtr..], op);
             if (storage.OpSize != 0 &&
                 storage.Line[storage.LPtr + storage.OpSize] != '=' &&
