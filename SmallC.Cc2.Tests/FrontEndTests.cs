@@ -16,6 +16,29 @@ using static SmallC.Cc.Storage;
 public class FrontEndTests
 {
     /// <summary>
+    /// Tests preprocessor.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expected">Expected parsing line.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("", "")]
+    public async Task CanPreprocessAsync(string inputText, string? expected)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, storage) = Arrange(output, input: input);
+
+        await sut.PreprocessAsync();
+        var actual = storage.PLine;
+
+        Assert.Equal(expected, actual);
+    }
+
+    /// <summary>
     /// Tests that can test for legal symbol names.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
