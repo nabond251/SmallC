@@ -142,7 +142,7 @@ dw 0
             stage.Add(new(pCode.Value, value.Value));
         }
 
-        var (sut, storage) = Arrange(output, stage);
+        var (sut, storage) = Arrange(output, stage: stage);
 
         // Act
         var (actualBefore, actualStart) = sut.SetStage();
@@ -426,7 +426,8 @@ dw 0
                 new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "bar"),
                 new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "baz"),
             ]);
-        var (sut, storage) = Arrange(output, stage, symbolTable: symbolTable);
+        var (sut, storage) = Arrange(
+            output, stage: stage, symbolTable: symbolTable);
 
         await sut.GenAsync(pCode, value);
         await output.FlushAsync();
@@ -482,7 +483,7 @@ dw 0
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
         stage?.Add(new(PCode.ADD12, 0));
-        var (sut, storage) = Arrange(output, stage);
+        var (sut, storage) = Arrange(output, stage: stage);
 
         await sut.ClearStageAsync(before, start);
 
@@ -555,7 +556,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = [];
-        var (sut, _) = Arrange(output, stage);
+        var (sut, _) = Arrange(output, stage: stage);
 
         await sut.DumpZeroAsync(size, count);
 
@@ -687,6 +688,7 @@ dw 0
 
     private static (BackEnd Sut, Storage Storage) Arrange(
         StreamWriter output,
+        StreamReader? input = null,
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
@@ -698,6 +700,7 @@ dw 0
             Machine.Bpw,
             false,
             output,
+            input ?? StreamReader.Null,
             stage,
             null,
             null,

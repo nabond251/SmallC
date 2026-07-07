@@ -7,6 +7,7 @@ namespace SmallC.Cc2.Tests;
 using SmallC.Cc;
 using SmallC.Cc2;
 using System.Collections.ObjectModel;
+using System.Text;
 using static SmallC.Cc.Storage;
 
 /// <summary>
@@ -21,21 +22,27 @@ public class FrontEndTests
     [Fact]
     public async Task CanTestSymNameAsync()
     {
+        var text = "test";
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var (sut, _) = Arrange(output);
+        var byteArray = Encoding.ASCII.GetBytes(text);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, _) = Arrange(output, lineType: BufferLineType.Parsing);
 
         var actual = await sut.SymNameAsync();
 
-        Assert.Null(actual);
+        Assert.Equal(text, actual);
     }
 
     private static (FrontEnd Sut, Storage Storage) Arrange(
         StreamWriter output,
+        StreamReader? input = null,
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symbolTable = null,
         Collection<sbyte>? litQ = null,
+        BufferLineType? lineType = null,
         string? ssName = null)
     {
         var storage = new Storage(
@@ -43,6 +50,7 @@ public class FrontEndTests
             Machine.Bpw,
             false,
             output,
+            input ?? TextReader.Null,
             stage,
             null,
             null,
@@ -53,7 +61,7 @@ public class FrontEndTests
             litQ ?? [],
             string.Empty,
             string.Empty,
-            BufferLineType.None,
+            lineType ?? BufferLineType.None,
             0,
             ssName);
         var sut = new FrontEnd(storage);

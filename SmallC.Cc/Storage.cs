@@ -14,6 +14,7 @@ public class Storage(
     int csp,
     bool eof,
     TextWriter output,
+    TextReader input,
     Collection<KeyValuePair<PCode, int>>? stage,
     char? ch,
     char? nCh,
@@ -73,6 +74,11 @@ public class Storage(
     /// Gets fd for output file.
     /// </summary>
     public TextWriter Output { get; } = output;
+
+    /// <summary>
+    /// Gets fd for input file.
+    /// </summary>
+    public TextReader Input { get; } = input;
 
     /// <summary>
     /// Gets staging buffer.
@@ -148,16 +154,36 @@ public class Storage(
     public BufferLineType LineType { get; } = lineType;
 
     /// <summary>
-    /// Gets <see cref="PLine"/> or <see cref="MLine"/>, based on
+    /// Gets or sets <see cref="PLine"/> or <see cref="MLine"/>, based on
     /// <see cref="LineType"/>.
     /// </summary>
-    public string? Line =>
-        this.LineType switch
+    public string Line
+    {
+        get => this.LineType switch
         {
             BufferLineType.Parsing => this.PLine,
             BufferLineType.Macro => this.MLine,
-            BufferLineType.None or _ => null,
+            BufferLineType.None or _ => throw new InvalidOperationException(),
         };
+
+        set
+        {
+            switch (this.LineType)
+            {
+                case BufferLineType.Parsing:
+                    this.PLine = value;
+                    break;
+
+                case BufferLineType.Macro:
+                    this.MLine = value;
+                    break;
+
+                case BufferLineType.None:
+                default:
+                    break;
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets index to <see cref="Line"/>.

@@ -74,10 +74,9 @@ public class FrontEnd(Storage storage)
     /// Preprocess.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task PreprocessAsync()
+    public async Task PreprocessAsync()
     {
-        _ = storage;
-        return Task.CompletedTask;
+        await this.IfLineAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -90,6 +89,36 @@ public class FrontEnd(Storage storage)
         {
             storage.PLine += c;
         }
+    }
+
+    /// <summary>
+    /// Handles all matters pertaining to conditional compilation.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task IfLineAsync()
+    {
+        await this.InLineAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Fetches the next line of code from a source file and optionally lists
+    /// it.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task InLineAsync()
+    {
+        if (await storage.Input.ReadLineAsync()
+            .ConfigureAwait(false) is string line)
+        {
+            storage.Line = line;
+        }
+        else
+        {
+            storage.Input.Close();
+            storage.Input.Dispose();
+        }
+
+        this.Bump(0);
     }
 
     /// <summary>
@@ -186,8 +215,8 @@ public class FrontEnd(Storage storage)
     public bool White()
     {
         return
-            storage.LPtr < storage.Line?.Length &&
-            storage.Line?[storage.LPtr] <= ' ';
+            storage.LPtr < storage.Line.Length &&
+            storage.Line[storage.LPtr] <= ' ';
     }
 
     /// <summary>
@@ -226,11 +255,11 @@ public class FrontEnd(Storage storage)
             storage.LPtr = 0;
         }
 
-        storage.NCh = storage.Line?[storage.LPtr];
+        storage.NCh = storage.Line[storage.LPtr];
         storage.Ch = storage.NCh;
         if (storage.Ch.HasValue)
         {
-            storage.NCh = storage.Line?[storage.LPtr + 1];
+            storage.NCh = storage.Line[storage.LPtr + 1];
         }
     }
 }

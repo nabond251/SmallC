@@ -13,6 +13,7 @@ var storage = new Storage(
     0,
     false,
     Console.Out,
+    Console.In,
     null,
     null,
     null,
