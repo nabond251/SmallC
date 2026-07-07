@@ -18,14 +18,17 @@ public class FrontEndTests
     /// <summary>
     /// Tests that can test for legal symbol names.
     /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expected">Expected symbol match.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [Fact]
-    public async Task CanTestSymNameAsync()
+    [Theory]
+    [InlineData("", null)]
+    [InlineData("test", "test")]
+    public async Task CanTestSymNameAsync(string inputText, string? expected)
     {
-        var text = "test";
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var byteArray = Encoding.ASCII.GetBytes(text);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
         var (sut, _) = Arrange(
@@ -33,7 +36,7 @@ public class FrontEndTests
 
         var actual = await sut.SymNameAsync();
 
-        Assert.Equal(text, actual);
+        Assert.Equal(expected, actual);
     }
 
     private static (FrontEnd Sut, Storage Storage) Arrange(
