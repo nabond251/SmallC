@@ -135,6 +135,8 @@ public class FrontEndTests
     {
         var storage = new Storage(
             0,
+            0,
+            0,
             Machine.Bpw,
             false,
             output,

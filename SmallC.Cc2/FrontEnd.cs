@@ -242,6 +242,46 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Called by the expression analyzer to determine if the next token in the
+    /// source line is one of a list of expression operators.
+    /// </summary>
+    /// <param name="list">List of operators to check.</param>
+    /// <returns>
+    /// <c>true</c> iff next token is in <paramref name="list"/>;
+    /// <see cref="Storage.OpIndex"/> indicates which one;
+    /// <see cref="Storage.OpSize"/> indicates its length.
+    /// </returns>
+    public async Task<bool> NextOpAsync(IList<string> list)
+    {
+        ArgumentNullException.ThrowIfNull(list);
+
+        string op;
+        storage.OpIndex = 0;
+        await this.BlanksAsync().ConfigureAwait(false);
+        while (true)
+        {
+            op = list[storage.OpIndex];
+            storage.OpSize = StrEq(storage.Line[storage.LPtr..], op);
+            if (storage.OpSize != 0 &&
+                storage.Line[storage.LPtr + storage.OpSize] != '=' &&
+                storage.Line[storage.LPtr + storage.OpSize] !=
+                storage.Line[storage.LPtr + storage.OpSize - 1])
+            {
+                return true;
+            }
+
+            if (storage.OpIndex < list.Count)
+            {
+                storage.OpIndex++;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    /// <summary>
     /// Advances the input past white space to the beginning of the next token
     /// or until the end of the input is reached.
     /// </summary>

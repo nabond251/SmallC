@@ -10,6 +10,8 @@ using System.Collections.ObjectModel;
 /// Miscellaneous storage.
 /// </summary>
 public class Storage(
+    int opIndex,
+    int opSize,
     int litLab,
     int csp,
     bool eof,
@@ -54,6 +56,16 @@ public class Storage(
         /// </summary>
         Macro,
     }
+
+    /// <summary>
+    /// Gets or sets index to matched operator.
+    /// </summary>
+    public int OpIndex { get; set; } = opIndex;
+
+    /// <summary>
+    /// Gets or sets size of operator in characters.
+    /// </summary>
+    public int OpSize { get; set; } = opSize;
 
     /// <summary>
     /// Gets or sets label # assigned to literal pool.

@@ -11,6 +11,8 @@ using static SmallC.Cc.SymbolTableEntry;
 var storage = new Storage(
     0,
     0,
+    0,
+    0,
     false,
     Console.Out,
     Console.In,
