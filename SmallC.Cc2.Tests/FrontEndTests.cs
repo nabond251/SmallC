@@ -57,7 +57,7 @@ public class FrontEndTests
     /// <param name="expectedNext">Expected next input text.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("", "", true, "")]
+    [InlineData("", "", false, "")]
     [InlineData(";", ";", true, "")]
     [InlineData("test", "test", true, "")]
     [InlineData("foo()", "foo", true, "()")]

@@ -208,7 +208,7 @@ public class FrontEnd(Storage storage)
     {
         int k;
         await this.BlanksAsync().ConfigureAwait(false);
-        k = StrEq(storage.Line[storage.LitPtr..], lit);
+        k = StrEq(storage.Line[storage.LPtr..], lit);
         if (k != 0)
         {
             this.Bump(k);
