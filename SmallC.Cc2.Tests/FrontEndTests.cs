@@ -98,6 +98,116 @@ public class FrontEndTests
     }
 
     /// <summary>
+    /// Tests #if... directives.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expected">Expected parsing line.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("", "")]
+    [InlineData(
+        @"
+#ifdef FOO
+    foo();
+#endif",
+        "foo(); ")]
+    [InlineData(
+        @"
+#ifdef FOO
+    foo();
+#else
+    bar();
+#endif",
+        "foo(); ")]
+    [InlineData(
+        @"
+#ifndef BAR
+    bar();
+#endif",
+        "bar(); ")]
+    [InlineData(
+        @"
+#ifndef BAR
+    bar();
+#else
+    foo();
+#endif",
+        "bar(); ")]
+    [InlineData(
+        @"
+#ifndef FOO
+    foo();
+#endif",
+        "\r\n")]
+    [InlineData(
+        @"
+#ifndef FOO
+    foo();
+#else
+    bar();
+#endif",
+        "bar(); ")]
+    [InlineData(
+        @"
+#ifdef BAR
+    bar();
+#endif",
+        "\r\n")]
+    [InlineData(
+        @"
+#ifdef BAR
+    bar();
+#else
+    foo();
+#endif",
+        "foo(); ")]
+    public async Task CanIfLineAsync(
+        string inputText, string? expected)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var mac = new Dictionary<string, string>
+        {
+            { "FOO", "BAR" },
+            { "FOOBARBA", "QUUX" },
+        };
+        var (sut, storage) = Arrange(
+            output, input: input, mac: mac);
+
+        await sut.IfLineAsync();
+        var actual = storage.PLine;
+
+        Assert.Equal(expected, actual);
+    }
+
+    /// <summary>
+    /// Tests failing #if... directives.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expected">Expected error.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("#else", "no matching #if...")]
+    [InlineData("#endif", "no matching #if...")]
+    public async Task CanFailIfLineAsync(string inputText, string? expected)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, _) = Arrange(output, input: input);
+
+        var actual = (await Assert.ThrowsAsync<InvalidOperationException>(
+            sut.IfLineAsync)).Message;
+
+        Assert.Equal(expected, actual);
+    }
+
+    /// <summary>
     /// Tests that can test for legal symbol names.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
