@@ -137,8 +137,9 @@ public class FrontEndTests
         @"
 #ifndef FOO
     foo();
-#endif",
-        "\r\n")]
+#endif
+    bar();",
+        "bar(); ")]
     [InlineData(
         @"
 #ifndef FOO
@@ -151,8 +152,9 @@ public class FrontEndTests
         @"
 #ifdef BAR
     bar();
-#endif",
-        "\r\n")]
+#endif
+    foo();",
+        "foo(); ")]
     [InlineData(
         @"
 #ifdef BAR
