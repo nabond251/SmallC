@@ -166,6 +166,16 @@ public class FrontEndTests
         "bar(); ")]
     [InlineData(
         @"
+#ifndef FOO
+    foo();
+#else
+#ifndef FOOBARBAZ
+#endif
+#endif
+    bar();",
+        "bar(); ")]
+    [InlineData(
+        @"
 #ifdef BAR
     bar();
 #endif
@@ -179,6 +189,15 @@ public class FrontEndTests
     foo();
 #endif",
         "foo(); ")]
+    [InlineData(
+        @"
+#ifdef FOO
+#ifndef FOOBARBAZ
+    foobarbaz();
+#endif
+#endif
+    bar();",
+        "bar(); ")]
     public async Task CanIfLineAsync(
         string inputText, string? expected)
     {
