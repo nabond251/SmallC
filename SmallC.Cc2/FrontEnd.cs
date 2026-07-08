@@ -318,6 +318,27 @@ public class FrontEnd(Storage storage)
                 continue;
             }
 
+            if (await this.MatchAsync("#endif").ConfigureAwait(false))
+            {
+                if (storage.IfLevel != 0)
+                {
+                    if (storage.SkipLevel == storage.IfLevel)
+                    {
+                        storage.SkipLevel = 0;
+                    }
+                    else if (storage.SkipLevel == 0)
+                    {
+                        storage.SkipLevel = storage.IfLevel;
+                    }
+                }
+                else
+                {
+                    ErrorUseCases.NoIfError();
+                }
+
+                continue;
+            }
+
             if (storage.SkipLevel != 0)
             {
                 continue;
