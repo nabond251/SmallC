@@ -326,10 +326,8 @@ public class FrontEnd(Storage storage)
                     {
                         storage.SkipLevel = 0;
                     }
-                    else if (storage.SkipLevel == 0)
-                    {
-                        storage.SkipLevel = storage.IfLevel;
-                    }
+
+                    storage.IfLevel--;
                 }
                 else
                 {
