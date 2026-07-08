@@ -114,11 +114,15 @@ public class FrontEndTests
     [InlineData(
         @"
 #ifdef FOO
+#ifdef FOOBARBAZ
+    foobarbaz();
+#else
     foo();
+#endif
 #else
     bar();
 #endif",
-        "foo(); ")]
+        "foobarbaz(); ")]
     [InlineData(
         @"
 #ifndef BAR
@@ -146,6 +150,18 @@ public class FrontEndTests
     foo();
 #else
     bar();
+#endif",
+        "bar(); ")]
+    [InlineData(
+        @"
+#ifndef FOO
+    foo();
+#else
+#ifndef FOOBARBAZ
+    foobarbaz();
+#else
+    bar();
+#endif
 #endif",
         "bar(); ")]
     [InlineData(
