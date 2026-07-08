@@ -426,9 +426,10 @@ public class FrontEnd(Storage storage)
 
         while (UtilityUseCases.An(storage.Ch))
         {
+            var c = this.Gch();
             if (sName.Length < SymbolName.NameMax)
             {
-                _ = sName.Append(this.Gch());
+                _ = sName.Append(c);
             }
         }
 
