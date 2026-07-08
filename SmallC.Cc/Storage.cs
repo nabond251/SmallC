@@ -21,6 +21,8 @@ public class Storage(
     Collection<KeyValuePair<PCode, int>>? stage,
     char? ch,
     char? nCh,
+    int ifLevel,
+    int skipLevel,
     int sLast,
     SegmentType oldSeg,
     bool optimize,
@@ -125,6 +127,16 @@ public class Storage(
     /// Gets or sets next character of input line.
     /// </summary>
     public char? NCh { get; set; } = nCh;
+
+    /// <summary>
+    /// Gets or sets #if... nest level.
+    /// </summary>
+    public int IfLevel { get; set; } = ifLevel;
+
+    /// <summary>
+    /// Gets or sets level at which #if... skipping started.
+    /// </summary>
+    public int SkipLevel { get; set; } = skipLevel;
 
     /// <summary>
     /// Gets next index in stage.

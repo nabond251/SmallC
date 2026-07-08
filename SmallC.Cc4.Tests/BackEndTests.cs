@@ -707,6 +707,8 @@ dw 0
             stage,
             null,
             null,
+            0,
+            0,
             StageSize,
             oldSeg,
             false,

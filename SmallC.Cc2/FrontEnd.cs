@@ -253,7 +253,83 @@ public class FrontEnd(Storage storage)
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task IfLineAsync()
     {
-        await this.InLineAsync().ConfigureAwait(false);
+        while (true)
+        {
+            await this.InLineAsync().ConfigureAwait(false);
+            if (storage.Eof)
+            {
+                return;
+            }
+
+            if (await this.MatchAsync("#ifdef").ConfigureAwait(false))
+            {
+                storage.IfLevel++;
+                if (storage.SkipLevel != 0)
+                {
+                    continue;
+                }
+
+                storage.MsName = await this.SymNameAsync()
+                    .ConfigureAwait(false);
+                if (!storage.Mac.ContainsKey(storage.MsName ?? string.Empty))
+                {
+                    storage.SkipLevel = storage.IfLevel;
+                }
+
+                continue;
+            }
+
+            if (await this.MatchAsync("#ifndef").ConfigureAwait(false))
+            {
+                storage.IfLevel++;
+                if (storage.SkipLevel != 0)
+                {
+                    continue;
+                }
+
+                storage.MsName = await this.SymNameAsync()
+                    .ConfigureAwait(false);
+                if (storage.Mac.ContainsKey(storage.MsName ?? string.Empty))
+                {
+                    storage.SkipLevel = storage.IfLevel;
+                }
+
+                continue;
+            }
+
+            if (await this.MatchAsync("#else").ConfigureAwait(false))
+            {
+                if (storage.IfLevel != 0)
+                {
+                    if (storage.SkipLevel == storage.IfLevel)
+                    {
+                        storage.SkipLevel = 0;
+                    }
+                    else if (storage.SkipLevel == 0)
+                    {
+                        storage.SkipLevel = storage.IfLevel;
+                    }
+                }
+                else
+                {
+                    ErrorUseCases.NoIfError();
+                }
+
+                continue;
+            }
+
+            if (storage.SkipLevel != 0)
+            {
+                continue;
+            }
+
+            if (!storage.Ch.HasValue)
+            {
+                continue;
+            }
+
+            break;
+        }
     }
 
     /// <summary>

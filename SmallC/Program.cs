@@ -21,6 +21,8 @@ var storage = new Storage(
     null,
     null,
     0,
+    0,
+    0,
     SegmentType.None,
     false,
     new(
