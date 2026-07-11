@@ -9,7 +9,6 @@ using SmallC.Cc2;
 using SmallC.Cc4;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using static SmallC.Cc.Storage;
 using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>

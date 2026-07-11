@@ -31,15 +31,15 @@ var misc = new MiscellaneousUseCases(storage);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
 
-var frontend = new FrontEnd(storage);
-var parser = new Parser(storage);
-var backend = new BackEnd(symTabMgmt, utility, storage);
+var frontEnd = new FrontEnd(storage);
+var parser = new Parser(storage, frontEnd);
+var backEnd = new BackEnd(symTabMgmt, utility, storage);
 
 await misc.AskAsync().ConfigureAwait(true); // get user options
-await frontend.OpenFileAsync().ConfigureAwait(true); // and initial input file
-await frontend.PreprocessAsync().ConfigureAwait(true); // fetch first line
-await backend.HeaderAsync().ConfigureAwait(true); // intro code
-backend.SetCodes(); // initialize code pointer array
+await frontEnd.OpenFileAsync().ConfigureAwait(true); // and initial input file
+await frontEnd.PreprocessAsync().ConfigureAwait(true); // fetch first line
+await backEnd.HeaderAsync().ConfigureAwait(true); // intro code
+backEnd.SetCodes(); // initialize code pointer array
 await parser.ParseAsync().ConfigureAwait(true); // process ALL input
-await backend.TrailerAsync().ConfigureAwait(true); // follow-up code
+await backEnd.TrailerAsync().ConfigureAwait(true); // follow-up code
 storage.Output.Close(); // explicitly close output
