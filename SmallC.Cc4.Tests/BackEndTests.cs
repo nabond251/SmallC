@@ -696,17 +696,15 @@ dw 0
         string? ssName = null)
     {
         var storage = new Storage(
-            stage,
-            output,
-            input != null,
-            input,
-            true,
-            oldSeg,
-            symTab ?? new([], []),
-            litQ ?? [],
-            [],
-            BufferLineType.None,
-            ssName);
+            stage: stage,
+            csp: Machine.Bpw,
+            output: output,
+            files: input != null,
+            input: input,
+            oldSeg: oldSeg,
+            symTab: symTab ?? new([], []),
+            litQ: litQ ?? [],
+            ssName: ssName);
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
         var sut = new BackEnd(symTabMgmt, utility, storage);

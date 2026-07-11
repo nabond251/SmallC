@@ -52,73 +52,89 @@ public class Storage(
     /// <summary>
     /// Initializes a new instance of the <see cref="Storage"/> class.
     /// </summary>
+    /// <param name="swNext">Switch queue.</param>
+    /// <param name="swEnd">Last index in switch queue.</param>
     /// <param name="stage">Staging buffer.</param>
+    /// <param name="wq">While queue.</param>
+    /// <param name="args">Static args.</param>
+    /// <param name="wqPtr">Index to next entry.</param>
+    /// <param name="csp">Compiler relative stk ptr.</param>
     /// <param name="output">Fd for output file.</param>
-    /// <param name="files">
-    /// A value indicating whether file list specified on cmd line.
-    /// </param>
+    /// <param name="files">A value indicating whether file list specified on cmd line.</param>
     /// <param name="input">Fd for input file.</param>
     /// <param name="cCode">A value indicating whether parsing C code.</param>
+    /// <param name="sLast">Last index in stage.</param>
     /// <param name="oldSeg">Current <see cref="SegmentType"/>.</param>
     /// <param name="symTab">Symbol table.</param>
     /// <param name="litQ">Literal pool.</param>
-    /// <param name="mac">Macro buffer.</param>
+    /// <param name="mac">Macro name/string buffer.</param>
+    /// <param name="pLine">Parsing buffer.</param>
+    /// <param name="mLine">Macro buffer.</param>
     /// <param name="lineType">
     /// A value indicating whether <see cref="Line"/> points to
     /// <see cref="PLine"/> or <see cref="MLine"/>.
     /// </param>
     /// <param name="ssName">Static symbol name.</param>
     public Storage(
+        Dictionary<int, string>? swNext = null,
+        int? swEnd = null,
         Collection<KeyValuePair<PCode, int>>? stage = null,
-        StreamWriter? output = null,
-        bool files = false,
-        StreamReader? input = null,
-        bool cCode = true,
-        SegmentType oldSeg = SegmentType.None,
+        Collection<WhileQueueEntry>? wq = null,
+        Collection<string>? args = null,
+        int? wqPtr = null,
+        int? csp = null,
+        TextWriter? output = null,
+        bool? files = null,
+        TextReader? input = null,
+        bool? cCode = null,
+        int? sLast = null,
+        SegmentType? oldSeg = null,
         SymbolTable? symTab = null,
         Collection<sbyte>? litQ = null,
         Dictionary<string, string>? mac = null,
+        string? pLine = null,
+        string? mLine = null,
         BufferLineType? lineType = null,
         string? ssName = null)
         : this(
-            0,
-            0,
-            [],
-            0,
-            stage,
-            [],
-            [],
-            0,
-            null,
-            null,
-            0,
-            0,
-            0,
-            0,
-            Machine.Bpw,
-            false,
-            output ?? Console.Out,
-            files,
-            0,
-            input,
-            null,
-            cCode,
-            StagingBuffer.StageSize,
-            null,
-            oldSeg,
-            false,
-            false,
-            false,
-            false,
-            symTab ?? new([], []),
-            litQ ?? [],
-            mac ?? [],
-            string.Empty,
-            string.Empty,
-            lineType ?? BufferLineType.Parsing,
-            0,
-            null,
-            ssName)
+            opIndex: 0,
+            opSize: 0,
+            swNext: swNext ?? [],
+            swEnd: swEnd ?? SwitchTable.SwTabSz,
+            stage: stage,
+            wq: wq ?? [],
+            args: args ?? [],
+            wqPtr: wqPtr ?? 0,
+            ch: null,
+            nCh: null,
+            ifLevel: 0,
+            skipLevel: 0,
+            nxtLab: 0,
+            litLab: 0,
+            csp: csp ?? 0,
+            eof: false,
+            output: output ?? Console.Out,
+            files: files ?? false,
+            fileArg: 0,
+            input: input,
+            input2: null,
+            cCode: cCode ?? true,
+            sLast: sLast ?? StagingBuffer.StageSize,
+            listFp: null,
+            oldSeg: oldSeg ?? SegmentType.None,
+            optimize: false,
+            alarm: false,
+            monitor: false,
+            pause: false,
+            symTab: symTab ?? new([], []),
+            litQ: litQ ?? [],
+            mac: mac ?? [],
+            pLine: pLine ?? string.Empty,
+            mLine: mLine ?? string.Empty,
+            lineType: lineType ?? BufferLineType.None,
+            lPtr: 0,
+            msName: null,
+            ssName: ssName)
     {
     }
 
@@ -316,7 +332,7 @@ public class Storage(
     public Collection<sbyte> LitQ { get; } = litQ;
 
     /// <summary>
-    /// Gets the macro buffer.
+    /// Gets the macro name/string buffer.
     /// </summary>
     public Dictionary<string, string> Mac { get; } = mac;
 

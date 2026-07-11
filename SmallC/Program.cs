@@ -7,52 +7,25 @@ using SmallC.Cc;
 using SmallC.Cc1;
 using SmallC.Cc2;
 using SmallC.Cc4;
-using static SmallC.Cc.Storage;
 
 await Console.Error.WriteLineAsync(Notice.Version).ConfigureAwait(true);
 await Console.Error.WriteLineAsync(Notice.CRight1).ConfigureAwait(true);
 
 var storage = new Storage(
-    0,
-    0,
-    [],
-    SwitchTable.SwTabSz - 1,
-    [],
-    [],
-    [.. args],
-    0,
-    null,
-    null,
-    0,
-    0,
-    0,
-    0,
-    0,
-    false,
-    Console.Out,
-    false,
-    0,
-    Console.In,
-    null,
-    true,
-    StagingBuffer.StageSize,
-    Console.Out,
-    SegmentType.None,
-    false,
-    false,
-    false,
-    false,
-    new(
+    swNext: [],
+    swEnd: SwitchTable.SwTabSz - 1,
+    stage: null,
+    wq: [],
+    args: [.. args],
+    wqPtr: 0,
+    sLast: StagingBuffer.StageSize,
+    symTab: new(
         [],
         []),
-    [],
-    [],
-    string.Empty,
-    string.Empty,
-    BufferLineType.None,
-    0,
-    null,
-    null);
+    litQ: [],
+    mac: [],
+    pLine: string.Empty,
+    mLine: string.Empty);
 
 var misc = new MiscellaneousUseCases(storage);
 var symTabMgmt = new SymbolTableUseCases(storage);
