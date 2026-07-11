@@ -16,7 +16,8 @@ public class Storage(
     int csp,
     bool eof,
     TextWriter output,
-    TextReader input,
+    TextReader? input,
+    TextReader? input2,
     bool cCode,
     Collection<KeyValuePair<PCode, int>>? stage,
     char? ch,
@@ -24,6 +25,7 @@ public class Storage(
     int ifLevel,
     int skipLevel,
     int sLast,
+    TextWriter? listFp,
     SegmentType oldSeg,
     bool optimize,
     SymbolTable symTable,
@@ -98,6 +100,11 @@ public class Storage(
     public TextReader? Input { get; set; } = input;
 
     /// <summary>
+    /// Gets or sets fd for "#include" file.
+    /// </summary>
+    public TextReader? Input2 { get; set; } = input2;
+
+    /// <summary>
     /// Gets or sets a value indicating whether parsing C code.
     /// </summary>
     public bool CCode { get; set; } = cCode;
@@ -147,6 +154,11 @@ public class Storage(
     /// Gets last index in stage.
     /// </summary>
     public int? SLast { get; } = sLast;
+
+    /// <summary>
+    /// Gets or sets file pointer to list device.
+    /// </summary>
+    public TextWriter? ListFp { get; set; } = listFp;
 
     /// <summary>
     /// Gets or sets current <see cref="SegmentType"/>.

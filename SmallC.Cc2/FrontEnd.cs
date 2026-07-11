@@ -360,6 +360,8 @@ public class FrontEnd(Storage storage)
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task InLineAsync()
     {
+        TextReader? unit;
+
         if (storage.Input is null)
         {
             await this.OpenFileAsync().ConfigureAwait(false);
@@ -370,17 +372,40 @@ public class FrontEnd(Storage storage)
             return;
         }
 
-        if (storage.Input is TextReader input &&
-            await input.ReadLineAsync().ConfigureAwait(false) is string line)
+        unit = storage.Input2;
+        unit ??= storage.Input;
+
+        if (unit is not TextReader input ||
+            await input.ReadLineAsync().ConfigureAwait(false)
+            is not string line)
         {
-            storage.Line = $"{line}{Environment.NewLine}";
+            unit?.Close();
+            unit?.Dispose();
+            if (storage.Input2 is not null)
+            {
+                storage.Input2 = null;
+            }
+            else
+            {
+                storage.Input = null;
+            }
+
+            storage.Line = string.Empty;
         }
         else
         {
-            storage.Input?.Close();
-            storage.Input?.Dispose();
-            storage.Input = null;
-            storage.Line = string.Empty;
+            storage.Line = $"{line}{Environment.NewLine}";
+
+            if (storage.ListFp is not null)
+            {
+                if (storage.ListFp == storage.Output)
+                {
+                    await storage.Output.WriteAsync(';').ConfigureAwait(false);
+                }
+
+                await storage.ListFp.WriteLineAsync(storage.Line)
+                    .ConfigureAwait(false);
+            }
         }
 
         this.Bump(0);

@@ -16,6 +16,7 @@ var storage = new Storage(
     false,
     Console.Out,
     Console.In,
+    null,
     true,
     null,
     null,
@@ -23,6 +24,7 @@ var storage = new Storage(
     0,
     0,
     0,
+    null,
     SegmentType.None,
     false,
     new(
