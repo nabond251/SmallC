@@ -106,7 +106,9 @@ public class FrontEnd(Storage storage)
         }
 
         storage.PLine = string.Empty;
-        while (storage.Ch.ToString() != Environment.NewLine &&
+        while ((
+            storage.Ch != Environment.NewLine[0] ||
+            storage.NCh != Environment.NewLine[^1]) &&
             storage.Ch.HasValue)
         {
             if (this.White())
