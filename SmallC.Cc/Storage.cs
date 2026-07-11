@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 public class Storage(
     int opIndex,
     int opSize,
+    Collection<KeyValuePair<PCode, int>>? stage,
     char? ch,
     char? nCh,
     int ifLevel,
@@ -23,7 +24,6 @@ public class Storage(
     TextReader? input,
     TextReader? input2,
     bool cCode,
-    Collection<KeyValuePair<PCode, int>>? stage,
     int sLast,
     TextWriter? listFp,
     SegmentType oldSeg,
@@ -46,10 +46,10 @@ public class Storage(
     /// <summary>
     /// Initializes a new instance of the <see cref="Storage"/> class.
     /// </summary>
+    /// <param name="stage">Staging buffer.</param>
     /// <param name="output">Fd for output file.</param>
     /// <param name="input">Fd for input file.</param>
     /// <param name="cCode">A value indicating whether parsing C code.</param>
-    /// <param name="stage">Staging buffer.</param>
     /// <param name="oldSeg">Current <see cref="SegmentType"/>.</param>
     /// <param name="symTab">Symbol table.</param>
     /// <param name="litQ">Literal pool.</param>
@@ -60,10 +60,10 @@ public class Storage(
     /// </param>
     /// <param name="ssName">Static symbol name.</param>
     public Storage(
-        StreamWriter output,
+        Collection<KeyValuePair<PCode, int>>? stage = null,
+        StreamWriter? output = null,
         StreamReader? input = null,
         bool cCode = true,
-        Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symTab = null,
         Collection<sbyte>? litQ = null,
@@ -73,6 +73,7 @@ public class Storage(
         : this(
             0,
             0,
+            stage,
             null,
             null,
             0,
@@ -80,11 +81,10 @@ public class Storage(
             0,
             Machine.Bpw,
             false,
-            output,
+            output ?? Console.Out,
             input,
             null,
             cCode,
-            stage,
             StageSize,
             null,
             oldSeg,
@@ -131,6 +131,22 @@ public class Storage(
     /// Gets or sets size of operator in characters.
     /// </summary>
     public int OpSize { get; set; } = opSize;
+
+    /// <summary>
+    /// Gets staging buffer.
+    /// </summary>
+    public Collection<KeyValuePair<PCode, int>>? Stage { get; private set; } =
+        stage;
+
+    /// <summary>
+    /// Gets index to next <see cref="LitQ"/> entry.
+    /// </summary>
+    public int LitPtr => this.LitQ.Count;
+
+    /// <summary>
+    /// Gets index to parsing buffer.
+    /// </summary>
+    public int PPtr => this.PLine.Length;
 
     /// <summary>
     /// Gets or sets current character of input line.
@@ -186,22 +202,6 @@ public class Storage(
     /// Gets or sets a value indicating whether parsing C code.
     /// </summary>
     public bool CCode { get; set; } = cCode;
-
-    /// <summary>
-    /// Gets staging buffer.
-    /// </summary>
-    public Collection<KeyValuePair<PCode, int>>? Stage { get; private set; } =
-        stage;
-
-    /// <summary>
-    /// Gets index to next <see cref="LitQ"/> entry.
-    /// </summary>
-    public int LitPtr => this.LitQ.Count;
-
-    /// <summary>
-    /// Gets index to parsing buffer.
-    /// </summary>
-    public int PPtr => this.PLine.Length;
 
     /// <summary>
     /// Gets next index in stage.

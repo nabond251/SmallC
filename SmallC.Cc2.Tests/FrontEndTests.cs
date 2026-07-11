@@ -62,7 +62,7 @@ public class FrontEndTests
             { "FOOBARBA", "QUUX" },
         };
         var (sut, storage) = Arrange(
-            output, input: input, cCode: cCode, mac: mac);
+            output: output, input: input, cCode: cCode, mac: mac);
 
         await sut.PreprocessAsync();
         var actual = storage.PLine;
@@ -89,7 +89,7 @@ public class FrontEndTests
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, _) = Arrange(output, input: input);
+        var (sut, _) = Arrange(output: output, input: input);
 
         var actual = (await Assert.ThrowsAsync<InvalidOperationException>(
             sut.PreprocessAsync)).Message;
@@ -212,7 +212,7 @@ public class FrontEndTests
             { "FOOBARBA", "QUUX" },
         };
         var (sut, storage) = Arrange(
-            output, input: input, mac: mac);
+            output: output, input: input, mac: mac);
 
         await sut.IfLineAsync();
         var actual = storage.PLine;
@@ -236,7 +236,7 @@ public class FrontEndTests
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, _) = Arrange(output, input: input);
+        var (sut, _) = Arrange(output: output, input: input);
 
         var actual = (await Assert.ThrowsAsync<InvalidOperationException>(
             sut.IfLineAsync)).Message;
@@ -268,7 +268,7 @@ public class FrontEndTests
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
         var (sut, _) = Arrange(
-            output, input: input, lineType: BufferLineType.Parsing);
+            output: output, input: input, lineType: BufferLineType.Parsing);
 
         var actual = await sut.SymNameAsync();
 
@@ -308,7 +308,7 @@ public class FrontEndTests
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
         var (sut, storage) = Arrange(
-            output, input: input, lineType: BufferLineType.Parsing);
+            output: output, input: input, lineType: BufferLineType.Parsing);
 
         var actualMatch = await sut.MatchAsync(lit);
 
@@ -344,7 +344,7 @@ public class FrontEndTests
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
         var (sut, storage) = Arrange(
-            output, input: input, lineType: BufferLineType.Parsing);
+            output: output, input: input, lineType: BufferLineType.Parsing);
 
         var actualMatch = await sut.AMatchAsync(lit, 3);
 
@@ -387,7 +387,7 @@ public class FrontEndTests
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
         var (sut, storage) = Arrange(
-            output, input: input, lineType: BufferLineType.Parsing);
+            output: output, input: input, lineType: BufferLineType.Parsing);
 
         var actualMatch = await sut.NextOpAsync(list.Split(
             ' ', StringSplitOptions.RemoveEmptyEntries));
@@ -399,10 +399,10 @@ public class FrontEndTests
     }
 
     private static (FrontEnd Sut, Storage Storage) Arrange(
-        StreamWriter output,
+        Collection<KeyValuePair<PCode, int>>? stage = null,
+        StreamWriter? output = null,
         StreamReader? input = null,
         bool cCode = true,
-        Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
         SymbolTable? symTab = null,
         Collection<sbyte>? litQ = null,
@@ -411,10 +411,10 @@ public class FrontEndTests
         string? ssName = null)
     {
         var storage = new Storage(
+            stage,
             output,
             input,
             cCode,
-            stage,
             oldSeg,
             symTab ?? new([], []),
             litQ ?? [],
