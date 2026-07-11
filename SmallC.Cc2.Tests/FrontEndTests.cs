@@ -35,19 +35,19 @@ public class FrontEndTests
     [InlineData("\r\n  ", true, "")]
     [InlineData(" \r\n ", true, "")]
     [InlineData("  \r\n", true, "")]
-    [InlineData("\"\"", true, "\"\" ")]
-    [InlineData("\"test\"", true, "\"test\" ")]
-    [InlineData("\"test\"\r\n", true, "\"test\" ")]
-    [InlineData("''", true, "'' ")]
-    [InlineData("'t'", true, "'t' ")]
-    [InlineData("/**/", true, " ")]
-    [InlineData("/* test */", true, " ")]
-    [InlineData("foo/*bar*/baz", true, "foobaz ")]
+    [InlineData("\"\"", true, "\"\"")]
+    [InlineData("\"test\"", true, "\"test\"")]
+    [InlineData("\"test\"\r\n", true, "\"test\"")]
+    [InlineData("''", true, "''")]
+    [InlineData("'t'", true, "'t'")]
+    [InlineData("/**/", true, "")]
+    [InlineData("/* test */", true, "")]
+    [InlineData("foo/*bar*/baz", true, "foobaz")]
     [InlineData("foo/*bar\r\nbaz\r\nquux", true, "foo")]
-    [InlineData("foo/*bar*/baz\r\nquux", true, "foobaz ")]
-    [InlineData("foo/*bar\r\nbaz*/quux", true, "fooquux ")]
-    [InlineData("FOO", true, "BAR ")]
-    [InlineData("FOOBARBAZ", true, "QUUX ")]
+    [InlineData("foo/*bar*/baz\r\nquux", true, "foobaz")]
+    [InlineData("foo/*bar\r\nbaz*/quux", true, "fooquux")]
+    [InlineData("FOO", true, "BAR")]
+    [InlineData("FOOBARBAZ", true, "QUUX")]
     public async Task CanPreprocessAsync(
         string inputText, bool cCode, string? expected)
     {
@@ -110,7 +110,7 @@ public class FrontEndTests
 #ifdef FOO
     foo();
 #endif",
-        "foo(); ")]
+        "foo();")]
     [InlineData(
         @"
 #ifdef FOO
@@ -122,13 +122,13 @@ public class FrontEndTests
 #else
     bar();
 #endif",
-        "foobarbaz(); ")]
+        "foobarbaz();")]
     [InlineData(
         @"
 #ifndef BAR
     bar();
 #endif",
-        "bar(); ")]
+        "bar();")]
     [InlineData(
         @"
 #ifndef BAR
@@ -136,14 +136,14 @@ public class FrontEndTests
 #else
     foo();
 #endif",
-        "bar(); ")]
+        "bar();")]
     [InlineData(
         @"
 #ifndef FOO
     foo();
 #endif
     bar();",
-        "bar(); ")]
+        "bar();")]
     [InlineData(
         @"
 #ifndef FOO
@@ -151,7 +151,7 @@ public class FrontEndTests
 #else
     bar();
 #endif",
-        "bar(); ")]
+        "bar();")]
     [InlineData(
         @"
 #ifndef FOO
@@ -163,7 +163,7 @@ public class FrontEndTests
     bar();
 #endif
 #endif",
-        "bar(); ")]
+        "bar();")]
     [InlineData(
         @"
 #ifndef FOO
@@ -173,14 +173,14 @@ public class FrontEndTests
 #endif
 #endif
     bar();",
-        "bar(); ")]
+        "bar();")]
     [InlineData(
         @"
 #ifdef BAR
     bar();
 #endif
     foo();",
-        "foo(); ")]
+        "foo();")]
     [InlineData(
         @"
 #ifdef BAR
@@ -188,7 +188,7 @@ public class FrontEndTests
 #else
     foo();
 #endif",
-        "foo(); ")]
+        "foo();")]
     [InlineData(
         @"
 #ifdef FOO
@@ -197,7 +197,7 @@ public class FrontEndTests
 #endif
 #endif
     bar();",
-        "bar(); ")]
+        "bar();")]
     public async Task CanIfLineAsync(
         string inputText, string? expected)
     {
@@ -287,16 +287,16 @@ public class FrontEndTests
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
     [InlineData("", "", false, "")]
-    [InlineData(";", ";", true, " ")]
-    [InlineData(";", "", false, "; ")]
+    [InlineData(";", ";", true, "")]
+    [InlineData(";", "", false, ";")]
     [InlineData("", ";", false, "")]
-    [InlineData("foo", ";", false, "foo ")]
-    [InlineData("foo", "bar", false, "foo ")]
-    [InlineData("test", "test", true, " ")]
-    [InlineData("foo()", "foo", true, "() ")]
-    [InlineData(" bar", "bar", true, " ")]
-    [InlineData("  baz;", "baz", true, "; ")]
-    [InlineData("  foo_();", "foo_", true, "(); ")]
+    [InlineData("foo", ";", false, "foo")]
+    [InlineData("foo", "bar", false, "foo")]
+    [InlineData("test", "test", true, "")]
+    [InlineData("foo()", "foo", true, "()")]
+    [InlineData(" bar", "bar", true, "")]
+    [InlineData("  baz;", "baz", true, ";")]
+    [InlineData("  foo_();", "foo_", true, "();")]
     [InlineData(" _bar ", "_bar", true, " ")]
     [InlineData("b4z ", "b4z", true, " ")]
     public async Task CanMatchAsync(
@@ -327,12 +327,12 @@ public class FrontEndTests
     /// <param name="expectedNext">Expected next input text.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("foo", "bar", false, "foo ")]
-    [InlineData("test", "test", false, "test ")]
-    [InlineData("foo()", "foo", true, "() ")]
-    [InlineData(" bar", "bar", true, " ")]
-    [InlineData("  _az;", "_az", true, "; ")]
-    [InlineData("  foo_();", "foo_", false, "foo_(); ")]
+    [InlineData("foo", "bar", false, "foo")]
+    [InlineData("test", "test", false, "test")]
+    [InlineData("foo()", "foo", true, "()")]
+    [InlineData(" bar", "bar", true, "")]
+    [InlineData("  _az;", "_az", true, ";")]
+    [InlineData("  foo_();", "foo_", false, "foo_();")]
     [InlineData(" _bar ", "_bar", false, "_bar ")]
     [InlineData("b4z ", "b4z", true, " ")]
     public async Task CanAlphanumericMatchAsync(
