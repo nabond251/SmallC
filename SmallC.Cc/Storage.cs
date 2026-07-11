@@ -12,6 +12,10 @@ using System.Collections.ObjectModel;
 public class Storage(
     int opIndex,
     int opSize,
+    char? ch,
+    char? nCh,
+    int ifLevel,
+    int skipLevel,
     int litLab,
     int csp,
     bool eof,
@@ -20,15 +24,11 @@ public class Storage(
     TextReader? input2,
     bool cCode,
     Collection<KeyValuePair<PCode, int>>? stage,
-    char? ch,
-    char? nCh,
-    int ifLevel,
-    int skipLevel,
     int sLast,
     TextWriter? listFp,
     SegmentType oldSeg,
     bool optimize,
-    SymbolTable symTable,
+    SymbolTable symTab,
     Collection<sbyte> litQ,
     Dictionary<string, string> mac,
     string pLine,
@@ -73,6 +73,26 @@ public class Storage(
     /// Gets or sets size of operator in characters.
     /// </summary>
     public int OpSize { get; set; } = opSize;
+
+    /// <summary>
+    /// Gets or sets current character of input line.
+    /// </summary>
+    public char? Ch { get; set; } = ch;
+
+    /// <summary>
+    /// Gets or sets next character of input line.
+    /// </summary>
+    public char? NCh { get; set; } = nCh;
+
+    /// <summary>
+    /// Gets or sets #if... nest level.
+    /// </summary>
+    public int IfLevel { get; set; } = ifLevel;
+
+    /// <summary>
+    /// Gets or sets level at which #if... skipping started.
+    /// </summary>
+    public int SkipLevel { get; set; } = skipLevel;
 
     /// <summary>
     /// Gets or sets label # assigned to literal pool.
@@ -126,26 +146,6 @@ public class Storage(
     public int PPtr => this.PLine.Length;
 
     /// <summary>
-    /// Gets or sets current character of input line.
-    /// </summary>
-    public char? Ch { get; set; } = ch;
-
-    /// <summary>
-    /// Gets or sets next character of input line.
-    /// </summary>
-    public char? NCh { get; set; } = nCh;
-
-    /// <summary>
-    /// Gets or sets #if... nest level.
-    /// </summary>
-    public int IfLevel { get; set; } = ifLevel;
-
-    /// <summary>
-    /// Gets or sets level at which #if... skipping started.
-    /// </summary>
-    public int SkipLevel { get; set; } = skipLevel;
-
-    /// <summary>
     /// Gets next index in stage.
     /// </summary>
     public int? SNext => this.Stage?.Count;
@@ -174,7 +174,7 @@ public class Storage(
     /// <summary>
     /// Gets symbol table.
     /// </summary>
-    public SymbolTable SymTable { get; } = symTable;
+    public SymbolTable SymTab { get; } = symTab;
 
     /// <summary>
     /// Gets literal pool.
