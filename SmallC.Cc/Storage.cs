@@ -44,6 +44,64 @@ public class Storage(
     public const int StageSize = 200;
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="Storage"/> class.
+    /// </summary>
+    /// <param name="output">Fd for output file.</param>
+    /// <param name="input">Fd for input file.</param>
+    /// <param name="cCode">A value indicating whether parsing C code.</param>
+    /// <param name="stage">Staging buffer.</param>
+    /// <param name="oldSeg">Current <see cref="SegmentType"/>.</param>
+    /// <param name="symTab">Symbol table.</param>
+    /// <param name="litQ">Literal pool.</param>
+    /// <param name="mac">Macro buffer.</param>
+    /// <param name="lineType">
+    /// A value indicating whether <see cref="Line"/> points to
+    /// <see cref="PLine"/> or <see cref="MLine"/>.
+    /// </param>
+    /// <param name="ssName">Static symbol name.</param>
+    public Storage(
+        StreamWriter output,
+        StreamReader? input = null,
+        bool cCode = true,
+        Collection<KeyValuePair<PCode, int>>? stage = null,
+        SegmentType oldSeg = SegmentType.None,
+        SymbolTable? symTab = null,
+        Collection<sbyte>? litQ = null,
+        Dictionary<string, string>? mac = null,
+        BufferLineType? lineType = null,
+        string? ssName = null)
+        : this(
+            0,
+            0,
+            null,
+            null,
+            0,
+            0,
+            0,
+            Machine.Bpw,
+            false,
+            output,
+            input,
+            null,
+            cCode,
+            stage,
+            StageSize,
+            null,
+            oldSeg,
+            false,
+            symTab ?? new([], []),
+            litQ ?? [],
+            mac ?? [],
+            string.Empty,
+            string.Empty,
+            lineType ?? BufferLineType.Parsing,
+            0,
+            null,
+            ssName)
+    {
+    }
+
+    /// <summary>
     /// <see cref="Line"/> type enumeration.
     /// </summary>
     public enum BufferLineType

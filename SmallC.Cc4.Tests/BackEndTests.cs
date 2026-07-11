@@ -91,7 +91,7 @@ dw 0
         using var output = new StreamWriter(outputStream);
         var (sut, _) = Arrange(
             output,
-            symbolTable: new([], [.. globalsAndAnyMain]));
+            symTab: new([], [.. globalsAndAnyMain]));
 
         await sut.TrailerAsync();
         await output.FlushAsync();
@@ -419,7 +419,7 @@ dw 0
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
         Collection<KeyValuePair<PCode, int>>? stage = setStage ? [] : null;
-        var symbolTable = new SymbolTable(
+        var symTab = new SymbolTable(
             [],
             [
                 new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "foo"),
@@ -427,7 +427,7 @@ dw 0
                 new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "baz"),
             ]);
         var (sut, storage) = Arrange(
-            output, stage: stage, symbolTable: symbolTable);
+            output, stage: stage, symTab: symTab);
 
         await sut.GenAsync(pCode, value);
         await output.FlushAsync();
@@ -691,37 +691,20 @@ dw 0
         StreamReader? input = null,
         Collection<KeyValuePair<PCode, int>>? stage = null,
         SegmentType oldSeg = SegmentType.None,
-        SymbolTable? symbolTable = null,
+        SymbolTable? symTab = null,
         Collection<sbyte>? litQ = null,
         string? ssName = null)
     {
         var storage = new Storage(
-            0,
-            0,
-            null,
-            null,
-            0,
-            0,
-            0,
-            Machine.Bpw,
-            false,
             output,
             input,
-            null,
             true,
             stage,
-            StageSize,
-            null,
             oldSeg,
-            false,
-            symbolTable ?? new([], []),
+            symTab ?? new([], []),
             litQ ?? [],
             [],
-            string.Empty,
-            string.Empty,
             BufferLineType.None,
-            0,
-            null,
             ssName);
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
