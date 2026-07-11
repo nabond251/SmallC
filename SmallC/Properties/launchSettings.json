@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SmallC": {
+      "commandName": "Project",
+      "commandLineArgs": "WORDS"
+    }
+  }
+}

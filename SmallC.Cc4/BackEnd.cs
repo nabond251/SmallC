@@ -236,7 +236,7 @@ public class BackEnd(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TrailerAsync()
     {
-        var globals = storage.SymTable.Globals;
+        var globals = storage.SymTab.Globals;
         foreach (var cptr in globals)
         {
             if (cptr.Ident == SymbolIdentity.Function
@@ -807,7 +807,7 @@ public class BackEnd(
             {
                 // mem ref by label
                 case 'm':
-                    await this.OutNameAsync(storage.SymTable[value].Name)
+                    await this.OutNameAsync(storage.SymTab[value].Name)
                         .ConfigureAwait(false);
                     break;
 

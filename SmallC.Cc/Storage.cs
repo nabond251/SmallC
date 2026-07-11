@@ -12,23 +12,34 @@ using System.Collections.ObjectModel;
 public class Storage(
     int opIndex,
     int opSize,
-    int litLab,
-    int csp,
-    bool eof,
-    TextWriter output,
-    TextReader? input,
-    TextReader? input2,
-    bool cCode,
+    Dictionary<int, string> swNext,
+    int swEnd,
     Collection<KeyValuePair<PCode, int>>? stage,
+    Collection<WhileQueueEntry> wq,
+    Collection<string> args,
+    int wqPtr,
     char? ch,
     char? nCh,
     int ifLevel,
     int skipLevel,
+    int nxtLab,
+    int litLab,
+    int csp,
+    bool eof,
+    TextWriter output,
+    bool files,
+    int fileArg,
+    TextReader? input,
+    TextReader? input2,
+    bool cCode,
     int sLast,
     TextWriter? listFp,
     SegmentType oldSeg,
     bool optimize,
-    SymbolTable symTable,
+    bool alarm,
+    bool monitor,
+    bool pause,
+    SymbolTable symTab,
     Collection<sbyte> litQ,
     Dictionary<string, string> mac,
     string pLine,
@@ -39,9 +50,93 @@ public class Storage(
     string? ssName)
 {
     /// <summary>
-    /// Entries in staging buffer.
+    /// Initializes a new instance of the <see cref="Storage"/> class.
     /// </summary>
-    public const int StageSize = 200;
+    /// <param name="swNext">Switch queue.</param>
+    /// <param name="swEnd">Last index in switch queue.</param>
+    /// <param name="stage">Staging buffer.</param>
+    /// <param name="wq">While queue.</param>
+    /// <param name="args">Static args.</param>
+    /// <param name="wqPtr">Index to next entry.</param>
+    /// <param name="csp">Compiler relative stk ptr.</param>
+    /// <param name="output">Fd for output file.</param>
+    /// <param name="files">A value indicating whether file list specified on cmd line.</param>
+    /// <param name="input">Fd for input file.</param>
+    /// <param name="cCode">A value indicating whether parsing C code.</param>
+    /// <param name="sLast">Last index in stage.</param>
+    /// <param name="oldSeg">Current <see cref="SegmentType"/>.</param>
+    /// <param name="symTab">Symbol table.</param>
+    /// <param name="litQ">Literal pool.</param>
+    /// <param name="mac">Macro name/string buffer.</param>
+    /// <param name="pLine">Parsing buffer.</param>
+    /// <param name="mLine">Macro buffer.</param>
+    /// <param name="lineType">
+    /// A value indicating whether <see cref="Line"/> points to
+    /// <see cref="PLine"/> or <see cref="MLine"/>.
+    /// </param>
+    /// <param name="ssName">Static symbol name.</param>
+    public Storage(
+        Dictionary<int, string>? swNext = null,
+        int? swEnd = null,
+        Collection<KeyValuePair<PCode, int>>? stage = null,
+        Collection<WhileQueueEntry>? wq = null,
+        Collection<string>? args = null,
+        int? wqPtr = null,
+        int? csp = null,
+        TextWriter? output = null,
+        bool? files = null,
+        TextReader? input = null,
+        bool? cCode = null,
+        int? sLast = null,
+        SegmentType? oldSeg = null,
+        SymbolTable? symTab = null,
+        Collection<sbyte>? litQ = null,
+        Dictionary<string, string>? mac = null,
+        string? pLine = null,
+        string? mLine = null,
+        BufferLineType? lineType = null,
+        string? ssName = null)
+        : this(
+            opIndex: 0,
+            opSize: 0,
+            swNext: swNext ?? [],
+            swEnd: swEnd ?? SwitchTable.SwTabSz,
+            stage: stage,
+            wq: wq ?? [],
+            args: args ?? [],
+            wqPtr: wqPtr ?? 0,
+            ch: null,
+            nCh: null,
+            ifLevel: 0,
+            skipLevel: 0,
+            nxtLab: 0,
+            litLab: 0,
+            csp: csp ?? 0,
+            eof: false,
+            output: output ?? Console.Out,
+            files: files ?? false,
+            fileArg: 0,
+            input: input,
+            input2: null,
+            cCode: cCode ?? true,
+            sLast: sLast ?? StagingBuffer.StageSize,
+            listFp: null,
+            oldSeg: oldSeg ?? SegmentType.None,
+            optimize: false,
+            alarm: false,
+            monitor: false,
+            pause: false,
+            symTab: symTab ?? new([], []),
+            litQ: litQ ?? [],
+            mac: mac ?? [],
+            pLine: pLine ?? string.Empty,
+            mLine: mLine ?? string.Empty,
+            lineType: lineType ?? BufferLineType.None,
+            lPtr: 0,
+            msName: null,
+            ssName: ssName)
+    {
+    }
 
     /// <summary>
     /// <see cref="Line"/> type enumeration.
@@ -75,45 +170,35 @@ public class Storage(
     public int OpSize { get; set; } = opSize;
 
     /// <summary>
-    /// Gets or sets label # assigned to literal pool.
+    /// Gets switch queue.
     /// </summary>
-    public int LitLab { get; set; } = litLab;
+    public Dictionary<int, string> SwNext { get; } = swNext;
 
     /// <summary>
-    /// Gets or sets compiler relative stk ptr.
+    /// Gets last index in switch queue.
     /// </summary>
-    public int Csp { get; set; } = csp;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether end of input has been reached.
-    /// </summary>
-    public bool Eof { get; set; } = eof;
-
-    /// <summary>
-    /// Gets fd for output file.
-    /// </summary>
-    public TextWriter Output { get; } = output;
-
-    /// <summary>
-    /// Gets or sets fd for input file.
-    /// </summary>
-    public TextReader? Input { get; set; } = input;
-
-    /// <summary>
-    /// Gets or sets fd for "#include" file.
-    /// </summary>
-    public TextReader? Input2 { get; set; } = input2;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether parsing C code.
-    /// </summary>
-    public bool CCode { get; set; } = cCode;
+    public int SwEnd { get; } = swEnd;
 
     /// <summary>
     /// Gets staging buffer.
     /// </summary>
     public Collection<KeyValuePair<PCode, int>>? Stage { get; private set; } =
         stage;
+
+    /// <summary>
+    /// Gets while queue.
+    /// </summary>
+    public Collection<WhileQueueEntry> Wq { get; } = wq;
+
+    /// <summary>
+    /// Gets static args.
+    /// </summary>
+    public Collection<string> Args { get; } = args;
+
+    /// <summary>
+    /// Gets index to next entry.
+    /// </summary>
+    public int WqPtr { get; } = wqPtr;
 
     /// <summary>
     /// Gets index to next <see cref="LitQ"/> entry.
@@ -146,6 +231,56 @@ public class Storage(
     public int SkipLevel { get; set; } = skipLevel;
 
     /// <summary>
+    /// Gets or sets next avail label #.
+    /// </summary>
+    public int NxtLab { get; set; } = nxtLab;
+
+    /// <summary>
+    /// Gets or sets label # assigned to literal pool.
+    /// </summary>
+    public int LitLab { get; set; } = litLab;
+
+    /// <summary>
+    /// Gets or sets compiler relative stk ptr.
+    /// </summary>
+    public int Csp { get; set; } = csp;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether end of input has been reached.
+    /// </summary>
+    public bool Eof { get; set; } = eof;
+
+    /// <summary>
+    /// Gets or sets fd for output file.
+    /// </summary>
+    public TextWriter Output { get; set; } = output;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether file list specified on cmd line.
+    /// </summary>
+    public bool Files { get; set; } = files;
+
+    /// <summary>
+    /// Gets or sets cur file arg index.
+    /// </summary>
+    public int FileArg { get; set; } = fileArg;
+
+    /// <summary>
+    /// Gets or sets fd for input file.
+    /// </summary>
+    public TextReader? Input { get; set; } = input;
+
+    /// <summary>
+    /// Gets or sets fd for "#include" file.
+    /// </summary>
+    public TextReader? Input2 { get; set; } = input2;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether parsing C code.
+    /// </summary>
+    public bool CCode { get; set; } = cCode;
+
+    /// <summary>
     /// Gets next index in stage.
     /// </summary>
     public int? SNext => this.Stage?.Count;
@@ -172,9 +307,24 @@ public class Storage(
     public bool Optimize { get; set; } = optimize;
 
     /// <summary>
+    /// Gets or sets a value indicating whether to emit audible alarm on errors.
+    /// </summary>
+    public bool Alarm { get; set; } = alarm;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to monitor function headers.
+    /// </summary>
+    public bool Monitor { get; set; } = monitor;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to pause for operator on errors.
+    /// </summary>
+    public bool Pause { get; set; } = pause;
+
+    /// <summary>
     /// Gets symbol table.
     /// </summary>
-    public SymbolTable SymTable { get; } = symTable;
+    public SymbolTable SymTab { get; } = symTab;
 
     /// <summary>
     /// Gets literal pool.
@@ -182,7 +332,7 @@ public class Storage(
     public Collection<sbyte> LitQ { get; } = litQ;
 
     /// <summary>
-    /// Gets the macro buffer.
+    /// Gets the macro name/string buffer.
     /// </summary>
     public Dictionary<string, string> Mac { get; } = mac;
 

@@ -2,52 +2,44 @@
 // Copyright (c) Soli Deo Gloria Apps. All rights reserved.
 // </copyright>
 
+using SmallC;
 using SmallC.Cc;
+using SmallC.Cc1;
 using SmallC.Cc2;
 using SmallC.Cc4;
-using static SmallC.Cc.Storage;
-using static SmallC.Cc.SymbolTableEntry;
+
+await Console.Error.WriteLineAsync(Notice.Version).ConfigureAwait(true);
+await Console.Error.WriteLineAsync(Notice.CRight1).ConfigureAwait(true);
 
 var storage = new Storage(
-    0,
-    0,
-    0,
-    0,
-    false,
-    Console.Out,
-    Console.In,
-    null,
-    true,
-    null,
-    null,
-    null,
-    0,
-    0,
-    0,
-    Console.Out,
-    SegmentType.None,
-    false,
-    new(
+    swNext: [],
+    swEnd: SwitchTable.SwTabSz - 1,
+    stage: null,
+    wq: [],
+    args: [.. args],
+    wqPtr: 0,
+    sLast: StagingBuffer.StageSize,
+    symTab: new(
         [],
-        [
-            new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "func"),
-            new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 2, null, "main"),
-        ]),
-    [],
-    [],
-    string.Empty,
-    string.Empty,
-    BufferLineType.None,
-    0,
-    null,
-    null);
+        []),
+    litQ: [],
+    mac: [],
+    pLine: string.Empty,
+    mLine: string.Empty);
+
+var misc = new MiscellaneousUseCases(storage);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
+
 var frontend = new FrontEnd(storage);
+var parser = new Parser(storage);
 var backend = new BackEnd(symTabMgmt, utility, storage);
-backend.SetCodes();
-await backend.HeaderAsync().ConfigureAwait(true);
-await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);
-await frontend.PreprocessAsync().ConfigureAwait(true);
-await backend.GenAsync(PCode.POINT1l, 1).ConfigureAwait(true);
-await backend.TrailerAsync().ConfigureAwait(true);
+
+await misc.AskAsync().ConfigureAwait(true); // get user options
+await frontend.OpenFileAsync().ConfigureAwait(true); // and initial input file
+await frontend.PreprocessAsync().ConfigureAwait(true); // fetch first line
+await backend.HeaderAsync().ConfigureAwait(true); // intro code
+backend.SetCodes(); // initialize code pointer array
+await parser.ParseAsync().ConfigureAwait(true); // process ALL input
+await backend.TrailerAsync().ConfigureAwait(true); // follow-up code
+storage.Output.Close(); // explicitly close output

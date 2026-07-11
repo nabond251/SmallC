@@ -18,6 +18,6 @@ public class SymbolTableUseCases(Storage storage)
     /// <returns>Global with matching name, if any.</returns>
     public SymbolTableEntry? FindGlb(string sName)
     {
-        return storage.SymTable.Globals.FirstOrDefault(x => x.Name == sName);
+        return storage.SymTab.Globals.FirstOrDefault(x => x.Name == sName);
     }
 }
