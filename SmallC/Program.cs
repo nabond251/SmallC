@@ -53,10 +53,13 @@ var storage = new Storage(
     0,
     null,
     null);
+
 var misc = new MiscellaneousUseCases(storage);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
+
 var frontend = new FrontEnd(storage);
+var parser = new Parser(storage);
 var backend = new BackEnd(symTabMgmt, utility, storage);
 
 await misc.AskAsync().ConfigureAwait(true); // get user options
@@ -64,7 +67,6 @@ await frontend.OpenFileAsync().ConfigureAwait(true); // and initial input file
 await frontend.PreprocessAsync().ConfigureAwait(true); // fetch first line
 await backend.HeaderAsync().ConfigureAwait(true); // intro code
 backend.SetCodes(); // initialize code pointer array
-await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);
-await backend.GenAsync(PCode.POINT1l, 1).ConfigureAwait(true);
+await parser.ParseAsync().ConfigureAwait(true); // process ALL input
 await backend.TrailerAsync().ConfigureAwait(true); // follow-up code
 storage.Output.Close(); // explicitly close output
