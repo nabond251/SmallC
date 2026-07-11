@@ -37,4 +37,10 @@
     <ProjectReference Include="..\SmallC.Cc4\SmallC.Cc4.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="WORDS.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
