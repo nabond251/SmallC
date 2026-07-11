@@ -22,6 +22,7 @@ public class Storage(
     char? nCh,
     int ifLevel,
     int skipLevel,
+    int nxtLab,
     int litLab,
     int csp,
     bool eof,
@@ -33,6 +34,9 @@ public class Storage(
     TextWriter? listFp,
     SegmentType oldSeg,
     bool optimize,
+    bool alarm,
+    bool monitor,
+    bool pause,
     SymbolTable symTab,
     Collection<sbyte> litQ,
     Dictionary<string, string> mac,
@@ -84,6 +88,7 @@ public class Storage(
             0,
             0,
             0,
+            0,
             Machine.Bpw,
             false,
             output ?? Console.Out,
@@ -93,6 +98,9 @@ public class Storage(
             StagingBuffer.StageSize,
             null,
             oldSeg,
+            false,
+            false,
+            false,
             false,
             symTab ?? new([], []),
             litQ ?? [],
@@ -199,6 +207,11 @@ public class Storage(
     public int SkipLevel { get; set; } = skipLevel;
 
     /// <summary>
+    /// Gets or sets next avail label #.
+    /// </summary>
+    public int NxtLab { get; set; } = nxtLab;
+
+    /// <summary>
     /// Gets or sets label # assigned to literal pool.
     /// </summary>
     public int LitLab { get; set; } = litLab;
@@ -214,9 +227,9 @@ public class Storage(
     public bool Eof { get; set; } = eof;
 
     /// <summary>
-    /// Gets fd for output file.
+    /// Gets or sets fd for output file.
     /// </summary>
-    public TextWriter Output { get; } = output;
+    public TextWriter Output { get; set; } = output;
 
     /// <summary>
     /// Gets or sets fd for input file.
@@ -258,6 +271,21 @@ public class Storage(
     /// buffer.
     /// </summary>
     public bool Optimize { get; set; } = optimize;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to emit audible alarm on errors.
+    /// </summary>
+    public bool Alarm { get; set; } = alarm;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to monitor function headers.
+    /// </summary>
+    public bool Monitor { get; set; } = monitor;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to pause for operator on errors.
+    /// </summary>
+    public bool Pause { get; set; } = pause;
 
     /// <summary>
     /// Gets symbol table.

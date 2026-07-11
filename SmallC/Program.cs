@@ -4,6 +4,7 @@
 
 using SmallC;
 using SmallC.Cc;
+using SmallC.Cc1;
 using SmallC.Cc2;
 using SmallC.Cc4;
 using static SmallC.Cc.Storage;
@@ -26,6 +27,7 @@ var storage = new Storage(
     0,
     0,
     0,
+    0,
     false,
     Console.Out,
     Console.In,
@@ -34,6 +36,9 @@ var storage = new Storage(
     StagingBuffer.StageSize,
     Console.Out,
     SegmentType.None,
+    false,
+    false,
+    false,
     false,
     new(
         [],
@@ -46,10 +51,13 @@ var storage = new Storage(
     0,
     null,
     null);
+var misc = new MiscellaneousUseCases(storage);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
 var frontend = new FrontEnd(storage);
 var backend = new BackEnd(symTabMgmt, utility, storage);
+
+await misc.AskAsync().ConfigureAwait(true);
 backend.SetCodes();
 await backend.HeaderAsync().ConfigureAwait(true);
 await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);
