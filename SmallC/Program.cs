@@ -7,7 +7,6 @@ using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc4;
 using static SmallC.Cc.Storage;
-using static SmallC.Cc.SymbolTableEntry;
 
 await Console.Error.WriteLineAsync(Notice.Version).ConfigureAwait(true);
 await Console.Error.WriteLineAsync(Notice.CRight1).ConfigureAwait(true);
@@ -15,7 +14,12 @@ await Console.Error.WriteLineAsync(Notice.CRight1).ConfigureAwait(true);
 var storage = new Storage(
     0,
     0,
-    null,
+    [],
+    SwitchTable.SwTabSz - 1,
+    [],
+    [],
+    [.. args],
+    0,
     null,
     null,
     0,
@@ -27,16 +31,13 @@ var storage = new Storage(
     Console.In,
     null,
     true,
-    0,
+    StagingBuffer.StageSize,
     Console.Out,
     SegmentType.None,
     false,
     new(
         [],
-        [
-            new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "func"),
-            new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 2, null, "main"),
-        ]),
+        []),
     [],
     [],
     string.Empty,

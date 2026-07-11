@@ -12,7 +12,12 @@ using System.Collections.ObjectModel;
 public class Storage(
     int opIndex,
     int opSize,
+    Dictionary<int, string> swNext,
+    int swEnd,
     Collection<KeyValuePair<PCode, int>>? stage,
+    Collection<WhileQueueEntry> wq,
+    Collection<string> args,
+    int wqPtr,
     char? ch,
     char? nCh,
     int ifLevel,
@@ -38,11 +43,6 @@ public class Storage(
     string? msName,
     string? ssName)
 {
-    /// <summary>
-    /// Entries in staging buffer.
-    /// </summary>
-    public const int StageSize = 200;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="Storage"/> class.
     /// </summary>
@@ -73,7 +73,12 @@ public class Storage(
         : this(
             0,
             0,
+            [],
+            0,
             stage,
+            [],
+            [],
+            0,
             null,
             null,
             0,
@@ -85,7 +90,7 @@ public class Storage(
             input,
             null,
             cCode,
-            StageSize,
+            StagingBuffer.StageSize,
             null,
             oldSeg,
             false,
@@ -133,10 +138,35 @@ public class Storage(
     public int OpSize { get; set; } = opSize;
 
     /// <summary>
+    /// Gets switch queue.
+    /// </summary>
+    public Dictionary<int, string> SwNext { get; } = swNext;
+
+    /// <summary>
+    /// Gets last index in switch queue.
+    /// </summary>
+    public int SwEnd { get; } = swEnd;
+
+    /// <summary>
     /// Gets staging buffer.
     /// </summary>
     public Collection<KeyValuePair<PCode, int>>? Stage { get; private set; } =
         stage;
+
+    /// <summary>
+    /// Gets while queue.
+    /// </summary>
+    public Collection<WhileQueueEntry> Wq { get; } = wq;
+
+    /// <summary>
+    /// Gets static args.
+    /// </summary>
+    public Collection<string> Args { get; } = args;
+
+    /// <summary>
+    /// Gets index to next entry.
+    /// </summary>
+    public int WqPtr { get; } = wqPtr;
 
     /// <summary>
     /// Gets index to next <see cref="LitQ"/> entry.
