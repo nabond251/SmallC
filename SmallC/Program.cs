@@ -2,11 +2,15 @@
 // Copyright (c) Soli Deo Gloria Apps. All rights reserved.
 // </copyright>
 
+using SmallC;
 using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc4;
 using static SmallC.Cc.Storage;
 using static SmallC.Cc.SymbolTableEntry;
+
+await Console.Error.WriteLineAsync(Notice.Version).ConfigureAwait(true);
+await Console.Error.WriteLineAsync(Notice.CRight1).ConfigureAwait(true);
 
 var storage = new Storage(
     0,
