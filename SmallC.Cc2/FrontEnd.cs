@@ -403,7 +403,7 @@ public class FrontEnd(Storage storage)
                     await storage.Output.WriteAsync(';').ConfigureAwait(false);
                 }
 
-                await storage.ListFp.WriteLineAsync(storage.Line)
+                await storage.ListFp.WriteAsync(storage.Line)
                     .ConfigureAwait(false);
             }
         }

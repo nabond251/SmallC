@@ -24,7 +24,7 @@ var storage = new Storage(
     0,
     0,
     0,
-    null,
+    Console.Out,
     SegmentType.None,
     false,
     new(
@@ -43,9 +43,11 @@ var storage = new Storage(
     null);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
+var frontend = new FrontEnd(storage);
 var backend = new BackEnd(symTabMgmt, utility, storage);
 backend.SetCodes();
 await backend.HeaderAsync().ConfigureAwait(true);
 await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);
+await frontend.PreprocessAsync().ConfigureAwait(true);
 await backend.GenAsync(PCode.POINT1l, 1).ConfigureAwait(true);
 await backend.TrailerAsync().ConfigureAwait(true);
