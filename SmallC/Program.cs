@@ -30,6 +30,8 @@ var storage = new Storage(
     0,
     false,
     Console.Out,
+    false,
+    0,
     Console.In,
     null,
     true,
@@ -58,6 +60,7 @@ var frontend = new FrontEnd(storage);
 var backend = new BackEnd(symTabMgmt, utility, storage);
 
 await misc.AskAsync().ConfigureAwait(true);
+await frontend.OpenFileAsync().ConfigureAwait(true);
 backend.SetCodes();
 await backend.HeaderAsync().ConfigureAwait(true);
 await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);

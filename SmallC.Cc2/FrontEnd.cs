@@ -75,10 +75,65 @@ public class FrontEnd(Storage storage)
     /// Input and output file opens.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task OpenFileAsync()
+    public async Task OpenFileAsync()
     {
-        storage.Eof = true;
-        return Task.CompletedTask;
+        StringBuilder outFn = new();
+        int i, j;
+        bool ext;
+
+        storage.Input = null;
+        foreach (var pLine in storage.Args.Skip(storage.FileArg).ToList())
+        {
+            storage.FileArg++;
+            if (pLine.ElementAtOrDefault(0) == '-')
+            {
+                continue;
+            }
+
+            ext = false;
+            i = 0;
+            j = 0;
+            while (i < pLine.Length)
+            {
+                if (pLine[i] == '.')
+                {
+                    ext = true;
+                    break;
+                }
+
+                if (j < 10)
+                {
+                    _ = outFn.Append(pLine[i]);
+                }
+
+                i++;
+            }
+
+            var inFn = !ext ? pLine + ".C" : pLine;
+            storage.Input = await MustOpenReadAsync(inFn).ConfigureAwait(false);
+            if (!storage.Files && !Console.IsOutputRedirected)
+            {
+                _ = outFn.Append(".ASM");
+                storage.Output = await MustOpenWriteAsync(outFn.ToString())
+                    .ConfigureAwait(false);
+            }
+
+            storage.Files = true;
+            this.Kill();
+            return;
+        }
+
+        if (storage.Files)
+        {
+            storage.Eof = true;
+        }
+        else
+        {
+            storage.Input = Console.In;
+        }
+
+        storage.Files = true;
+        this.Kill();
     }
 
     /// <summary>
@@ -642,5 +697,49 @@ public class FrontEnd(Storage storage)
             storage.NCh = storage.LPtr + 1 < storage.Line.Length ?
                 storage.Line[storage.LPtr + 1] : null;
         }
+    }
+
+    /// <summary>
+    /// Open an input file with error checking.
+    /// </summary>
+    private static async Task<StreamReader> MustOpenReadAsync(string fn)
+    {
+        StreamReader fd;
+        try
+        {
+            fd = File.OpenText(fn);
+            return fd;
+        }
+        catch
+        {
+            await Console.Error.WriteLineAsync($"open error on {fn}")
+                .ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Open an ouput file with error checking.
+    /// </summary>
+    private static async Task<StreamWriter> MustOpenWriteAsync(string fn)
+    {
+        StreamWriter fd;
+        try
+        {
+            fd = File.CreateText(fn);
+            return fd;
+        }
+        catch
+        {
+            await Console.Error.WriteLineAsync($"open error on {fn}")
+                .ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    private void Kill()
+    {
+        storage.Line = string.Empty;
+        this.Bump(0);
     }
 }

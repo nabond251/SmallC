@@ -27,6 +27,8 @@ public class Storage(
     int csp,
     bool eof,
     TextWriter output,
+    bool files,
+    int fileArg,
     TextReader? input,
     TextReader? input2,
     bool cCode,
@@ -52,6 +54,9 @@ public class Storage(
     /// </summary>
     /// <param name="stage">Staging buffer.</param>
     /// <param name="output">Fd for output file.</param>
+    /// <param name="files">
+    /// A value indicating whether file list specified on cmd line.
+    /// </param>
     /// <param name="input">Fd for input file.</param>
     /// <param name="cCode">A value indicating whether parsing C code.</param>
     /// <param name="oldSeg">Current <see cref="SegmentType"/>.</param>
@@ -66,6 +71,7 @@ public class Storage(
     public Storage(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         StreamWriter? output = null,
+        bool files = false,
         StreamReader? input = null,
         bool cCode = true,
         SegmentType oldSeg = SegmentType.None,
@@ -92,6 +98,8 @@ public class Storage(
             Machine.Bpw,
             false,
             output ?? Console.Out,
+            files,
+            0,
             input,
             null,
             cCode,
@@ -230,6 +238,16 @@ public class Storage(
     /// Gets or sets fd for output file.
     /// </summary>
     public TextWriter Output { get; set; } = output;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether file list specified on cmd line.
+    /// </summary>
+    public bool Files { get; set; } = files;
+
+    /// <summary>
+    /// Gets or sets cur file arg index.
+    /// </summary>
+    public int FileArg { get; set; } = fileArg;
 
     /// <summary>
     /// Gets or sets fd for input file.

@@ -698,6 +698,7 @@ dw 0
         var storage = new Storage(
             stage,
             output,
+            input != null,
             input,
             true,
             oldSeg,

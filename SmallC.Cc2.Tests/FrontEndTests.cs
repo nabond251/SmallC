@@ -413,6 +413,7 @@ public class FrontEndTests
         var storage = new Storage(
             stage,
             output,
+            input != null,
             input,
             cCode,
             oldSeg,
