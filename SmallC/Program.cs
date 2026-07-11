@@ -59,12 +59,12 @@ var utility = new UtilityUseCases(storage);
 var frontend = new FrontEnd(storage);
 var backend = new BackEnd(symTabMgmt, utility, storage);
 
-await misc.AskAsync().ConfigureAwait(true);
-await frontend.OpenFileAsync().ConfigureAwait(true);
-backend.SetCodes();
-await backend.HeaderAsync().ConfigureAwait(true);
+await misc.AskAsync().ConfigureAwait(true); // get user options
+await frontend.OpenFileAsync().ConfigureAwait(true); // and initial input file
+await frontend.PreprocessAsync().ConfigureAwait(true); // fetch first line
+await backend.HeaderAsync().ConfigureAwait(true); // intro code
+backend.SetCodes(); // initialize code pointer array
 await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);
-await frontend.PreprocessAsync().ConfigureAwait(true);
 await backend.GenAsync(PCode.POINT1l, 1).ConfigureAwait(true);
-await backend.TrailerAsync().ConfigureAwait(true);
-storage.Output.Close();
+await backend.TrailerAsync().ConfigureAwait(true); // follow-up code
+storage.Output.Close(); // explicitly close output
