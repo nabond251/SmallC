@@ -67,3 +67,4 @@ await backend.ToSegAsync(SegmentType.CodeSeg).ConfigureAwait(true);
 await frontend.PreprocessAsync().ConfigureAwait(true);
 await backend.GenAsync(PCode.POINT1l, 1).ConfigureAwait(true);
 await backend.TrailerAsync().ConfigureAwait(true);
+storage.Output.Close();
