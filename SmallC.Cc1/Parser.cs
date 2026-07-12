@@ -217,7 +217,8 @@ public class Parser(
             {
                 while (dim != 0)
                 {
-                    dim = this.Init(size, ident, dim);
+                    dim = await this.InitAsync(size, ident, dim)
+                        .ConfigureAwait(false);
                     if (!await frontEnd.MatchAsync(",").ConfigureAwait(false))
                     {
                         break;
@@ -228,7 +229,8 @@ public class Parser(
             }
             else
             {
-                dim = this.Init(size, ident, dim);
+                dim = await this.InitAsync(size, ident, dim)
+                    .ConfigureAwait(false);
             }
         }
 
@@ -249,10 +251,26 @@ public class Parser(
         await backEnd.DumpZeroAsync(size, dim).ConfigureAwait(false);
     }
 
-    // TODO: finish implementation
-    private int Init(int size, SymbolIdentity ident, int dim)
+    /// <summary>
+    /// Evaluate one initializer.
+    /// </summary>
+    private async Task<int> InitAsync(int size, SymbolIdentity ident, int dim)
     {
-        if (analyzer.ConstExpr() is int value)
+        if (await analyzer.StringAsync().ConfigureAwait(false) is int offset)
+        {
+            if (ident == SymbolIdentity.Variable || size != 1)
+            {
+                throw new InvalidOperationException(
+                    "must assign to char pointer or char array");
+            }
+
+            dim -= storage.LitPtr - offset;
+            if (ident == SymbolIdentity.Pointer)
+            {
+                await backEnd.PointAsync().ConfigureAwait(false);
+            }
+        }
+        else if (analyzer.ConstExpr() is int value)
         {
             if (ident == SymbolIdentity.Pointer)
             {

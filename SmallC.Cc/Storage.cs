@@ -390,6 +390,11 @@ public class Storage(
     public int LPtr { get; set; } = lPtr;
 
     /// <summary>
+    /// Gets literal string for '"'.
+    /// </summary>
+    public string Quote { get; } = "\"";
+
+    /// <summary>
     /// Gets or sets macro symbol name.
     /// </summary>
     public string? MsName { get; set; } = msName;

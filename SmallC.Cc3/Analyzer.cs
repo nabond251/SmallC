@@ -37,6 +37,33 @@ public class Analyzer(
     }
 
     /// <summary>
+    /// Parses quoted strings.
+    /// </summary>
+    /// <returns>Literal table offset, if parsed.</returns>
+    public async Task<int?> StringAsync()
+    {
+        if (!await frontEnd.MatchAsync(storage.Quote).ConfigureAwait(false))
+        {
+            return null;
+        }
+
+        var offset = storage.LitPtr;
+        while (storage.Ch != '"')
+        {
+            if (!storage.Ch.HasValue)
+            {
+                break;
+            }
+
+            this.StowLit(this.LitChar() ?? 0, 1);
+        }
+
+        _ = frontEnd.Gch();
+        storage.LitQ.Add(0);
+        return offset;
+    }
+
+    /// <summary>
     /// Places character or integer values in the literal pool.
     /// </summary>
     /// <param name="value">Value to place.</param>
@@ -49,5 +76,47 @@ public class Analyzer(
         }
 
         utility.PutInt(value, storage.LitPtr, size);
+    }
+
+    /// <summary>
+    /// Parses character literal.
+    /// </summary>
+    /// <returns>Parsed literal.</returns>
+    public int? LitChar()
+    {
+        int i, oct;
+
+        if (storage.Ch != '\\' || !storage.NCh.HasValue)
+        {
+            return frontEnd.Gch();
+        }
+
+        _ = frontEnd.Gch();
+        switch (storage.Ch)
+        {
+            case 'n':
+                _ = frontEnd.Gch();
+                return '\n';
+            case 't':
+                _ = frontEnd.Gch();
+                return 9; // HT
+            case 'b':
+                _ = frontEnd.Gch();
+                return 8; // BS
+            case 'f':
+                _ = frontEnd.Gch();
+                return 12; // FF
+            default:
+                break;
+        }
+
+        i = 3;
+        oct = 0;
+        while (i-- > 0 && storage.Ch >= '0' && storage.Ch <= '7')
+        {
+            oct = (oct << 3) + (frontEnd.Gch() ?? 0) - '0';
+        }
+
+        return i == 2 ? frontEnd.Gch() : oct;
     }
 }
