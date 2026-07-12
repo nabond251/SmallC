@@ -741,7 +741,7 @@ public class FrontEnd(Storage storage)
     {
         await this.BlanksAsync().ConfigureAwait(false);
         return (storage.LPtr < storage.Line.Length
-            && storage.Line[storage.LPtr..] == ";")
+            && StrEq(storage.Line[storage.LPtr..], ";") != 0)
             || !storage.Ch.HasValue;
     }
 

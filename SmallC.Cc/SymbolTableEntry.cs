@@ -11,14 +11,21 @@ using static SmallC.Cc.SymbolTableEntry;
 /// Symbol table entry.
 /// </summary>
 [SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "Literature")]
-public record class SymbolTableEntry(
-    SymbolIdentity Ident,
-    SymbolType Type,
-    SymbolClass Class,
-    int Size,
-    int? Offset,
-    string Name)
+public class SymbolTableEntry(
+    SymbolIdentity ident,
+    SymbolType type,
+    SymbolClass @class,
+    int size,
+    int? offset,
+    string name)
 {
+    public SymbolIdentity Ident { get; } = ident;
+    public SymbolType Type { get; } = type;
+    public SymbolClass Class { get; set; } = @class;
+    public int Size { get; } = size;
+    public int? Offset { get; } = offset;
+    public string Name { get; } = name;
+
     /// <summary>
     /// Defined values for the <see cref="Ident"/> field.
     /// </summary>

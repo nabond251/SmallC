@@ -386,12 +386,174 @@ public class GlobalParser(
         }
     }
 
-    private Task DoFunctionAsync()
+    /// <summary>
+    /// Begin a function.
+    /// </summary>
+    /// <remarks>
+    /// Called from <see cref="ParseAsync"/> and tries to make a function
+    /// out of the following text.
+    /// </remarks>
+    private async Task DoFunctionAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        frontEnd.Kill();
-        return Task.CompletedTask;
+        SymbolTableEntry? ptr;
+
+        storage.LitQ.Clear(); // clear lit pool
+        storage.LastSt = 0; // no statement yet
+        storage.NoLoc = 0; // enable block-level declarations
+        storage.NoGo = 0; // enable goto statements
+        storage.LitLab = GetLabel(); // label next lit pool
+        storage.SymTab.Locals.Clear(); // clear local variables
+        if (await frontEnd.MatchAsync("void").ConfigureAwait(false))
+        {
+            // skip "void" & locate header
+            await frontEnd.BlanksAsync().ConfigureAwait(false);
+        }
+
+        if (storage.Monitor)
+        {
+            await Console.Error.WriteLineAsync(storage.Line).ConfigureAwait(false);
+        }
+
+        storage.SsName = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        if (storage.SsName is null)
+        {
+            throw new InvalidOperationException(
+                "illegal function or declaration");
+        }
+
+        // already in symbol table?
+        ptr = symbolTable.FindGlb(storage.SsName);
+        if (ptr is not null)
+        {
+            if (ptr.Class == SymbolClass.AutoExt)
+            {
+                ptr.Class = SymbolClass.Static;
+            }
+            else
+            {
+                ErrorUseCases.MultiDef(storage.SsName);
+            }
+        }
+        else
+        {
+            _ = symbolTable.AddSym(
+                storage.SsName,
+                SymbolIdentity.Function,
+                SymbolType.Int,
+                0,
+                0,
+                storage.SymTab.Globals,
+                SymbolClass.Static);
+        }
+
+        await backEnd.PublicAsync(SymbolIdentity.Function)
+            .ConfigureAwait(false);
+        storage.ArgStk = 0; // init arg count
+        if (!await frontEnd.MatchAsync("(").ConfigureAwait(false))
+        {
+            throw new InvalidOperationException("no open paren");
+        }
+
+        // then count args
+        while (!await frontEnd.MatchAsync(")").ConfigureAwait(false))
+        {
+            storage.SsName = await frontEnd.SymNameAsync()
+                .ConfigureAwait(false);
+            if (storage.SsName is not null)
+            {
+                if (symbolTable.FindLoc(storage.SsName))
+                {
+                    ErrorUseCases.MultiDef(storage.SsName);
+                }
+                else
+                {
+                    _ = symbolTable.AddSym(
+                        storage.SsName,
+                        0,
+                        0,
+                        0,
+                        storage.ArgStk,
+                        storage.SymTab.Locals,
+                        SymbolClass.Automatic);
+                    storage.ArgStk += Machine.Bpw;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("illegal argument name");
+            }
+
+            await frontEnd.BlanksAsync().ConfigureAwait(false);
+            if ((storage.LPtr >= storage.Line.Length
+                || FrontEnd.StrEq(storage.Line[storage.LPtr..], ")") == 0)
+                && (await frontEnd.MatchAsync(",").ConfigureAwait(false)))
+            {
+                throw new InvalidOperationException("no comma");
+            }
+
+            if (await frontEnd.EndStAsync().ConfigureAwait(false))
+            {
+                break;
+            }
+        }
+
+        storage.Csp = 0; // preset stack ptr
+
+        // account for the pushed BP
+        storage.ArgTop = storage.ArgStk + Machine.Bpw;
+        while (storage.ArgStk != 0)
+        {
+            if (await frontEnd.AMatchAsync("char", 4).ConfigureAwait(false))
+            {
+                await this.DoArgsAsync(SymbolType.Chr).ConfigureAwait(false);
+                await frontEnd.NsAsync().ConfigureAwait(false);
+            }
+            else if (await frontEnd.AMatchAsync("int", 3).ConfigureAwait(false))
+            {
+                await this.DoArgsAsync(SymbolType.Int).ConfigureAwait(false);
+                await frontEnd.NsAsync().ConfigureAwait(false);
+            }
+            else if (await frontEnd.AMatchAsync("unsigned", 8)
+                .ConfigureAwait(false))
+            {
+                if (await frontEnd.AMatchAsync("char", 4).ConfigureAwait(false))
+                {
+                    await this.DoArgsAsync(SymbolType.UChr)
+                        .ConfigureAwait(false);
+                    await frontEnd.NsAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    _ = await frontEnd.AMatchAsync("int", 3)
+                        .ConfigureAwait(false);
+                    await this.DoArgsAsync(SymbolType.UInt)
+                        .ConfigureAwait(false);
+                    await frontEnd.NsAsync().ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "wrong number of arguments");
+            }
+        }
+
+        await backEnd.GenAsync(PCode.ENTER, null).ConfigureAwait(false);
+        await localParser.StatementAsync().ConfigureAwait(false);
+        if (storage.LastSt != StatementType.Return
+            && storage.LastSt != StatementType.Goto)
+        {
+            await backEnd.GenAsync(PCode.RETURN, null).ConfigureAwait(false);
+        }
+
+        if (storage.LitPtr != 0)
+        {
+            await backEnd.ToSegAsync(SegmentType.DataSeg).ConfigureAwait(false);
+            await backEnd.GenAsync(PCode.REFm, storage.LitLab)
+                .ConfigureAwait(false);
+
+            // dump literals
+            await backEnd.DumpLitsAsync(1).ConfigureAwait(false);
+        }
     }
 }
