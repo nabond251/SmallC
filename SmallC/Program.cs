@@ -6,6 +6,7 @@ using SmallC;
 using SmallC.Cc;
 using SmallC.Cc1;
 using SmallC.Cc2;
+using SmallC.Cc3;
 using SmallC.Cc4;
 
 await Console.Error.WriteLineAsync(Notice.Version).ConfigureAwait(true);
@@ -32,8 +33,9 @@ var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
 
 var frontEnd = new FrontEnd(storage);
+var analyzer = new Analyzer(utility, frontEnd, storage);
 var backEnd = new BackEnd(symTabMgmt, utility, storage);
-var parser = new Parser(symTabMgmt, utility, frontEnd, backEnd, storage);
+var parser = new Parser(symTabMgmt, frontEnd, analyzer, backEnd, storage);
 
 await misc.AskAsync().ConfigureAwait(true); // get user options
 await frontEnd.OpenFileAsync().ConfigureAwait(true); // and initial input file

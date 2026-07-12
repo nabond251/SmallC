@@ -6,6 +6,7 @@ namespace SmallC.Cc1;
 
 using SmallC.Cc;
 using SmallC.Cc2;
+using SmallC.Cc3;
 using SmallC.Cc4;
 using System.Text;
 using static SmallC.Cc.SymbolTableEntry;
@@ -15,8 +16,8 @@ using static SmallC.Cc.SymbolTableEntry;
 /// </summary>
 public class Parser(
     SymbolTableUseCases symbolTable,
-    UtilityUseCases utility,
     FrontEnd frontEnd,
+    Analyzer analyzer,
     BackEnd backEnd,
     Storage storage)
 {
@@ -239,7 +240,7 @@ public class Parser(
             }
 
             size = Machine.Bpw;
-            this.StowLit(0, size);
+            analyzer.StowLit(0, size);
         }
 
         await backEnd.DumpLitsAsync(size).ConfigureAwait(false);
@@ -251,14 +252,14 @@ public class Parser(
     // TODO: finish implementation
     private int Init(int size, SymbolIdentity ident, int dim)
     {
-        if (this.ConstExpr() is int value)
+        if (analyzer.ConstExpr() is int value)
         {
             if (ident == SymbolIdentity.Pointer)
             {
                 throw new InvalidOperationException("cannot assign to pointer");
             }
 
-            this.StowLit(value, size);
+            analyzer.StowLit(value, size);
             dim -= 1;
         }
 
@@ -277,7 +278,7 @@ public class Parser(
             return 0; // null size
         }
 
-        val = this.ConstExpr() ?? 1;
+        val = analyzer.ConstExpr() ?? 1;
         if (val < 0)
         {
             throw new InvalidCastException("negative size illegal");
@@ -286,35 +287,6 @@ public class Parser(
         // force single dimension
         await frontEnd.NeedAsync("]").ConfigureAwait(false);
         return val; // and return size
-    }
-
-    // TODO: move to cc3
-    private int? ConstExpr()
-    {
-        int? e = null;
-        if (storage.Ch is char c && char.IsDigit(c))
-        {
-            e = 0;
-            while (storage.Ch is char d && char.IsDigit(d))
-            {
-                e *= 10;
-                e += d - '0';
-                _ = frontEnd.Gch();
-            }
-        }
-
-        return e;
-    }
-
-    // TODO: move to cc3
-    private void StowLit(int value, int size)
-    {
-        if (storage.LitPtr + size >= LiteralPool.LitMax)
-        {
-            throw new InvalidOperationException("literal queue overflow");
-        }
-
-        utility.PutInt(value, storage.LitPtr, size);
     }
 
     /// <summary>
