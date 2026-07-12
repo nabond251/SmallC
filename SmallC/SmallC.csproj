@@ -41,6 +41,9 @@
     <None Update="STDIO.H">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="ABS.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="WORDS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
