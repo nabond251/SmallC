@@ -399,8 +399,8 @@ public class GlobalParser(
         SymbolTableEntry? ptr;
 
         storage.LitQ.Clear(); // clear lit pool
-        storage.LastSt = 0; // no statement yet
-        storage.NoLoc = 0; // enable block-level declarations
+        storage.LastSt = StatementType.None; // no statement yet
+        storage.NoLoc = false; // enable block-level declarations
         storage.NoGo = false; // enable goto statements
         storage.LitLab = utility.GetLabel(); // label next lit pool
         storage.SymTab.Locals.Clear(); // clear local variables
@@ -415,12 +415,9 @@ public class GlobalParser(
             await Console.Error.WriteLineAsync(storage.Line).ConfigureAwait(false);
         }
 
-        storage.SsName = await frontEnd.SymNameAsync().ConfigureAwait(false);
-        if (storage.SsName is null)
-        {
+        storage.SsName = await frontEnd.SymNameAsync().ConfigureAwait(false) ??
             throw new InvalidOperationException(
                 "illegal function or declaration");
-        }
 
         // already in symbol table?
         ptr = symbolTable.FindGlb(storage.SsName);
@@ -541,8 +538,8 @@ public class GlobalParser(
 
         await backEnd.GenAsync(PCode.ENTER, null).ConfigureAwait(false);
         await localParser.StatementAsync().ConfigureAwait(false);
-        if (storage.LastSt != StatementType.Return
-            && storage.LastSt != StatementType.Goto)
+        if (storage.LastSt is not StatementType.Return
+            and not StatementType.Goto)
         {
             await backEnd.GenAsync(PCode.RETURN, null).ConfigureAwait(false);
         }
@@ -612,17 +609,8 @@ public class GlobalParser(
         string? n;
         SymbolIdentity id;
         int sz;
-        bool p;
 
-        if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
-        {
-            p = true;
-        }
-        else
-        {
-            p = false;
-        }
-
+        var p = await frontEnd.MatchAsync("(").ConfigureAwait(false);
         if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
         {
             id = SymbolIdentity.Pointer;

@@ -14,9 +14,14 @@ public class LocalParser(
     FrontEnd frontEnd,
     Storage storage)
 {
-    internal async Task StatementAsync()
+    /// <summary>
+    /// Parse statement.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task StatementAsync()
     {
-        throw new NotImplementedException();
+        _ = storage;
+        return Task.CompletedTask;
     }
 
     /// <summary>

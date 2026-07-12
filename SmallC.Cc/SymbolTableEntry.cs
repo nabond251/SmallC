@@ -113,7 +113,7 @@ public class SymbolTableEntry(
     }
 
     /// <summary>
-    /// Gets what the declared entity is.
+    /// Gets or sets what the declared entity is.
     /// </summary>
     public SymbolIdentity Ident { get; set; } = ident;
 
@@ -133,7 +133,7 @@ public class SymbolTableEntry(
     public int Size { get; set; } = size;
 
     /// <summary>
-    /// Gets the numeric value (if applicable).
+    /// Gets or sets the numeric value (if applicable).
     /// </summary>
     /// <remarks>
     /// Primarily the stack frame offset for local objects.

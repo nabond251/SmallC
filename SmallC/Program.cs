@@ -37,7 +37,7 @@ var analyzer = new Analyzer(utility, frontEnd, storage);
 var backEnd = new BackEnd(symTabMgmt, utility, storage);
 var localParser = new LocalParser(frontEnd, storage);
 var parser = new GlobalParser(
-    symTabMgmt, frontEnd, localParser, analyzer, backEnd, storage);
+    symTabMgmt, utility, frontEnd, localParser, analyzer, backEnd, storage);
 
 await misc.AskAsync().ConfigureAwait(true); // get user options
 await frontEnd.OpenFileAsync().ConfigureAwait(true); // and initial input file

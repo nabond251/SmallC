@@ -102,6 +102,8 @@ public class Storage(
         BufferLineType? lineType = null,
         string? ssName = null)
         : this(
+            noGo: false,
+            noLoc: false,
             opIndex: 0,
             opSize: 0,
             swNext: swNext ?? [],
@@ -117,6 +119,8 @@ public class Storage(
             nxtLab: 0,
             litLab: 0,
             csp: csp ?? 0,
+            argStk: 0,
+            argTop: 0,
             eof: false,
             output: output ?? Console.Out,
             files: files ?? false,
@@ -126,6 +130,7 @@ public class Storage(
             cCode: cCode ?? true,
             sLast: sLast ?? StagingBuffer.StageSize,
             listFp: null,
+            lastSt: StatementType.None,
             oldSeg: oldSeg ?? SegmentType.None,
             optimize: false,
             alarm: false,
@@ -168,6 +173,10 @@ public class Storage(
     /// Gets or sets a value indicating whether to disable goto statements.
     /// </summary>
     public bool NoGo { get; set; } = noGo;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to disable block locals.
+    /// </summary>
     public bool NoLoc { get; set; } = noLoc;
 
     /// <summary>
@@ -262,9 +271,9 @@ public class Storage(
     public int ArgStk { get; set; } = argStk;
 
     /// <summary>
-    /// Gets highest formal argument offset.
+    /// Gets or sets highest formal argument offset.
     /// </summary>
-    public int ArgTop { get; } = argTop;
+    public int ArgTop { get; set; } = argTop;
 
     /// <summary>
     /// Gets or sets a value indicating whether end of input has been reached.
