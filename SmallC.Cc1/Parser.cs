@@ -248,6 +248,7 @@ public class Parser(
         await backEnd.DumpZeroAsync(size, dim).ConfigureAwait(false);
     }
 
+    // TODO: finish implementation
     private int Init(int size, SymbolIdentity ident, int dim)
     {
         if (this.ConstExpr() is int value)
@@ -287,6 +288,7 @@ public class Parser(
         return val; // and return size
     }
 
+    // TODO: move to cc3
     private int? ConstExpr()
     {
         int? e = null;
@@ -304,6 +306,7 @@ public class Parser(
         return e;
     }
 
+    // TODO: move to cc3
     private void StowLit(int value, int size)
     {
         if (storage.LitPtr + size >= LiteralPool.LitMax)
