@@ -17,6 +17,7 @@ using static SmallC.Cc.SymbolTableEntry;
 public class GlobalParser(
     SymbolTableUseCases symbolTable,
     FrontEnd frontEnd,
+    LocalParser localParser,
     Analyzer analyzer,
     BackEnd backEnd,
     Storage storage)
@@ -46,7 +47,7 @@ public class GlobalParser(
             }
             else if (await frontEnd.MatchAsync("#asm").ConfigureAwait(false))
             {
-                await this.DoAsmAsync().ConfigureAwait(false);
+                await localParser.DoAsmAsync().ConfigureAwait(false);
             }
             else if (await frontEnd.MatchAsync("#include")
                 .ConfigureAwait(false))
@@ -387,16 +388,6 @@ public class GlobalParser(
 
     private Task DoFunctionAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        frontEnd.Kill();
-        return Task.CompletedTask;
-    }
-
-    private Task DoAsmAsync()
-    {
-        _ = storage;
         _ = storage;
         _ = storage;
         _ = storage;
