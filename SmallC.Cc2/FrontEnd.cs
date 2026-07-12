@@ -700,6 +700,15 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Discards current line and cause new one to be read.
+    /// </summary>
+    public void Kill()
+    {
+        storage.Line = string.Empty;
+        this.Bump(0);
+    }
+
+    /// <summary>
     /// Open an input file with error checking.
     /// </summary>
     private static async Task<StreamReader> MustOpenReadAsync(string fn)
@@ -735,11 +744,5 @@ public class FrontEnd(Storage storage)
                 .ConfigureAwait(false);
             throw;
         }
-    }
-
-    private void Kill()
-    {
-        storage.Line = string.Empty;
-        this.Bump(0);
     }
 }

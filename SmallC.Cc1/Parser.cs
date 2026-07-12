@@ -6,6 +6,7 @@ namespace SmallC.Cc1;
 
 using SmallC.Cc;
 using SmallC.Cc2;
+using System.Text;
 using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
@@ -67,10 +68,40 @@ public class Parser(
         return Task.FromResult(false);
     }
 
-    private Task DoIncludeAsync()
+    private async Task DoIncludeAsync()
     {
-        _ = storage;
-        return Task.CompletedTask;
+        int i;
+        var str = new StringBuilder();
+
+        // skip over to name
+        await frontEnd.BlanksAsync().ConfigureAwait(false);
+        if (storage.Line.ElementAtOrDefault(storage.LPtr) is '"' or '<')
+        {
+            storage.LPtr++;
+        }
+
+        i = 0;
+        while (storage.Line.ElementAtOrDefault(storage.LPtr + i) is char c
+            && c != '"'
+            && c != '>'
+            && c != '\n')
+        {
+            _ = str.Append(c);
+            i++;
+        }
+
+        try
+        {
+            storage.Input2 = File.OpenText(str.ToString());
+        }
+        catch (Exception ex)
+        {
+            storage.Input2 = null;
+            throw new InvalidOperationException(
+                "open failure on include file", ex);
+        }
+
+        frontEnd.Kill();
     }
 
     private Task DoDefineAsync()
