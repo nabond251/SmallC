@@ -397,6 +397,7 @@ public class Parser(
         _ = storage;
         _ = storage;
         _ = storage;
+        frontEnd.Kill();
         return Task.CompletedTask;
     }
 
@@ -406,6 +407,7 @@ public class Parser(
         _ = storage;
         _ = storage;
         _ = storage;
+        frontEnd.Kill();
         return Task.CompletedTask;
     }
 }
