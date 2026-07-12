@@ -1,4 +1,4 @@
-﻿// <copyright file="Parser.cs" company="Soli Deo Gloria Apps">
+﻿// <copyright file="GlobalParser.cs" company="Soli Deo Gloria Apps">
 // Copyright (c) Soli Deo Gloria Apps. All rights reserved.
 // </copyright>
 
@@ -14,7 +14,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// <summary>
 /// High level parser.
 /// </summary>
-public class Parser(
+public class GlobalParser(
     SymbolTableUseCases symbolTable,
     FrontEnd frontEnd,
     Analyzer analyzer,
