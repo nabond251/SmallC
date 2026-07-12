@@ -18,10 +18,31 @@ public class LocalParser(
     /// Parse statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task StatementAsync()
+    public async Task StatementAsync()
     {
-        _ = storage;
-        return Task.CompletedTask;
+        _ = await frontEnd.MatchAsync("{").ConfigureAwait(false);
+        var level = 1;
+
+        while (level != 0)
+        {
+            switch (storage.Ch)
+            {
+                case '{':
+                    level++;
+                    _ = frontEnd.Gch();
+                    break;
+                case '}':
+                    level--;
+                    _ = frontEnd.Gch();
+                    break;
+                case null:
+                    await frontEnd.PreprocessAsync().ConfigureAwait(false);
+                    break;
+                default:
+                    _ = frontEnd.Gch();
+                    break;
+            }
+        }
     }
 
     /// <summary>
