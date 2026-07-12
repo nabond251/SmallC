@@ -18,6 +18,15 @@ public static class ErrorUseCases
     }
 
     /// <summary>
+    /// Output multiple defined error.
+    /// </summary>
+    /// <param name="sName">Symbol with multiple definitions.</param>
+    public static void MultiDef(string sName)
+    {
+        throw new InvalidOperationException("already defined");
+    }
+
+    /// <summary>
     /// Output no #if... error.
     /// </summary>
     public static void NoIfError()

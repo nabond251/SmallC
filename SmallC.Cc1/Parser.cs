@@ -6,6 +6,7 @@ namespace SmallC.Cc1;
 
 using SmallC.Cc;
 using SmallC.Cc2;
+using SmallC.Cc4;
 using System.Text;
 using static SmallC.Cc.SymbolTableEntry;
 
@@ -13,8 +14,11 @@ using static SmallC.Cc.SymbolTableEntry;
 /// High level parser.
 /// </summary>
 public class Parser(
-    Storage storage,
-    FrontEnd frontEnd)
+    SymbolTableUseCases symbolTable,
+    UtilityUseCases utility,
+    FrontEnd frontEnd,
+    BackEnd backEnd,
+    Storage storage)
 {
     /// <summary>
     /// Process all input text.
@@ -57,15 +61,257 @@ public class Parser(
                 await this.DoFunctionAsync().ConfigureAwait(false);
             }
 
+            // force eof if pending
             await frontEnd.BlanksAsync().ConfigureAwait(false);
         }
     }
 
-    private Task<bool> DoDeclareAsync(SymbolClass @class)
+    /// <summary>
+    /// Test for global declarations.
+    /// </summary>
+    private async Task<bool> DoDeclareAsync(SymbolClass @class)
     {
-        _ = storage;
-        _ = @class;
-        return Task.FromResult(false);
+        if (await frontEnd.AMatchAsync("char", 4).ConfigureAwait(false))
+        {
+            await this.DeclGlbAsync(SymbolType.Chr, @class)
+                .ConfigureAwait(false);
+        }
+        else if (await frontEnd.AMatchAsync("unsigned", 8)
+            .ConfigureAwait(false))
+        {
+            if (await frontEnd.AMatchAsync("char", 4).ConfigureAwait(false))
+            {
+                await this.DeclGlbAsync(SymbolType.UChr, @class)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                _ = await frontEnd.AMatchAsync("int", 3).ConfigureAwait(false);
+                await this.DeclGlbAsync(SymbolType.UInt, @class)
+                    .ConfigureAwait(false);
+            }
+        }
+        else if (await frontEnd.AMatchAsync("int", 3).ConfigureAwait(false)
+            || @class == SymbolClass.External)
+        {
+            await this.DeclGlbAsync(SymbolType.Int, @class)
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            return false;
+        }
+
+        await frontEnd.NsAsync().ConfigureAwait(false);
+        return true;
+    }
+
+    /// <summary>
+    /// Declare a static variable.
+    /// </summary>
+    private async Task DeclGlbAsync(SymbolType type, SymbolClass @class)
+    {
+        SymbolIdentity id;
+        int dim;
+
+        while (true)
+        {
+            if (await frontEnd.EndStAsync().ConfigureAwait(false))
+            {
+                return; // do line
+            }
+
+            if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
+            {
+                id = SymbolIdentity.Pointer;
+                dim = 0;
+            }
+            else
+            {
+                id = SymbolIdentity.Variable;
+                dim = 1;
+            }
+
+            storage.SsName = await frontEnd.SymNameAsync()
+                .ConfigureAwait(false);
+            if (storage.SsName is null)
+            {
+                ErrorUseCases.IllName();
+                throw new InvalidOperationException();
+            }
+
+            if (symbolTable.FindGlb(storage.SsName) is not null)
+            {
+                ErrorUseCases.MultiDef(storage.SsName);
+            }
+
+            if (id == SymbolIdentity.Variable)
+            {
+                if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
+                {
+                    id = SymbolIdentity.Function;
+                    await frontEnd.NeedAsync(")").ConfigureAwait(false);
+                }
+                else if (await frontEnd.MatchAsync("[").ConfigureAwait(false))
+                {
+                    id = SymbolIdentity.Array;
+                    dim = await this.NeedSubAsync().ConfigureAwait(false);
+                }
+            }
+
+            if (@class == SymbolClass.External)
+            {
+                await backEnd.ExternalAsync(storage.SsName, (int)type >> 2, id)
+                    .ConfigureAwait(false);
+            }
+            else if (id != SymbolIdentity.Function)
+            {
+                await this.InitialsAsync((int)type >> 2, id, dim)
+                    .ConfigureAwait(false);
+            }
+
+            _ = id == SymbolIdentity.Pointer
+                ? symbolTable.AddSym(
+                    storage.SsName,
+                    id,
+                    type,
+                    Machine.Bpw,
+                    0,
+                    storage.SymTab.Globals,
+                    @class)
+                : symbolTable.AddSym(
+                    storage.SsName,
+                    id,
+                    type,
+                    dim * ((int)type >> 2),
+                    0,
+                    storage.SymTab.Globals,
+                    @class);
+
+            if (!await frontEnd.MatchAsync(",").ConfigureAwait(false))
+            {
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Initialize global objects.
+    /// </summary>
+    private async Task InitialsAsync(int size, SymbolIdentity ident, int dim)
+    {
+        int savedDim;
+
+        storage.LitQ.Clear();
+        if (dim == 0)
+        {
+            dim = -1; // *... or ...[]
+        }
+
+        savedDim = dim;
+        await backEnd.PublicAsync(ident).ConfigureAwait(false);
+        if (await frontEnd.MatchAsync("=").ConfigureAwait(false))
+        {
+            if (await frontEnd.MatchAsync("{").ConfigureAwait(false))
+            {
+                while (dim != 0)
+                {
+                    dim = this.Init(size, ident, dim);
+                    if (!await frontEnd.MatchAsync(",").ConfigureAwait(false))
+                    {
+                        break;
+                    }
+                }
+
+                await frontEnd.NeedAsync("}").ConfigureAwait(false);
+            }
+            else
+            {
+                dim = this.Init(size, ident, dim);
+            }
+        }
+
+        if (savedDim == -1 && dim == -1)
+        {
+            if (ident == SymbolIdentity.Array)
+            {
+                throw new InvalidOperationException("need array size");
+            }
+
+            size = Machine.Bpw;
+            this.StowLit(0, size);
+        }
+
+        await backEnd.DumpLitsAsync(size).ConfigureAwait(false);
+
+        // only if dim > 0
+        await backEnd.DumpZeroAsync(size, dim).ConfigureAwait(false);
+    }
+
+    private int Init(int size, SymbolIdentity ident, int dim)
+    {
+        if (this.ConstExpr() is int value)
+        {
+            if (ident == SymbolIdentity.Pointer)
+            {
+                throw new InvalidOperationException("cannot assign to pointer");
+            }
+
+            this.StowLit(value, size);
+            dim -= 1;
+        }
+
+        return dim;
+    }
+
+    /// <summary>
+    /// Get required array size.
+    /// </summary>
+    private async Task<int> NeedSubAsync()
+    {
+        int val;
+
+        if (await frontEnd.MatchAsync("]").ConfigureAwait(false))
+        {
+            return 0; // null size
+        }
+
+        val = this.ConstExpr() ?? 1;
+        if (val < 0)
+        {
+            throw new InvalidCastException("negative size illegal");
+        }
+
+        // force single dimension
+        await frontEnd.NeedAsync("]").ConfigureAwait(false);
+        return val; // and return size
+    }
+
+    private int? ConstExpr()
+    {
+        int? e = null;
+        if (storage.Ch is char c && char.IsDigit(c))
+        {
+            e = 0;
+            while (storage.Ch is char d && char.IsDigit(d))
+            {
+                e *= 10;
+                e += d - '0';
+                _ = frontEnd.Gch();
+            }
+        }
+
+        return e;
+    }
+
+    private void StowLit(int value, int size)
+    {
+        if (storage.LitPtr + size >= LiteralPool.LitMax)
+        {
+            throw new InvalidOperationException("literal queue overflow");
+        }
+
+        utility.PutInt(value, storage.LitPtr, size);
     }
 
     /// <summary>

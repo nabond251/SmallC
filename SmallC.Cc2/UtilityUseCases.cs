@@ -56,4 +56,29 @@ public class UtilityUseCases(Storage storage)
 
         return i;
     }
+
+    /// <summary>
+    /// Put integer of length <paramref name="len"/> into address
+    /// <paramref name="addr"/> (low byte first).
+    /// </summary>
+    /// <param name="i">Int to put.</param>
+    /// <param name="addr">Index into <see cref="Storage.LitQ"/>.</param>
+    /// <param name="len">Length of int to put.</param>
+    public void PutInt(int i, int addr, int len)
+    {
+        while (len-- != 0)
+        {
+            if (storage.LitQ.Count <= addr)
+            {
+                storage.LitQ.Add((sbyte)(i & 255));
+            }
+            else
+            {
+                storage.LitQ[addr] = (sbyte)(i & 255);
+            }
+
+            addr++;
+            i >>= 8;
+        }
+    }
 }

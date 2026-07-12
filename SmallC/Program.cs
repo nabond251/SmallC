@@ -32,8 +32,8 @@ var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
 
 var frontEnd = new FrontEnd(storage);
-var parser = new Parser(storage, frontEnd);
 var backEnd = new BackEnd(symTabMgmt, utility, storage);
+var parser = new Parser(symTabMgmt, utility, frontEnd, backEnd, storage);
 
 await misc.AskAsync().ConfigureAwait(true); // get user options
 await frontEnd.OpenFileAsync().ConfigureAwait(true); // and initial input file
