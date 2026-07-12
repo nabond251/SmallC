@@ -73,4 +73,15 @@ public class SymbolTableUseCases(Storage storage)
     {
         return storage.SymTab.Globals.FirstOrDefault(x => x.Name == sName);
     }
+
+    /// <summary>
+    /// Find local with given name.
+    /// </summary>
+    /// <param name="sName">Symbol name of local to find.</param>
+    /// <returns>Local with matching name, if any.</returns>
+    public SymbolTableEntry? FindLoc(string sName)
+    {
+        // search backward for block locals
+        return storage.SymTab.Locals.LastOrDefault(x => x.Name == sName);
+    }
 }

@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 /// Miscellaneous storage.
 /// </summary>
 public class Storage(
+    bool noGo,
     int opIndex,
     int opSize,
     Dictionary<int, string> swNext,
@@ -25,6 +26,7 @@ public class Storage(
     int nxtLab,
     int litLab,
     int csp,
+    int argStk,
     bool eof,
     TextWriter output,
     bool files,
@@ -34,6 +36,7 @@ public class Storage(
     bool cCode,
     int sLast,
     TextWriter? listFp,
+    StatementType lastSt,
     SegmentType oldSeg,
     bool optimize,
     bool alarm,
@@ -159,6 +162,8 @@ public class Storage(
         Macro,
     }
 
+    public bool NoGo { get; set; } = noGo;
+
     /// <summary>
     /// Gets or sets index to matched operator.
     /// </summary>
@@ -244,6 +249,7 @@ public class Storage(
     /// Gets or sets compiler relative stk ptr.
     /// </summary>
     public int Csp { get; set; } = csp;
+    public int ArgStk { get; set; } = argStk;
 
     /// <summary>
     /// Gets or sets a value indicating whether end of input has been reached.
@@ -294,6 +300,7 @@ public class Storage(
     /// Gets or sets file pointer to list device.
     /// </summary>
     public TextWriter? ListFp { get; set; } = listFp;
+    public StatementType LastSt { get; set; } = lastSt;
 
     /// <summary>
     /// Gets or sets current <see cref="SegmentType"/>.

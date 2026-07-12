@@ -36,6 +36,17 @@ public class UtilityUseCases(Storage storage)
     }
 
     /// <summary>
+    /// Return next avail internal label number.
+    /// </summary>
+    /// <returns>Next avail internal label number.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:Use properties where appropriate", Justification = "Has an observable side effect")]
+    public int GetLabel()
+    {
+        storage.NxtLab++;
+        return storage.NxtLab;
+    }
+
+    /// <summary>
     /// Get integer of length <paramref name="len"/> from address
     /// <paramref name="addr"/> (byte sequence set by "putint").
     /// </summary>

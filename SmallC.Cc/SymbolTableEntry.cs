@@ -19,13 +19,6 @@ public class SymbolTableEntry(
     int? offset,
     string name)
 {
-    public SymbolIdentity Ident { get; } = ident;
-    public SymbolType Type { get; } = type;
-    public SymbolClass Class { get; set; } = @class;
-    public int Size { get; } = size;
-    public int? Offset { get; } = offset;
-    public string Name { get; } = name;
-
     /// <summary>
     /// Defined values for the <see cref="Ident"/> field.
     /// </summary>
@@ -118,4 +111,38 @@ public class SymbolTableEntry(
         /// </summary>
         AutoExt,
     }
+
+    /// <summary>
+    /// Gets what the declared entity is.
+    /// </summary>
+    public SymbolIdentity Ident { get; } = ident;
+
+    /// <summary>
+    /// Gets the data type.
+    /// </summary>
+    public SymbolType Type { get; } = type;
+
+    /// <summary>
+    /// Gets or sets the storage class.
+    /// </summary>
+    public SymbolClass Class { get; set; } = @class;
+
+    /// <summary>
+    /// Gets the number of bytes occupied.
+    /// </summary>
+    public int Size { get; } = size;
+
+    /// <summary>
+    /// Gets the numeric value (if applicable).
+    /// </summary>
+    /// <remarks>
+    /// Primarily the stack frame offset for local objects.
+    /// Compiler-assigned label number for labels.
+    /// </remarks>
+    public int? Offset { get; } = offset;
+
+    /// <summary>
+    /// Gets the name.
+    /// </summary>
+    public string Name { get; } = name;
 }

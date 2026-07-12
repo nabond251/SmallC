@@ -16,6 +16,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// </summary>
 public class GlobalParser(
     SymbolTableUseCases symbolTable,
+    UtilityUseCases utility,
     FrontEnd frontEnd,
     LocalParser localParser,
     Analyzer analyzer,
@@ -401,7 +402,7 @@ public class GlobalParser(
         storage.LastSt = 0; // no statement yet
         storage.NoLoc = 0; // enable block-level declarations
         storage.NoGo = 0; // enable goto statements
-        storage.LitLab = GetLabel(); // label next lit pool
+        storage.LitLab = utility.GetLabel(); // label next lit pool
         storage.SymTab.Locals.Clear(); // clear local variables
         if (await frontEnd.MatchAsync("void").ConfigureAwait(false))
         {
@@ -554,6 +555,52 @@ public class GlobalParser(
 
             // dump literals
             await backEnd.DumpLitsAsync(1).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Declare argument types.
+    /// </summary>
+    private async Task DoArgsAsync(SymbolType type)
+    {
+        SymbolIdentity id;
+        int sz;
+        char c;
+
+        while (true)
+        {
+            if (storage.ArgStk == 0)
+            {
+                return; // no arguments
+            }
+
+            (var n, id, sz) = await this.DeclAsync(type, SymbolIdentity.Pointer)
+                .ConfigureAwait(false);
+            if (n is not null)
+            {
+                if (symbolTable.FindLoc(n) is SymbolTableEntry ptr)
+                {
+                    ptr.Ident = id;
+                    ptr.Type = type;
+                    ptr.Size = sz;
+                    ptr.Offset = storage.ArgTop - ptr.Offset;
+                }
+                else
+                {
+                    throw new InvalidOperationException("not an argument");
+                }
+            }
+
+            storage.ArgStk -= Machine.Bpw; // cnt down
+            if (await frontEnd.EndStAsync().ConfigureAwait(false))
+            {
+                return;
+            }
+
+            if (!await frontEnd.MatchAsync(",").ConfigureAwait(false))
+            {
+                throw new InvalidOperationException("no comma");
+            }
         }
     }
 }
