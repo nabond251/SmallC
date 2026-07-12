@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 /// </summary>
 public class Storage(
     bool noGo,
+    bool noLoc,
     int opIndex,
     int opSize,
     Dictionary<int, string> swNext,
@@ -27,6 +28,7 @@ public class Storage(
     int litLab,
     int csp,
     int argStk,
+    int argTop,
     bool eof,
     TextWriter output,
     bool files,
@@ -162,7 +164,11 @@ public class Storage(
         Macro,
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether to disable goto statements.
+    /// </summary>
     public bool NoGo { get; set; } = noGo;
+    public bool NoLoc { get; set; } = noLoc;
 
     /// <summary>
     /// Gets or sets index to matched operator.
@@ -249,7 +255,16 @@ public class Storage(
     /// Gets or sets compiler relative stk ptr.
     /// </summary>
     public int Csp { get; set; } = csp;
+
+    /// <summary>
+    /// Gets or sets function arg sp.
+    /// </summary>
     public int ArgStk { get; set; } = argStk;
+
+    /// <summary>
+    /// Gets highest formal argument offset.
+    /// </summary>
+    public int ArgTop { get; } = argTop;
 
     /// <summary>
     /// Gets or sets a value indicating whether end of input has been reached.
@@ -300,6 +315,10 @@ public class Storage(
     /// Gets or sets file pointer to list device.
     /// </summary>
     public TextWriter? ListFp { get; set; } = listFp;
+
+    /// <summary>
+    /// Gets or sets last parsed statement type.
+    /// </summary>
     public StatementType LastSt { get; set; } = lastSt;
 
     /// <summary>

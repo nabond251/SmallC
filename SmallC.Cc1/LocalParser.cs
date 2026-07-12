@@ -14,6 +14,11 @@ public class LocalParser(
     FrontEnd frontEnd,
     Storage storage)
 {
+    internal async Task StatementAsync()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Parse assembly code.
     /// </summary>

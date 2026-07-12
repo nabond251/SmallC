@@ -115,12 +115,12 @@ public class SymbolTableEntry(
     /// <summary>
     /// Gets what the declared entity is.
     /// </summary>
-    public SymbolIdentity Ident { get; } = ident;
+    public SymbolIdentity Ident { get; set; } = ident;
 
     /// <summary>
-    /// Gets the data type.
+    /// Gets or sets the data type.
     /// </summary>
-    public SymbolType Type { get; } = type;
+    public SymbolType Type { get; set; } = type;
 
     /// <summary>
     /// Gets or sets the storage class.
@@ -128,9 +128,9 @@ public class SymbolTableEntry(
     public SymbolClass Class { get; set; } = @class;
 
     /// <summary>
-    /// Gets the number of bytes occupied.
+    /// Gets or sets the number of bytes occupied.
     /// </summary>
-    public int Size { get; } = size;
+    public int Size { get; set; } = size;
 
     /// <summary>
     /// Gets the numeric value (if applicable).
@@ -139,7 +139,7 @@ public class SymbolTableEntry(
     /// Primarily the stack frame offset for local objects.
     /// Compiler-assigned label number for labels.
     /// </remarks>
-    public int? Offset { get; } = offset;
+    public int? Offset { get; set; } = offset;
 
     /// <summary>
     /// Gets the name.

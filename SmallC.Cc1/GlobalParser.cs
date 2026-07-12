@@ -401,7 +401,7 @@ public class GlobalParser(
         storage.LitQ.Clear(); // clear lit pool
         storage.LastSt = 0; // no statement yet
         storage.NoLoc = 0; // enable block-level declarations
-        storage.NoGo = 0; // enable goto statements
+        storage.NoGo = false; // enable goto statements
         storage.LitLab = utility.GetLabel(); // label next lit pool
         storage.SymTab.Locals.Clear(); // clear local variables
         if (await frontEnd.MatchAsync("void").ConfigureAwait(false))
@@ -462,7 +462,7 @@ public class GlobalParser(
                 .ConfigureAwait(false);
             if (storage.SsName is not null)
             {
-                if (symbolTable.FindLoc(storage.SsName))
+                if (symbolTable.FindLoc(storage.SsName) is not null)
                 {
                     ErrorUseCases.MultiDef(storage.SsName);
                 }
@@ -565,7 +565,6 @@ public class GlobalParser(
     {
         SymbolIdentity id;
         int sz;
-        char c;
 
         while (true)
         {
@@ -602,5 +601,75 @@ public class GlobalParser(
                 throw new InvalidOperationException("no comma");
             }
         }
+    }
+
+    /// <summary>
+    /// Parse next local or argument declaration.
+    /// </summary>
+    private async Task<(string? N, SymbolIdentity Id, int Sz)>
+        DeclAsync(SymbolType type, SymbolIdentity aid)
+    {
+        string? n;
+        SymbolIdentity id;
+        int sz;
+        bool p;
+
+        if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
+        {
+            p = true;
+        }
+        else
+        {
+            p = false;
+        }
+
+        if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
+        {
+            id = SymbolIdentity.Pointer;
+            sz = Machine.Bpw;
+        }
+        else
+        {
+            id = SymbolIdentity.Variable;
+            sz = (int)type >> 2;
+        }
+
+        n = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        if (n is null)
+        {
+            ErrorUseCases.IllName();
+        }
+
+        if (p && await frontEnd.MatchAsync(")").ConfigureAwait(false))
+        {
+            // already parsed
+        }
+
+        if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
+        {
+            if (!p || id != SymbolIdentity.Pointer)
+            {
+                throw new InvalidOperationException("try (*...)()");
+            }
+
+            await frontEnd.NeedAsync(")").ConfigureAwait(false);
+        }
+        else if (id == SymbolIdentity.Variable
+            && await frontEnd.MatchAsync("[").ConfigureAwait(false))
+        {
+            id = aid;
+            sz *= await this.NeedSubAsync().ConfigureAwait(false);
+            if (sz == 0)
+            {
+                if (aid == SymbolIdentity.Array)
+                {
+                    throw new InvalidOperationException("need array size");
+                }
+
+                sz = Machine.Bpw;
+            }
+        }
+
+        return (n, id, sz);
     }
 }
