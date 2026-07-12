@@ -517,6 +517,31 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Need given token.
+    /// </summary>
+    /// <param name="str">Needed token.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task NeedAsync(string str)
+    {
+        if (!await this.MatchAsync(str).ConfigureAwait(false))
+        {
+            throw new InvalidOperationException("missing token");
+        }
+    }
+
+    /// <summary>
+    /// Need semicolon.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task NsAsync()
+    {
+        if (!await this.MatchAsync(";").ConfigureAwait(false))
+        {
+            throw new InvalidOperationException("no semicolon");
+        }
+    }
+
+    /// <summary>
     /// Looks for a match between a literal string and the current token in the
     /// input line.
     /// </summary>
@@ -700,6 +725,27 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Discards current line and cause new one to be read.
+    /// </summary>
+    public void Kill()
+    {
+        storage.Line = string.Empty;
+        this.Bump(0);
+    }
+
+    /// <summary>
+    /// Checks if end of statement.
+    /// </summary>
+    /// <returns>A value indicating whether at end of statement.</returns>
+    public async Task<bool> EndStAsync()
+    {
+        await this.BlanksAsync().ConfigureAwait(false);
+        return (storage.LPtr < storage.Line.Length
+            && StrEq(storage.Line[storage.LPtr..], ";") != 0)
+            || !storage.Ch.HasValue;
+    }
+
+    /// <summary>
     /// Open an input file with error checking.
     /// </summary>
     private static async Task<StreamReader> MustOpenReadAsync(string fn)
@@ -735,11 +781,5 @@ public class FrontEnd(Storage storage)
                 .ConfigureAwait(false);
             throw;
         }
-    }
-
-    private void Kill()
-    {
-        storage.Line = string.Empty;
-        this.Bump(0);
     }
 }

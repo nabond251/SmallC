@@ -36,6 +36,17 @@ public class UtilityUseCases(Storage storage)
     }
 
     /// <summary>
+    /// Return next avail internal label number.
+    /// </summary>
+    /// <returns>Next avail internal label number.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:Use properties where appropriate", Justification = "Has an observable side effect")]
+    public int GetLabel()
+    {
+        storage.NxtLab++;
+        return storage.NxtLab;
+    }
+
+    /// <summary>
     /// Get integer of length <paramref name="len"/> from address
     /// <paramref name="addr"/> (byte sequence set by "putint").
     /// </summary>
@@ -55,5 +66,30 @@ public class UtilityUseCases(Storage storage)
         }
 
         return i;
+    }
+
+    /// <summary>
+    /// Put integer of length <paramref name="len"/> into address
+    /// <paramref name="addr"/> (low byte first).
+    /// </summary>
+    /// <param name="i">Int to put.</param>
+    /// <param name="addr">Index into <see cref="Storage.LitQ"/>.</param>
+    /// <param name="len">Length of int to put.</param>
+    public void PutInt(int i, int addr, int len)
+    {
+        while (len-- != 0)
+        {
+            if (storage.LitQ.Count <= addr)
+            {
+                storage.LitQ.Add((sbyte)(i & 255));
+            }
+            else
+            {
+                storage.LitQ[addr] = (sbyte)(i & 255);
+            }
+
+            addr++;
+            i >>= 8;
+        }
     }
 }

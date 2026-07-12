@@ -6,6 +6,7 @@ using SmallC;
 using SmallC.Cc;
 using SmallC.Cc1;
 using SmallC.Cc2;
+using SmallC.Cc3;
 using SmallC.Cc4;
 
 await Console.Error.WriteLineAsync(Notice.Version).ConfigureAwait(true);
@@ -31,15 +32,18 @@ var misc = new MiscellaneousUseCases(storage);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
 
-var frontend = new FrontEnd(storage);
-var parser = new Parser(storage);
-var backend = new BackEnd(symTabMgmt, utility, storage);
+var frontEnd = new FrontEnd(storage);
+var analyzer = new Analyzer(utility, frontEnd, storage);
+var backEnd = new BackEnd(symTabMgmt, utility, storage);
+var localParser = new LocalParser(frontEnd, storage);
+var parser = new GlobalParser(
+    symTabMgmt, utility, frontEnd, localParser, analyzer, backEnd, storage);
 
 await misc.AskAsync().ConfigureAwait(true); // get user options
-await frontend.OpenFileAsync().ConfigureAwait(true); // and initial input file
-await frontend.PreprocessAsync().ConfigureAwait(true); // fetch first line
-await backend.HeaderAsync().ConfigureAwait(true); // intro code
-backend.SetCodes(); // initialize code pointer array
+await frontEnd.OpenFileAsync().ConfigureAwait(true); // and initial input file
+await frontEnd.PreprocessAsync().ConfigureAwait(true); // fetch first line
+await backEnd.HeaderAsync().ConfigureAwait(true); // intro code
+backEnd.SetCodes(); // initialize code pointer array
 await parser.ParseAsync().ConfigureAwait(true); // process ALL input
-await backend.TrailerAsync().ConfigureAwait(true); // follow-up code
+await backEnd.TrailerAsync().ConfigureAwait(true); // follow-up code
 storage.Output.Close(); // explicitly close output

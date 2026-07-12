@@ -10,6 +10,23 @@ namespace SmallC.Cc2;
 public static class ErrorUseCases
 {
     /// <summary>
+    /// Output illegal symbol error.
+    /// </summary>
+    public static void IllName()
+    {
+        throw new InvalidOperationException("illegal symbol");
+    }
+
+    /// <summary>
+    /// Output multiple defined error.
+    /// </summary>
+    /// <param name="sName">Symbol with multiple definitions.</param>
+    public static void MultiDef(string sName)
+    {
+        throw new InvalidOperationException("already defined");
+    }
+
+    /// <summary>
     /// Output no #if... error.
     /// </summary>
     public static void NoIfError()

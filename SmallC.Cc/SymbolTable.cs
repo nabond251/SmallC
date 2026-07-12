@@ -19,6 +19,11 @@ public record class SymbolTable(
     public const int NumLocs = 25;
 
     /// <summary>
+    /// Number of globals.
+    /// </summary>
+    public const int NumGlbs = 200;
+
+    /// <summary>
     /// Access symbol table by unified index.
     /// </summary>
     /// <param name="index">

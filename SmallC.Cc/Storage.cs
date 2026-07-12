@@ -10,6 +10,8 @@ using System.Collections.ObjectModel;
 /// Miscellaneous storage.
 /// </summary>
 public class Storage(
+    bool noGo,
+    bool noLoc,
     int opIndex,
     int opSize,
     Dictionary<int, string> swNext,
@@ -25,6 +27,8 @@ public class Storage(
     int nxtLab,
     int litLab,
     int csp,
+    int argStk,
+    int argTop,
     bool eof,
     TextWriter output,
     bool files,
@@ -34,6 +38,7 @@ public class Storage(
     bool cCode,
     int sLast,
     TextWriter? listFp,
+    StatementType lastSt,
     SegmentType oldSeg,
     bool optimize,
     bool alarm,
@@ -97,6 +102,8 @@ public class Storage(
         BufferLineType? lineType = null,
         string? ssName = null)
         : this(
+            noGo: false,
+            noLoc: false,
             opIndex: 0,
             opSize: 0,
             swNext: swNext ?? [],
@@ -112,6 +119,8 @@ public class Storage(
             nxtLab: 0,
             litLab: 0,
             csp: csp ?? 0,
+            argStk: 0,
+            argTop: 0,
             eof: false,
             output: output ?? Console.Out,
             files: files ?? false,
@@ -121,6 +130,7 @@ public class Storage(
             cCode: cCode ?? true,
             sLast: sLast ?? StagingBuffer.StageSize,
             listFp: null,
+            lastSt: StatementType.None,
             oldSeg: oldSeg ?? SegmentType.None,
             optimize: false,
             alarm: false,
@@ -158,6 +168,16 @@ public class Storage(
         /// </summary>
         Macro,
     }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to disable goto statements.
+    /// </summary>
+    public bool NoGo { get; set; } = noGo;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to disable block locals.
+    /// </summary>
+    public bool NoLoc { get; set; } = noLoc;
 
     /// <summary>
     /// Gets or sets index to matched operator.
@@ -246,6 +266,16 @@ public class Storage(
     public int Csp { get; set; } = csp;
 
     /// <summary>
+    /// Gets or sets function arg sp.
+    /// </summary>
+    public int ArgStk { get; set; } = argStk;
+
+    /// <summary>
+    /// Gets or sets highest formal argument offset.
+    /// </summary>
+    public int ArgTop { get; set; } = argTop;
+
+    /// <summary>
     /// Gets or sets a value indicating whether end of input has been reached.
     /// </summary>
     public bool Eof { get; set; } = eof;
@@ -294,6 +324,11 @@ public class Storage(
     /// Gets or sets file pointer to list device.
     /// </summary>
     public TextWriter? ListFp { get; set; } = listFp;
+
+    /// <summary>
+    /// Gets or sets last parsed statement type.
+    /// </summary>
+    public StatementType LastSt { get; set; } = lastSt;
 
     /// <summary>
     /// Gets or sets current <see cref="SegmentType"/>.
@@ -388,6 +423,11 @@ public class Storage(
     /// Gets or sets index to <see cref="Line"/>.
     /// </summary>
     public int LPtr { get; set; } = lPtr;
+
+    /// <summary>
+    /// Gets literal string for '"'.
+    /// </summary>
+    public string Quote { get; } = "\"";
 
     /// <summary>
     /// Gets or sets macro symbol name.

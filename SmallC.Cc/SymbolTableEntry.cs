@@ -11,13 +11,13 @@ using static SmallC.Cc.SymbolTableEntry;
 /// Symbol table entry.
 /// </summary>
 [SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "Literature")]
-public record class SymbolTableEntry(
-    SymbolIdentity Ident,
-    SymbolType Type,
-    SymbolClass Class,
-    int Size,
-    int? Offset,
-    string Name)
+public class SymbolTableEntry(
+    SymbolIdentity ident,
+    SymbolType type,
+    SymbolClass @class,
+    int size,
+    int? offset,
+    string name)
 {
     /// <summary>
     /// Defined values for the <see cref="Ident"/> field.
@@ -111,4 +111,38 @@ public record class SymbolTableEntry(
         /// </summary>
         AutoExt,
     }
+
+    /// <summary>
+    /// Gets or sets what the declared entity is.
+    /// </summary>
+    public SymbolIdentity Ident { get; set; } = ident;
+
+    /// <summary>
+    /// Gets or sets the data type.
+    /// </summary>
+    public SymbolType Type { get; set; } = type;
+
+    /// <summary>
+    /// Gets or sets the storage class.
+    /// </summary>
+    public SymbolClass Class { get; set; } = @class;
+
+    /// <summary>
+    /// Gets or sets the number of bytes occupied.
+    /// </summary>
+    public int Size { get; set; } = size;
+
+    /// <summary>
+    /// Gets or sets the numeric value (if applicable).
+    /// </summary>
+    /// <remarks>
+    /// Primarily the stack frame offset for local objects.
+    /// Compiler-assigned label number for labels.
+    /// </remarks>
+    public int? Offset { get; set; } = offset;
+
+    /// <summary>
+    /// Gets the name.
+    /// </summary>
+    public string Name { get; } = name;
 }

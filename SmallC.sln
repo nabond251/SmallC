@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallC.Cc2.Tests", "SmallC.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallC.Cc1", "SmallC.Cc1\SmallC.Cc1.csproj", "{4BEA4569-D0EA-4FC6-BF3D-5032FC8D4060}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallC.Cc3", "SmallC.Cc3\SmallC.Cc3.csproj", "{602E905A-0B23-4C95-BC2C-160A3EDF301B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{4BEA4569-D0EA-4FC6-BF3D-5032FC8D4060}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BEA4569-D0EA-4FC6-BF3D-5032FC8D4060}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BEA4569-D0EA-4FC6-BF3D-5032FC8D4060}.Release|Any CPU.Build.0 = Release|Any CPU
+		{602E905A-0B23-4C95-BC2C-160A3EDF301B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{602E905A-0B23-4C95-BC2C-160A3EDF301B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{602E905A-0B23-4C95-BC2C-160A3EDF301B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{602E905A-0B23-4C95-BC2C-160A3EDF301B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
