@@ -70,7 +70,7 @@ public enum StatementType
     Case,
 
     /// <summary>
-    /// Definition statement.
+    /// Default statement.
     /// </summary>
     Def,
 
