@@ -10,6 +10,14 @@ namespace SmallC.Cc2;
 public static class ErrorUseCases
 {
     /// <summary>
+    /// Output illegal symbol error.
+    /// </summary>
+    public static void IllName()
+    {
+        throw new InvalidOperationException("illegal symbol");
+    }
+
+    /// <summary>
     /// Output no #if... error.
     /// </summary>
     public static void NoIfError()

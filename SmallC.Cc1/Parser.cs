@@ -68,6 +68,9 @@ public class Parser(
         return Task.FromResult(false);
     }
 
+    /// <summary>
+    /// Open an include file.
+    /// </summary>
     private async Task DoIncludeAsync()
     {
         int i;
@@ -104,11 +107,43 @@ public class Parser(
         frontEnd.Kill();
     }
 
-    private Task DoDefineAsync()
+    /// <summary>
+    /// Define a macro symbol.
+    /// </summary>
+    private async Task DoDefineAsync()
     {
-        _ = storage;
-        _ = storage;
-        return Task.CompletedTask;
+        storage.MsName = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        if (storage.MsName is null)
+        {
+            ErrorUseCases.IllName();
+            frontEnd.Kill();
+            return;
+        }
+
+        if (!storage.Mac.ContainsKey(storage.MsName) &&
+            storage.Mac.Count >= MacroPool.MacNbr)
+        {
+            throw new InvalidOperationException("macro name table full");
+        }
+
+        while (frontEnd.White())
+        {
+            _ = frontEnd.Gch();
+        }
+
+        var macQ = new StringBuilder();
+        while (PutMac(macQ, frontEnd.Gch()) is not null)
+        {
+            // already parsed
+        }
+
+        storage.Mac[storage.MsName] = macQ.ToString();
+
+        static char? PutMac(StringBuilder macQ, char? c)
+        {
+            _ = macQ.Append(c);
+            return c;
+        }
     }
 
     private Task DoFunctionAsync()
