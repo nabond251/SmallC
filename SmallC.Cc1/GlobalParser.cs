@@ -537,7 +537,7 @@ public class GlobalParser(
         }
 
         await backEnd.GenAsync(PCode.ENTER, null).ConfigureAwait(false);
-        await localParser.StatementAsync().ConfigureAwait(false);
+        _ = await localParser.StatementAsync().ConfigureAwait(false);
         if (storage.LastSt is not StatementType.Return
             and not StatementType.Goto)
         {

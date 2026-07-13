@@ -22,6 +22,7 @@ public class Storage(
     int wqPtr,
     char? ch,
     char? nCh,
+    int declared,
     int ifLevel,
     int skipLevel,
     int nxtLab,
@@ -29,6 +30,8 @@ public class Storage(
     int csp,
     int argStk,
     int argTop,
+    int nCmp,
+    bool errFlag,
     bool eof,
     TextWriter output,
     bool files,
@@ -114,6 +117,7 @@ public class Storage(
             wqPtr: wqPtr ?? 0,
             ch: null,
             nCh: null,
+            declared: 0,
             ifLevel: 0,
             skipLevel: 0,
             nxtLab: 0,
@@ -121,6 +125,8 @@ public class Storage(
             csp: csp ?? 0,
             argStk: 0,
             argTop: 0,
+            nCmp: 0,
+            errFlag: false,
             eof: false,
             output: output ?? Console.Out,
             files: files ?? false,
@@ -241,6 +247,11 @@ public class Storage(
     public char? NCh { get; set; } = nCh;
 
     /// <summary>
+    /// Gets or sets # of local bytes to declare, -1 when declared.
+    /// </summary>
+    public int Declared { get; set; } = declared;
+
+    /// <summary>
     /// Gets or sets #if... nest level.
     /// </summary>
     public int IfLevel { get; set; } = ifLevel;
@@ -274,6 +285,16 @@ public class Storage(
     /// Gets or sets highest formal argument offset.
     /// </summary>
     public int ArgTop { get; set; } = argTop;
+
+    /// <summary>
+    /// Gets # open compound statements.
+    /// </summary>
+    public int NCmp { get; } = nCmp;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether an error is in statement.
+    /// </summary>
+    public bool ErrFlag { get; set; } = errFlag;
 
     /// <summary>
     /// Gets or sets a value indicating whether end of input has been reached.
