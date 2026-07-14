@@ -13,6 +13,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// 2nd level parser.
 /// </summary>
 public class LocalParser(
+    SymbolTableUseCases symbolTable,
     FrontEnd frontEnd,
     BackEnd backEnd,
     Storage storage)
@@ -180,10 +181,60 @@ public class LocalParser(
     /// Parse compound statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task CompoundAsync()
+    public async Task CompoundAsync()
     {
-        _ = storage;
-        throw new NotImplementedException();
+        int saveCsp;
+        int? saveLoc;
+
+        saveCsp = storage.Csp;
+        saveLoc = storage.LocPtr;
+        storage.Declared = 0; // may now declare local variables
+        storage.NCmp++; // new level open
+        while (!await frontEnd.MatchAsync("}").ConfigureAwait(false))
+        {
+            if (storage.Eof)
+            {
+                throw new InvalidOperationException("no final }");
+            }
+            else
+            {
+                _ = await this.StatementAsync().ConfigureAwait(false); // do one
+            }
+        }
+
+        storage.NCmp--; // close current level
+        if (storage.NCmp != 0
+            && storage.LastSt != StatementType.Return
+            && storage.LastSt != StatementType.Goto)
+        {
+            // delete local variable space
+            await backEnd.GenAsync(PCode.ADDSP, saveCsp).ConfigureAwait(false);
+        }
+
+        var cptr = saveLoc; // retain labels
+        while (cptr < storage.LocPtr && saveLoc.HasValue)
+        {
+            var cptr2 = symbolTable.NextSym(cptr.Value);
+            if (storage.SymTab.Locals[cptr.Value].Ident == SymbolIdentity.Label)
+            {
+                storage.SymTab.Locals[saveLoc.Value] =
+                    storage.SymTab.Locals[cptr.Value];
+                saveLoc = cptr2;
+                cptr = cptr2;
+            }
+            else
+            {
+                cptr = cptr2;
+            }
+        }
+
+        while (storage.LocPtr - 1 > saveLoc)
+        {
+            // delete local variables
+            storage.SymTab.Locals.RemoveAt(storage.LocPtr - 1);
+        }
+
+        storage.Declared = -1; // may not declare variables
     }
 
     /// <summary>

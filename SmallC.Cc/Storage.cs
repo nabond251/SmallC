@@ -287,9 +287,9 @@ public class Storage(
     public int ArgTop { get; set; } = argTop;
 
     /// <summary>
-    /// Gets # open compound statements.
+    /// Gets or sets # open compound statements.
     /// </summary>
-    public int NCmp { get; } = nCmp;
+    public int NCmp { get; set; } = nCmp;
 
     /// <summary>
     /// Gets or sets a value indicating whether an error is in statement.
@@ -444,6 +444,11 @@ public class Storage(
     /// Gets or sets index to <see cref="Line"/>.
     /// </summary>
     public int LPtr { get; set; } = lPtr;
+
+    /// <summary>
+    /// Gets index to next local symbol table entry.
+    /// </summary>
+    public int LocPtr => this.SymTab.Locals.Count;
 
     /// <summary>
     /// Gets literal string for '"'.

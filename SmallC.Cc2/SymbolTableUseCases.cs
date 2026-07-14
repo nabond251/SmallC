@@ -84,4 +84,15 @@ public class SymbolTableUseCases(Storage storage)
         // search backward for block locals
         return storage.SymTab.Locals.LastOrDefault(x => x.Name == sName);
     }
+
+    /// <summary>
+    /// Gets index to next symbol table entry.
+    /// </summary>
+    /// <param name="entry">Entry whose next index to get.</param>
+    /// <returns>Index to next entry after <paramref name="entry"/>.</returns>
+    public int? NextSym(int entry)
+    {
+        entry++;
+        return entry < storage.LocPtr ? entry : null;
+    }
 }
