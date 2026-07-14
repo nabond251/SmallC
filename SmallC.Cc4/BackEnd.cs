@@ -492,12 +492,12 @@ public class BackEnd(
                                 .ConfigureAwait(false);
                         }
 #endif
-                    }
-                }
 
 #pragma warning disable S907 // "goto" statement should not be used
-                goto restart;
+                        goto restart;
 #pragma warning restore S907 // "goto" statement should not be used
+                    }
+                }
             }
 
             var staged = storage.Stage[0];
