@@ -14,6 +14,7 @@ public class Storage(
     bool noLoc,
     int opIndex,
     int opSize,
+    bool swActive,
     Dictionary<int, string> swNext,
     int swEnd,
     Collection<KeyValuePair<PCode, int>>? stage,
@@ -108,6 +109,7 @@ public class Storage(
             noGo: false,
             noLoc: false,
             opIndex: 0,
+            swActive: false,
             opSize: 0,
             swNext: swNext ?? [],
             swEnd: swEnd ?? SwitchTable.SwTabSz,
@@ -194,6 +196,11 @@ public class Storage(
     /// Gets or sets size of operator in characters.
     /// </summary>
     public int OpSize { get; set; } = opSize;
+
+    /// <summary>
+    /// Gets a value indicating whether inside a switch.
+    /// </summary>
+    public bool SwActive { get; } = swActive;
 
     /// <summary>
     /// Gets switch queue.

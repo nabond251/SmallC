@@ -158,7 +158,8 @@ public class GlobalParser(
                 else if (await frontEnd.MatchAsync("[").ConfigureAwait(false))
                 {
                     id = SymbolIdentity.Array;
-                    dim = await this.NeedSubAsync().ConfigureAwait(false);
+                    dim = await localParser.NeedSubAsync()
+                        .ConfigureAwait(false);
                 }
             }
 
@@ -284,29 +285,6 @@ public class GlobalParser(
         }
 
         return dim;
-    }
-
-    /// <summary>
-    /// Get required array size.
-    /// </summary>
-    private async Task<int> NeedSubAsync()
-    {
-        int val;
-
-        if (await frontEnd.MatchAsync("]").ConfigureAwait(false))
-        {
-            return 0; // null size
-        }
-
-        val = analyzer.ConstExpr() ?? 1;
-        if (val < 0)
-        {
-            throw new InvalidCastException("negative size illegal");
-        }
-
-        // force single dimension
-        await frontEnd.NeedAsync("]").ConfigureAwait(false);
-        return val; // and return size
     }
 
     /// <summary>
@@ -570,7 +548,8 @@ public class GlobalParser(
                 return; // no arguments
             }
 
-            (var n, id, sz) = await this.DeclAsync(type, SymbolIdentity.Pointer)
+            (var n, id, sz) = await localParser.DeclAsync(
+                type, SymbolIdentity.Pointer)
                 .ConfigureAwait(false);
             if (n is not null)
             {
@@ -598,66 +577,5 @@ public class GlobalParser(
                 throw new InvalidOperationException("no comma");
             }
         }
-    }
-
-    /// <summary>
-    /// Parse next local or argument declaration.
-    /// </summary>
-    private async Task<(string? N, SymbolIdentity Id, int Sz)>
-        DeclAsync(SymbolType type, SymbolIdentity aid)
-    {
-        string? n;
-        SymbolIdentity id;
-        int sz;
-
-        var p = await frontEnd.MatchAsync("(").ConfigureAwait(false);
-        if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
-        {
-            id = SymbolIdentity.Pointer;
-            sz = Machine.Bpw;
-        }
-        else
-        {
-            id = SymbolIdentity.Variable;
-            sz = (int)type >> 2;
-        }
-
-        n = await frontEnd.SymNameAsync().ConfigureAwait(false);
-        if (n is null)
-        {
-            ErrorUseCases.IllName();
-        }
-
-        if (p && await frontEnd.MatchAsync(")").ConfigureAwait(false))
-        {
-            // already parsed
-        }
-
-        if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
-        {
-            if (!p || id != SymbolIdentity.Pointer)
-            {
-                throw new InvalidOperationException("try (*...)()");
-            }
-
-            await frontEnd.NeedAsync(")").ConfigureAwait(false);
-        }
-        else if (id == SymbolIdentity.Variable
-            && await frontEnd.MatchAsync("[").ConfigureAwait(false))
-        {
-            id = aid;
-            sz *= await this.NeedSubAsync().ConfigureAwait(false);
-            if (sz == 0)
-            {
-                if (aid == SymbolIdentity.Array)
-                {
-                    throw new InvalidOperationException("need array size");
-                }
-
-                sz = Machine.Bpw;
-            }
-        }
-
-        return (n, id, sz);
     }
 }

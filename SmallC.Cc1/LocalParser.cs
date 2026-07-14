@@ -8,7 +8,6 @@ using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc3;
 using SmallC.Cc4;
-using System.Collections;
 using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
@@ -22,6 +21,96 @@ public class LocalParser(
     BackEnd backEnd,
     Storage storage)
 {
+    /// <summary>
+    /// Get required array size.
+    /// </summary>
+    /// <returns>Required array size.</returns>
+    public async Task<int> NeedSubAsync()
+    {
+        int val;
+
+        if (await frontEnd.MatchAsync("]").ConfigureAwait(false))
+        {
+            return 0; // null size
+        }
+
+        val = analyzer.ConstExpr() ?? 1;
+        if (val < 0)
+        {
+            throw new InvalidCastException("negative size illegal");
+        }
+
+        // force single dimension
+        await frontEnd.NeedAsync("]").ConfigureAwait(false);
+        return val; // and return size
+    }
+
+    /// <summary>
+    /// Parse next local or argument declaration.
+    /// </summary>
+    /// <param name="type">Type of symbol being declared.</param>
+    /// <param name="aid">Automatic identity.</param>
+    /// <returns>
+    /// Tuple of declared symbol name (if valid), identity, and size.
+    /// </returns>
+    public async Task<(string? N, SymbolIdentity Id, int Sz)>
+        DeclAsync(SymbolType type, SymbolIdentity aid)
+    {
+        string? n;
+        SymbolIdentity id;
+        int sz;
+
+        var p = await frontEnd.MatchAsync("(").ConfigureAwait(false);
+        if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
+        {
+            id = SymbolIdentity.Pointer;
+            sz = Machine.Bpw;
+        }
+        else
+        {
+            id = SymbolIdentity.Variable;
+            sz = (int)type >> 2;
+        }
+
+        n = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        if (n is null)
+        {
+            ErrorUseCases.IllName();
+        }
+
+        if (p && await frontEnd.MatchAsync(")").ConfigureAwait(false))
+        {
+            // already parsed
+        }
+
+        if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
+        {
+            if (!p || id != SymbolIdentity.Pointer)
+            {
+                throw new InvalidOperationException("try (*...)()");
+            }
+
+            await frontEnd.NeedAsync(")").ConfigureAwait(false);
+        }
+        else if (id == SymbolIdentity.Variable
+            && await frontEnd.MatchAsync("[").ConfigureAwait(false))
+        {
+            id = aid;
+            sz *= await this.NeedSubAsync().ConfigureAwait(false);
+            if (sz == 0)
+            {
+                if (aid == SymbolIdentity.Array)
+                {
+                    throw new InvalidOperationException("need array size");
+                }
+
+                sz = Machine.Bpw;
+            }
+        }
+
+        return (n, id, sz);
+    }
+
     /// <summary>
     /// Parse statement.
     /// </summary>
@@ -174,11 +263,49 @@ public class LocalParser(
     /// </summary>
     /// <param name="type">Type of locals to declare.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DeclLocAsync(SymbolType type)
+    public async Task DeclLocAsync(SymbolType type)
     {
-        _ = storage;
-        _ = type;
-        throw new NotImplementedException();
+        SymbolIdentity id;
+        int sz;
+
+        if (storage.SwActive)
+        {
+            throw new InvalidOperationException("not allowed in switch");
+        }
+
+        if (storage.NoLoc)
+        {
+            throw new InvalidOperationException("not allowed with goto");
+        }
+
+        if (storage.Declared < 0)
+        {
+            throw new InvalidOperationException("must declare first in block");
+        }
+
+        while (true)
+        {
+            if (await frontEnd.EndStAsync().ConfigureAwait(false))
+            {
+                return;
+            }
+
+            (_, id, sz) = await this.DeclAsync(type, SymbolIdentity.Array)
+                .ConfigureAwait(false);
+            storage.Declared += sz;
+            _ = symbolTable.AddSym(
+                storage.SsName ?? throw new InvalidOperationException(),
+                id,
+                type,
+                sz,
+                storage.Csp - storage.Declared,
+                storage.SymTab.Locals,
+                SymbolClass.Automatic);
+            if (!await frontEnd.MatchAsync(",").ConfigureAwait(false))
+            {
+                return;
+            }
+        }
     }
 
     /// <summary>
