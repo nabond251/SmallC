@@ -416,20 +416,18 @@ public class LocalParser(
     /// Parse return statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoReturnAsync()
+    public async Task DoReturnAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        int saveCsp;
+
+        if (!await frontEnd.EndStAsync().ConfigureAwait(false))
+        {
+            await this.DoExprAsync(true).ConfigureAwait(false);
+        }
+
+        saveCsp = storage.Csp;
+        await backEnd.GenAsync(PCode.RETURN, null).ConfigureAwait(false);
+        storage.Csp = saveCsp;
     }
 
     /// <summary>
