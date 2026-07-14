@@ -389,20 +389,27 @@ public class LocalParser(
     /// <summary>
     /// Parse label statement.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task<bool> DoLabelAsync()
+    /// <returns>A value indicating whether a label was parsed.</returns>
+    public async Task<bool> DoLabelAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        int saveLPtr;
+
+        await frontEnd.BlanksAsync().ConfigureAwait(false);
+        saveLPtr = storage.LPtr;
+        storage.SsName = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        if (storage.SsName is not null)
+        {
+            if (frontEnd.Gch() == ':')
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                frontEnd.Bump(saveLPtr - storage.LPtr);
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
