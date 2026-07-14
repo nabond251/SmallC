@@ -33,9 +33,10 @@ var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
 
 var frontEnd = new FrontEnd(storage);
-var analyzer = new Analyzer(utility, frontEnd, storage);
 var backEnd = new BackEnd(symTabMgmt, utility, storage);
-var localParser = new LocalParser(symTabMgmt, frontEnd, backEnd, storage);
+var analyzer = new Analyzer(utility, frontEnd, backEnd, storage);
+var localParser = new LocalParser(
+    symTabMgmt, utility, frontEnd, analyzer, backEnd, storage);
 var parser = new GlobalParser(
     symTabMgmt, utility, frontEnd, localParser, analyzer, backEnd, storage);
 

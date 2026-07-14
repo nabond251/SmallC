@@ -6,6 +6,7 @@ namespace SmallC.Cc1;
 
 using SmallC.Cc;
 using SmallC.Cc2;
+using SmallC.Cc3;
 using SmallC.Cc4;
 using static SmallC.Cc.SymbolTableEntry;
 
@@ -14,7 +15,9 @@ using static SmallC.Cc.SymbolTableEntry;
 /// </summary>
 public class LocalParser(
     SymbolTableUseCases symbolTable,
+    UtilityUseCases utility,
     FrontEnd frontEnd,
+    Analyzer analyzer,
     BackEnd backEnd,
     Storage storage)
 {
@@ -241,11 +244,41 @@ public class LocalParser(
     /// Parse if statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoIfAsync()
+    public async Task DoIfAsync()
     {
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        int flab1, flab2;
+
+        flab1 = utility.GetLabel();
+
+        // get expr, and branch false
+        await analyzer.TestAsync(flab1, true).ConfigureAwait(false);
+
+        // if true, do a statement
+        _ = await this.StatementAsync().ConfigureAwait(false);
+
+        // if...else ?
+        if (!await frontEnd.AMatchAsync("else", 4).ConfigureAwait(false))
+        {
+            // simple "if"... print false label
+            await backEnd.GenAsync(PCode.LABm, flab1).ConfigureAwait(false);
+            return; // and exit
+        }
+
+        flab2 = utility.GetLabel();
+        if (storage.LastSt is not StatementType.Return
+            and not StatementType.Goto)
+        {
+            await backEnd.GenAsync(PCode.JMPm, flab2).ConfigureAwait(false);
+        }
+
+        // print false label
+        await backEnd.GenAsync(PCode.LABm, flab1).ConfigureAwait(false);
+
+        // and do "else" clause
+        _ = await this.StatementAsync().ConfigureAwait(false);
+
+        // print true label
+        await backEnd.GenAsync(PCode.LABm, flab2).ConfigureAwait(false);
     }
 
     /// <summary>
