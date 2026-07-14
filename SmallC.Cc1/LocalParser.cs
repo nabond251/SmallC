@@ -16,6 +16,7 @@ using static SmallC.Cc.SymbolTableEntry;
 public class LocalParser(
     SymbolTableUseCases symbolTable,
     UtilityUseCases utility,
+    WhileQueueUseCases whileQueue,
     FrontEnd frontEnd,
     Analyzer analyzer,
     BackEnd backEnd,
@@ -414,12 +415,26 @@ public class LocalParser(
     /// Parse while statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoWhileAsync()
+    public async Task DoWhileAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        var wq = whileQueue.AddWhile(); // add entry to queue for "break"
+
+        // loop label
+        await backEnd.GenAsync(PCode.LABm, wq.LoopLabel).ConfigureAwait(false);
+
+        // see if true
+        await analyzer.TestAsync(wq.ExitLabel, true).ConfigureAwait(false);
+
+        // if so, do a statement
+        _ = await this.StatementAsync().ConfigureAwait(false);
+
+        // loop to label
+        await backEnd.GenAsync(PCode.JMPm, wq.LoopLabel).ConfigureAwait(false);
+
+        // exit label
+        await backEnd.GenAsync(PCode.LABm, wq.ExitLabel).ConfigureAwait(false);
+
+        whileQueue.DelWhile(); // delete queue entry
     }
 
     /// <summary>
