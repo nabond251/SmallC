@@ -8,6 +8,7 @@ using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc3;
 using SmallC.Cc4;
+using System.Collections;
 using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
@@ -507,10 +508,34 @@ public class LocalParser(
     /// A value indicating whether to use the expression.
     /// </param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoExprAsync(bool use)
+    public async Task DoExprAsync(bool use)
     {
         _ = storage;
         _ = use;
-        throw new NotImplementedException();
+
+        await frontEnd.NeedAsync("(").ConfigureAwait(false);
+
+        var level = 1;
+
+        while (level != 0)
+        {
+            switch (storage.Ch)
+            {
+                case '(':
+                    level++;
+                    _ = frontEnd.Gch();
+                    break;
+                case ')':
+                    level--;
+                    _ = frontEnd.Gch();
+                    break;
+                case null:
+                    await frontEnd.PreprocessAsync().ConfigureAwait(false);
+                    break;
+                default:
+                    _ = frontEnd.Gch();
+                    break;
+            }
+        }
     }
 }
