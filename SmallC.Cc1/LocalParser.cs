@@ -72,7 +72,8 @@ public class LocalParser(
             sz = (int)type >> 2;
         }
 
-        n = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        storage.SsName = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        n = storage.SsName;
         if (n is null)
         {
             ErrorUseCases.IllName();
