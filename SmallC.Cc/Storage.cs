@@ -15,7 +15,8 @@ public class Storage(
     int opIndex,
     int opSize,
     bool swActive,
-    Dictionary<int, string> swNext,
+    int swDefault,
+    Dictionary<int, int> swNext,
     int swEnd,
     Collection<KeyValuePair<PCode, int>>? stage,
     Collection<WhileQueueEntry> wq,
@@ -85,7 +86,7 @@ public class Storage(
     /// </param>
     /// <param name="ssName">Static symbol name.</param>
     public Storage(
-        Dictionary<int, string>? swNext = null,
+        Dictionary<int, int>? swNext = null,
         int? swEnd = null,
         Collection<KeyValuePair<PCode, int>>? stage = null,
         Collection<WhileQueueEntry>? wq = null,
@@ -110,6 +111,7 @@ public class Storage(
             noLoc: false,
             opIndex: 0,
             swActive: false,
+            swDefault: 0,
             opSize: 0,
             swNext: swNext ?? [],
             swEnd: swEnd ?? SwitchTable.SwTabSz,
@@ -198,14 +200,19 @@ public class Storage(
     public int OpSize { get; set; } = opSize;
 
     /// <summary>
-    /// Gets a value indicating whether inside a switch.
+    /// Gets or sets a value indicating whether inside a switch.
     /// </summary>
-    public bool SwActive { get; } = swActive;
+    public bool SwActive { get; set; } = swActive;
+
+    /// <summary>
+    /// Gets or sets default label #, else 0.
+    /// </summary>
+    public int SwDefault { get; set; } = swDefault;
 
     /// <summary>
     /// Gets switch queue.
     /// </summary>
-    public Dictionary<int, string> SwNext { get; } = swNext;
+    public Dictionary<int, int> SwNext { get; } = swNext;
 
     /// <summary>
     /// Gets last index in switch queue.

@@ -501,15 +501,61 @@ public class LocalParser(
     /// Parse switch statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoSwitchAsync()
+    public async Task DoSwitchAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        bool swAct;
+        int endLab, swDef, swNex, swPtr;
+
+        swAct = storage.SwActive;
+        swDef = storage.SwDefault;
+        swPtr = storage.SwNext.Count;
+        swNex = swPtr;
+        var wq = whileQueue.AddWhile() with
+        {
+            LoopLabel = 0,
+        };
+        storage.Wq.RemoveAt(storage.WqPtr - 1);
+        storage.Wq.Add(wq);
+        await frontEnd.NeedAsync("(").ConfigureAwait(false);
+
+        // evaluate switch expression
+        await this.DoExprAsync(true).ConfigureAwait(false);
+        await frontEnd.NeedAsync(")").ConfigureAwait(false);
+        storage.SwDefault = 0;
+        storage.SwActive = true;
+        endLab = utility.GetLabel();
+        await backEnd.GenAsync(PCode.JMPm, endLab).ConfigureAwait(false);
+        _ = await this.StatementAsync().ConfigureAwait(false); // cases, etc.
+        await backEnd.GenAsync(PCode.JMPm, wq.ExitLabel).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, endLab).ConfigureAwait(false);
+
+        // match cases
+        await backEnd.GenAsync(PCode.SWITCH, null).ConfigureAwait(false);
+        foreach (var sw in storage.SwNext.Skip(swPtr))
+        {
+            await backEnd.GenAsync(PCode.NEARm, sw.Key).ConfigureAwait(false);
+
+            // case value
+            await backEnd.GenAsync(PCode.WORDn, sw.Value)
+                .ConfigureAwait(false);
+        }
+
+        await backEnd.GenAsync(PCode.WORDn, 0).ConfigureAwait(false);
+        if (storage.SwDefault != 0)
+        {
+            await backEnd.GenAsync(PCode.JMPm, storage.SwDefault)
+                .ConfigureAwait(false);
+        }
+
+        await backEnd.GenAsync(PCode.LABm, wq.ExitLabel).ConfigureAwait(false);
+        whileQueue.DelWhile();
+        while (storage.SwNext.Count > swNex)
+        {
+            _ = storage.SwNext.Remove(storage.SwNext.Last().Key);
+        }
+
+        storage.SwDefault = swDef;
+        storage.SwActive = swAct;
     }
 
     /// <summary>
