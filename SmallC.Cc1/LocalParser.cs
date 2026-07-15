@@ -441,13 +441,17 @@ public class LocalParser(
     /// Parse do statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoDoAsync()
+    public async Task DoDoAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        var wq = whileQueue.AddWhile();
+        await backEnd.GenAsync(PCode.LABm, wq.LoopLabel).ConfigureAwait(false);
+        _ = await this.StatementAsync().ConfigureAwait(false);
+        await frontEnd.NeedAsync("while").ConfigureAwait(false);
+        await analyzer.TestAsync(wq.ExitLabel, true).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.JMPm, wq.LoopLabel).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, wq.ExitLabel).ConfigureAwait(false);
+        whileQueue.DelWhile();
+        await frontEnd.NsAsync().ConfigureAwait(false);
     }
 
     /// <summary>
