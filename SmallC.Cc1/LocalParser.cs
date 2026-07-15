@@ -458,14 +458,43 @@ public class LocalParser(
     /// Parse for statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoForAsync()
+    public async Task DoForAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        int lab1, lab2;
+
+        var wq = whileQueue.AddWhile();
+        lab1 = utility.GetLabel();
+        lab2 = utility.GetLabel();
+        await frontEnd.NeedAsync("(").ConfigureAwait(false);
+        if (!await frontEnd.MatchAsync(";").ConfigureAwait(false))
+        {
+            await this.DoExprAsync(false).ConfigureAwait(false); // expr1
+            await frontEnd.NsAsync().ConfigureAwait(false);
+        }
+
+        await backEnd.GenAsync(PCode.LABm, lab1).ConfigureAwait(false);
+        if (!await frontEnd.MatchAsync(";").ConfigureAwait(false))
+        {
+            // expr2
+            await analyzer.TestAsync(wq.ExitLabel, false)
+                .ConfigureAwait(false);
+            await frontEnd.NsAsync().ConfigureAwait(false);
+        }
+
+        await backEnd.GenAsync(PCode.JMPm, lab2).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, wq.LoopLabel).ConfigureAwait(false);
+        if (!await frontEnd.MatchAsync(")").ConfigureAwait(false))
+        {
+            await this.DoExprAsync(false).ConfigureAwait(false); // expr3
+            await frontEnd.NeedAsync(")").ConfigureAwait(false);
+        }
+
+        await backEnd.GenAsync(PCode.JMPm, lab1).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, lab2).ConfigureAwait(false);
+        _ = await this.StatementAsync().ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.JMPm, wq.LoopLabel).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, wq.ExitLabel).ConfigureAwait(false);
+        whileQueue.DelWhile();
     }
 
     /// <summary>
