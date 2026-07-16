@@ -23,6 +23,12 @@ public class WhileQueueUseCases(
             storage.Csp,
             utility.GetLabel(),
             utility.GetLabel());
+        if (storage.WqPtr == WhileQueue.WqMax)
+        {
+            throw new InvalidOperationException(
+                "control statement nesting limit");
+        }
+
         storage.Wq.Add(ptr);
         return ptr;
     }
