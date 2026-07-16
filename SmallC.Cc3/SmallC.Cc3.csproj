@@ -33,6 +33,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\SmallC.Cc2\SmallC.Cc2.csproj" />
+        <ProjectReference Include="..\SmallC.Cc4\SmallC.Cc4.csproj" />
         <ProjectReference Include="..\SmallC.Cc\SmallC.Cc.csproj" />
     </ItemGroup>
 

@@ -6,6 +6,7 @@ namespace SmallC.Cc3;
 
 using SmallC.Cc;
 using SmallC.Cc2;
+using SmallC.Cc4;
 
 /// <summary>
 /// Expression analyzer.
@@ -13,6 +14,7 @@ using SmallC.Cc2;
 public class Analyzer(
     UtilityUseCases utility,
     FrontEnd frontEnd,
+    BackEnd backEnd,
     Storage storage)
 {
     /// <summary>
@@ -34,6 +36,54 @@ public class Analyzer(
         }
 
         return e;
+    }
+
+    /// <summary>
+    /// Analyzes a test expression.
+    /// </summary>
+    /// <param name="label">Label to jump to.</param>
+    /// <param name="parens">Whether parens are needed.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task TestAsync(int label, bool parens)
+    {
+        int? before, start;
+
+        if (parens)
+        {
+            await frontEnd.NeedAsync("(").ConfigureAwait(false);
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+
+        (before, start) = backEnd.SetStage();
+
+        var level = 1;
+
+        while (level != 0)
+        {
+            switch (storage.Ch)
+            {
+                case '(':
+                    level++;
+                    _ = frontEnd.Gch();
+                    break;
+                case ')':
+                    level--;
+                    _ = frontEnd.Gch();
+                    break;
+                case null:
+                    await frontEnd.PreprocessAsync().ConfigureAwait(false);
+                    break;
+                default:
+                    _ = frontEnd.Gch();
+                    break;
+            }
+        }
+
+        await backEnd.GenAsync(PCode.NE10f, label).ConfigureAwait(false);
+        await backEnd.ClearStageAsync(before, start).ConfigureAwait(false);
     }
 
     /// <summary>

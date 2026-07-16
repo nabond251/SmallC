@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ATOI.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="STDIO.H">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

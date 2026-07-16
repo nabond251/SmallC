@@ -14,7 +14,9 @@ public class Storage(
     bool noLoc,
     int opIndex,
     int opSize,
-    Dictionary<int, string> swNext,
+    bool swActive,
+    int swDefault,
+    Dictionary<int, int> swNext,
     int swEnd,
     Collection<KeyValuePair<PCode, int>>? stage,
     Collection<WhileQueueEntry> wq,
@@ -22,6 +24,7 @@ public class Storage(
     int wqPtr,
     char? ch,
     char? nCh,
+    int declared,
     int ifLevel,
     int skipLevel,
     int nxtLab,
@@ -29,6 +32,8 @@ public class Storage(
     int csp,
     int argStk,
     int argTop,
+    int nCmp,
+    bool errFlag,
     bool eof,
     TextWriter output,
     bool files,
@@ -81,7 +86,7 @@ public class Storage(
     /// </param>
     /// <param name="ssName">Static symbol name.</param>
     public Storage(
-        Dictionary<int, string>? swNext = null,
+        Dictionary<int, int>? swNext = null,
         int? swEnd = null,
         Collection<KeyValuePair<PCode, int>>? stage = null,
         Collection<WhileQueueEntry>? wq = null,
@@ -105,6 +110,8 @@ public class Storage(
             noGo: false,
             noLoc: false,
             opIndex: 0,
+            swActive: false,
+            swDefault: 0,
             opSize: 0,
             swNext: swNext ?? [],
             swEnd: swEnd ?? SwitchTable.SwTabSz,
@@ -114,6 +121,7 @@ public class Storage(
             wqPtr: wqPtr ?? 0,
             ch: null,
             nCh: null,
+            declared: 0,
             ifLevel: 0,
             skipLevel: 0,
             nxtLab: 0,
@@ -121,6 +129,8 @@ public class Storage(
             csp: csp ?? 0,
             argStk: 0,
             argTop: 0,
+            nCmp: 0,
+            errFlag: false,
             eof: false,
             output: output ?? Console.Out,
             files: files ?? false,
@@ -190,9 +200,19 @@ public class Storage(
     public int OpSize { get; set; } = opSize;
 
     /// <summary>
+    /// Gets or sets a value indicating whether inside a switch.
+    /// </summary>
+    public bool SwActive { get; set; } = swActive;
+
+    /// <summary>
+    /// Gets or sets default label #, else 0.
+    /// </summary>
+    public int SwDefault { get; set; } = swDefault;
+
+    /// <summary>
     /// Gets switch queue.
     /// </summary>
-    public Dictionary<int, string> SwNext { get; } = swNext;
+    public Dictionary<int, int> SwNext { get; } = swNext;
 
     /// <summary>
     /// Gets last index in switch queue.
@@ -241,6 +261,11 @@ public class Storage(
     public char? NCh { get; set; } = nCh;
 
     /// <summary>
+    /// Gets or sets # of local bytes to declare, -1 when declared.
+    /// </summary>
+    public int Declared { get; set; } = declared;
+
+    /// <summary>
     /// Gets or sets #if... nest level.
     /// </summary>
     public int IfLevel { get; set; } = ifLevel;
@@ -274,6 +299,16 @@ public class Storage(
     /// Gets or sets highest formal argument offset.
     /// </summary>
     public int ArgTop { get; set; } = argTop;
+
+    /// <summary>
+    /// Gets or sets # open compound statements.
+    /// </summary>
+    public int NCmp { get; set; } = nCmp;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether an error is in statement.
+    /// </summary>
+    public bool ErrFlag { get; set; } = errFlag;
 
     /// <summary>
     /// Gets or sets a value indicating whether end of input has been reached.
@@ -423,6 +458,11 @@ public class Storage(
     /// Gets or sets index to <see cref="Line"/>.
     /// </summary>
     public int LPtr { get; set; } = lPtr;
+
+    /// <summary>
+    /// Gets index to next local symbol table entry.
+    /// </summary>
+    public int LocPtr => this.SymTab.Locals.Count;
 
     /// <summary>
     /// Gets literal string for '"'.

@@ -24,7 +24,7 @@ public class SymbolTableUseCases(Storage storage)
     /// <param name="lgpp">Local or global table to add to.</param>
     /// <param name="class">Symbol class.</param>
     /// <returns>Symbol table entry for <paramref name="sName"/>.</returns>
-    public SymbolTableEntry? AddSym(
+    public SymbolTableEntry AddSym(
         string sName,
         SymbolIdentity id,
         SymbolType type,
@@ -83,5 +83,16 @@ public class SymbolTableUseCases(Storage storage)
     {
         // search backward for block locals
         return storage.SymTab.Locals.LastOrDefault(x => x.Name == sName);
+    }
+
+    /// <summary>
+    /// Gets index to next symbol table entry.
+    /// </summary>
+    /// <param name="entry">Entry whose next index to get.</param>
+    /// <returns>Index to next entry after <paramref name="entry"/>.</returns>
+    public int? NextSym(int entry)
+    {
+        entry++;
+        return entry < storage.LocPtr ? entry : null;
     }
 }

@@ -16,7 +16,7 @@ public class SymbolTableEntry(
     SymbolType type,
     SymbolClass @class,
     int size,
-    int? offset,
+    int offset,
     string name)
 {
     /// <summary>
@@ -139,7 +139,7 @@ public class SymbolTableEntry(
     /// Primarily the stack frame offset for local objects.
     /// Compiler-assigned label number for labels.
     /// </remarks>
-    public int? Offset { get; set; } = offset;
+    public int Offset { get; set; } = offset;
 
     /// <summary>
     /// Gets the name.

@@ -31,11 +31,13 @@ var storage = new Storage(
 var misc = new MiscellaneousUseCases(storage);
 var symTabMgmt = new SymbolTableUseCases(storage);
 var utility = new UtilityUseCases(storage);
+var whileQueueMgmt = new WhileQueueUseCases(utility, storage);
 
 var frontEnd = new FrontEnd(storage);
-var analyzer = new Analyzer(utility, frontEnd, storage);
 var backEnd = new BackEnd(symTabMgmt, utility, storage);
-var localParser = new LocalParser(frontEnd, storage);
+var analyzer = new Analyzer(utility, frontEnd, backEnd, storage);
+var localParser = new LocalParser(
+    symTabMgmt, utility, whileQueueMgmt, frontEnd, analyzer, backEnd, storage);
 var parser = new GlobalParser(
     symTabMgmt, utility, frontEnd, localParser, analyzer, backEnd, storage);
 
