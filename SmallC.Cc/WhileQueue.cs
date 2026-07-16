@@ -7,9 +7,8 @@ namespace SmallC.Cc;
 /// <summary>
 /// While queue constants.
 /// </summary>
-#pragma warning disable CA1711 // Identifiers should not have incorrect suffix
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "Literature")]
 public static class WhileQueue
-#pragma warning restore CA1711 // Identifiers should not have incorrect suffix
 {
     /// <summary>
     /// While queue size.
