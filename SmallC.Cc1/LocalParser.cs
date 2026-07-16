@@ -562,16 +562,23 @@ public class LocalParser(
     /// Parse case statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoCaseAsync()
+    public async Task DoCaseAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        if (!storage.SwActive)
+        {
+            throw new InvalidOperationException("not in switch");
+        }
+
+        if (storage.SwNext.Count > storage.SwEnd)
+        {
+            throw new InvalidOperationException("too many cases");
+        }
+
+        var label = utility.GetLabel();
+        await backEnd.GenAsync(PCode.LABm, label).ConfigureAwait(false);
+        storage.SwNext[label] = analyzer.ConstExpr() ??
+            throw new InvalidOperationException();
+        await frontEnd.NeedAsync(":").ConfigureAwait(false);
     }
 
     /// <summary>
