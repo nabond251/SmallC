@@ -24,7 +24,7 @@ public class SymbolTableUseCases(Storage storage)
     /// <param name="lgpp">Local or global table to add to.</param>
     /// <param name="class">Symbol class.</param>
     /// <returns>Symbol table entry for <paramref name="sName"/>.</returns>
-    public SymbolTableEntry? AddSym(
+    public SymbolTableEntry AddSym(
         string sName,
         SymbolIdentity id,
         SymbolType type,

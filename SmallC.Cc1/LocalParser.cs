@@ -609,18 +609,25 @@ public class LocalParser(
     /// Parse goto statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoGotoAsync()
+    public async Task DoGotoAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        storage.NoLoc = storage.NoGo
+            ? throw new InvalidOperationException(
+                "not allowed with block-locals")
+            : true;
+
+        storage.SsName = await frontEnd.SymNameAsync().ConfigureAwait(false);
+        if (storage.SsName is not null)
+        {
+            await backEnd.GenAsync(PCode.JMPm, this.AddLabel())
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            throw new InvalidOperationException("bad label");
+        }
+
+        await frontEnd.NsAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -638,7 +645,9 @@ public class LocalParser(
         {
             if (frontEnd.Gch() == ':')
             {
-                throw new NotImplementedException();
+                await backEnd.GenAsync(PCode.JMPm, this.AddLabel())
+                    .ConfigureAwait(false);
+                return true;
             }
             else
             {
@@ -647,6 +656,36 @@ public class LocalParser(
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Add a label.
+    /// </summary>
+    /// <returns>Added label value.</returns>
+    public int AddLabel()
+    {
+        var cptr = symbolTable.FindLoc(storage.SsName ??
+            throw new InvalidOperationException());
+        if (cptr is not null)
+        {
+            if (cptr.Ident != SymbolIdentity.Label)
+            {
+                throw new InvalidOperationException("not a label");
+            }
+        }
+        else
+        {
+            cptr = symbolTable.AddSym(
+                storage.SsName,
+                SymbolIdentity.Label,
+                SymbolType.Label,
+                0,
+                utility.GetLabel(),
+                storage.SymTab.Locals,
+                SymbolClass.Label);
+        }
+
+        return cptr.Offset;
     }
 
     /// <summary>

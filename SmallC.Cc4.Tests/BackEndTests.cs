@@ -77,14 +77,14 @@ dw 0
             SymbolType.Int,
             SymbolClass.AutoExt,
             0,
-            null,
+            0,
             f));
         var globalsAndAnyMain = hasMain ? globals.Append(new(
             SymbolIdentity.Function,
             SymbolType.Int,
             SymbolClass.Static,
             0,
-            null,
+            0,
             "main")) : globals;
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
@@ -421,9 +421,9 @@ dw 0
         var symTab = new SymbolTable(
             [],
             [
-                new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "foo"),
-                new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "bar"),
-                new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, null, "baz"),
+                new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, 0, "foo"),
+                new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, 0, "bar"),
+                new(SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 2, 0, "baz"),
             ]);
         var (sut, storage) = Arrange(
              stage: stage, output: output, symTab: symTab);
