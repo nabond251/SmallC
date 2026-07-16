@@ -710,43 +710,39 @@ public class LocalParser(
     /// Parse break statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoBreakAsync()
+    public async Task DoBreakAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        var ptr = whileQueue.ReadWhile(storage.WqPtr);
+        await backEnd.GenAsync(PCode.ADDSP, ptr.StackPointer)
+            .ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.JMPm, ptr.ExitLabel)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
     /// Parse continue statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoContAsync()
+    public async Task DoContAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        int ptr;
+        WhileQueueEntry wq;
+
+        ptr = storage.WqPtr;
+        while (true)
+        {
+            wq = whileQueue.ReadWhile(ptr);
+            ptr--;
+            if (wq.LoopLabel != 0)
+            {
+                break;
+            }
+        }
+
+        await backEnd.GenAsync(PCode.ADDSP, wq.StackPointer)
+            .ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.JMPm, wq.LoopLabel)
+            .ConfigureAwait(false);
     }
 
     /// <summary>

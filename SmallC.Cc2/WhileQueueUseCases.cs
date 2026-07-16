@@ -34,6 +34,18 @@ public class WhileQueueUseCases(
     }
 
     /// <summary>
+    /// Gets entry prior to given index.
+    /// </summary>
+    /// <param name="ptr">Index whose prior entry to get.</param>
+    /// <returns>Entry prior to given index.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "Literature")]
+    public WhileQueueEntry ReadWhile(int ptr)
+    {
+        return ptr < 0 ? throw new InvalidOperationException("out of context")
+            : storage.Wq[ptr - 1];
+    }
+
+    /// <summary>
     /// Remove last while.
     /// </summary>
     public void DelWhile()
