@@ -585,17 +585,24 @@ public class LocalParser(
     /// Parse default statement.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task DoDefaultAsync()
+    public async Task DoDefaultAsync()
     {
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        if (storage.SwActive)
+        {
+            if (storage.SwDefault != 0)
+            {
+                throw new InvalidOperationException("multiple defaults");
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException("not in switch");
+        }
+
+        await frontEnd.NeedAsync(":").ConfigureAwait(false);
+        storage.SwDefault = utility.GetLabel();
+        await backEnd.GenAsync(PCode.LABm, storage.SwDefault)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
