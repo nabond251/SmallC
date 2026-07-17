@@ -430,7 +430,21 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level4Async(ExpressionAnalysis @is)
+    public async Task<int?> Level4Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.SkimAsync(
+            ["&&"], PCode.NE10f, 0, 1, this.Level5Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 5.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> Level5Async(ExpressionAnalysis @is)
     {
         _ = storage;
         throw new NotImplementedException();
