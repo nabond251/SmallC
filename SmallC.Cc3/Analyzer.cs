@@ -322,11 +322,101 @@ public class Analyzer(
     }
 
     /// <summary>
-    /// Analyze level 1.
+    /// Analyze level 2.
+    /// </summary>
+    /// <param name="is1">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public async Task<int?> Level2Async(ExpressionAnalysis is1)
+    {
+        ArgumentNullException.ThrowIfNull(is1);
+
+        var is2 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        var is3 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        int? k;
+        int flab, endLab;
+
+        // expression 1
+        k = await this.Down1Async(this.Level3Async, is1).ConfigureAwait(false);
+        if (!await frontEnd.MatchAsync("?").ConfigureAwait(false))
+        {
+            return k;
+        }
+
+        flab = utility.GetLabel();
+        await this.DropOutAsync(k, PCode.NE10f, flab, is1)
+            .ConfigureAwait(false);
+
+        // expression 2
+        if ((await this.Down1Async(this.Level2Async, is2).ConfigureAwait(false))
+            .HasValue)
+        {
+            await this.FetchAsync(is2).ConfigureAwait(false);
+        }
+        else if (is2.ConstantType.HasValue)
+        {
+            await backEnd.GenAsync(PCode.GETw1n, is2.ConstantValue)
+                .ConfigureAwait(false);
+        }
+
+        await frontEnd.NeedAsync(":").ConfigureAwait(false);
+        endLab = utility.GetLabel();
+        await backEnd.GenAsync(PCode.JMPm, flab).ConfigureAwait(false);
+
+        // expression 3
+        if ((await this.Down1Async(this.Level2Async, is3).ConfigureAwait(false))
+            .HasValue)
+        {
+            await this.FetchAsync(is3).ConfigureAwait(false);
+        }
+        else if (is3.ConstantType.HasValue)
+        {
+            await backEnd.GenAsync(PCode.GETw1n, is3.ConstantValue)
+                .ConfigureAwait(false);
+        }
+
+        await backEnd.GenAsync(PCode.JMPm, endLab).ConfigureAwait(false);
+        is1.ConstantValue = 0;
+        is1.ConstantType = null;
+
+        // expr1 ? const2 : const3
+        if (is2.ConstantType.HasValue && is3.ConstantType.HasValue)
+        {
+            is1.StageIndex = null;
+            is1.IndirectType = null;
+            is1.AddressType = null;
+        }
+
+        // expr1 ? var2 : const3
+        else if (is3.ConstantType.HasValue)
+        {
+            is1.AddressType = is2.AddressType;
+            is1.IndirectType = is2.IndirectType;
+            is1.StageIndex = is2.StageIndex;
+        }
+
+        // expr1 ? const2 : var3
+        // expr1 ? same2 : same3
+        else if (is2.ConstantType.HasValue
+            || is2.AddressType == is3.AddressType)
+        {
+            is1.AddressType = is3.AddressType;
+            is1.IndirectType = is3.IndirectType;
+            is1.StageIndex = is3.StageIndex;
+        }
+        else
+        {
+            throw new InvalidOperationException("mismatched expressions");
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Analyze level 2.
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level2Async(ExpressionAnalysis @is)
+    public Task<int?> Level3Async(ExpressionAnalysis @is)
     {
         _ = storage;
         throw new NotImplementedException();
@@ -439,6 +529,20 @@ public class Analyzer(
         }
 
         return i == 2 ? frontEnd.Gch() : oct;
+    }
+
+    /// <summary>
+    /// Test for early dropout from || or &amp;&amp; sequence.
+    /// </summary>
+    private Task DropOutAsync(
+        int? k, PCode tCode, int exit1, ExpressionAnalysis @is)
+    {
+        _ = storage;
+        _ = k;
+        _ = tCode;
+        _ = exit1;
+        _ = @is;
+        throw new NotImplementedException();
     }
 
     /// <summary>

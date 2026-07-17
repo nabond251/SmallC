@@ -30,19 +30,19 @@ public class ExpressionAnalysis(
     public SymbolType? IndirectType { get; set; } = indirectType;
 
     /// <summary>
-    /// Gets data type of address, if any.
+    /// Gets or sets data type of address, if any.
     /// </summary>
-    public SymbolType? AddressType { get; } = addressType;
+    public SymbolType? AddressType { get; set; } = addressType;
 
     /// <summary>
-    /// Gets type of constant, if any.
+    /// Gets or sets type of constant, if any.
     /// </summary>
-    public SymbolType? ConstantType { get; } = constantType;
+    public SymbolType? ConstantType { get; set; } = constantType;
 
     /// <summary>
-    /// Gets constant value.
+    /// Gets or sets constant value.
     /// </summary>
-    public int ConstantValue { get; } = constantValue;
+    public int ConstantValue { get; set; } = constantValue;
 
     /// <summary>
     /// Gets p-code of highest binary operator.
@@ -50,7 +50,7 @@ public class ExpressionAnalysis(
     public PCode? HighestBinaryOp { get; } = highestBinaryOp;
 
     /// <summary>
-    /// Gets stage index of "oper 0" code, if any.
+    /// Gets or sets stage index of "oper 0" code, if any.
     /// </summary>
-    public int? StageIndex { get; } = stageIndex;
+    public int? StageIndex { get; set; } = stageIndex;
 }
