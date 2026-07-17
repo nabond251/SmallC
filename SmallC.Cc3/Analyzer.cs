@@ -7,6 +7,7 @@ namespace SmallC.Cc3;
 using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc4;
+using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
 /// Expression analyzer.
@@ -26,22 +27,29 @@ public class Analyzer(
         int? before;
 
         (before, _) = backEnd.SetStage();
-        var val = await this.ExpressionAsync().ConfigureAwait(false);
+        var (@const, val) = await this.ExpressionAsync().ConfigureAwait(false);
 
         // scratch generated code
         await backEnd.ClearStageAsync(before, 0).ConfigureAwait(false);
-        return val ?? throw new InvalidOperationException(
-            "must be constant expression");
+        return !@const.HasValue ?
+            throw new InvalidOperationException("must be constant expression") :
+            val;
     }
 
     /// <summary>
     /// Analyzes expression.
     /// </summary>
     /// <returns>Constant value, if any.</returns>
-    public Task<int?> ExpressionAsync()
+    public async Task<(SymbolType? Con, int Val)> ExpressionAsync()
     {
-        _ = storage;
-        throw new NotImplementedException();
+        var @is = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+
+        if ((await this.Level1Async(@is).ConfigureAwait(false)).HasValue)
+        {
+            await this.FetchAsync(@is).ConfigureAwait(false);
+        }
+
+        return (@is.ConstantType, @is.ConstantValue);
     }
 
     /// <summary>
@@ -90,6 +98,30 @@ public class Analyzer(
 
         await backEnd.GenAsync(PCode.NE10f, label).ConfigureAwait(false);
         await backEnd.ClearStageAsync(before, start).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 1.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> Level1Async(ExpressionAnalysis @is)
+    {
+        _ = storage;
+        _ = @is;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Fetch operand.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task FetchAsync(ExpressionAnalysis @is)
+    {
+        _ = storage;
+        _ = @is;
+        throw new NotImplementedException();
     }
 
     /// <summary>
