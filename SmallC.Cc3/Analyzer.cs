@@ -646,18 +646,46 @@ public class Analyzer(
     /// <summary>
     /// Drop to a lower level.
     /// </summary>
-    private Task<int?> DownAsync(
+    private async Task<int?> DownAsync(
         IList<string> ops,
         int opOff,
         Func<ExpressionAnalysis, Task<int?>> levelAsync,
         ExpressionAnalysis @is)
     {
-        _ = storage;
-        _ = ops;
-        _ = opOff;
-        _ = levelAsync;
-        _ = @is;
-        throw new NotImplementedException();
+        int? k;
+
+        k = await this.Down1Async(levelAsync, @is).ConfigureAwait(false);
+        if (!await frontEnd.NextOpAsync(ops).ConfigureAwait(false))
+        {
+            return k;
+        }
+
+        if (k.HasValue)
+        {
+            await this.FetchAsync(@is).ConfigureAwait(false);
+        }
+
+        while (true)
+        {
+            if (await frontEnd.NextOpAsync(ops).ConfigureAwait(false))
+            {
+                // allocate only if needed
+                var is2 = new ExpressionAnalysis(
+                    null, null, null, null, 0, null, null);
+                frontEnd.Bump(storage.OpSize);
+                storage.OpIndex += opOff;
+                await this.Down2Async(
+                    storage.Op[storage.OpIndex],
+                    storage.Op2[storage.OpIndex],
+                    levelAsync,
+                    @is,
+                    is2).ConfigureAwait(false);
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     /// <summary>
