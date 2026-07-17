@@ -183,7 +183,161 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level1Async(ExpressionAnalysis @is)
+    public async Task<int?> Level1Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        int? k;
+        var is2 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        var is3 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        PCode? oper, oper2;
+
+        k = await this.Down1Async(this.Level2Async, @is).ConfigureAwait(false);
+        if (@is.ConstantType.HasValue)
+        {
+            await backEnd.GenAsync(PCode.GETw1m, @is.ConstantValue)
+                .ConfigureAwait(false);
+        }
+
+        if (await frontEnd.MatchAsync("|=").ConfigureAwait(false))
+        {
+            oper2 = PCode.OR12;
+            oper = oper2;
+        }
+        else if (await frontEnd.MatchAsync("^=").ConfigureAwait(false))
+        {
+            oper2 = PCode.XOR12;
+            oper = oper2;
+        }
+        else if (await frontEnd.MatchAsync("&=").ConfigureAwait(false))
+        {
+            oper2 = PCode.AND12;
+            oper = oper2;
+        }
+        else if (await frontEnd.MatchAsync("+=").ConfigureAwait(false))
+        {
+            oper2 = PCode.ADD12;
+            oper = oper2;
+        }
+        else if (await frontEnd.MatchAsync("-=").ConfigureAwait(false))
+        {
+            oper2 = PCode.SUB12;
+            oper = oper2;
+        }
+        else if (await frontEnd.MatchAsync("*=").ConfigureAwait(false))
+        {
+            oper = PCode.MUL12;
+            oper2 = PCode.MUL12u;
+        }
+        else if (await frontEnd.MatchAsync("/=").ConfigureAwait(false))
+        {
+            oper = PCode.DIV12;
+            oper2 = PCode.DIV12u;
+        }
+        else if (await frontEnd.MatchAsync("%=").ConfigureAwait(false))
+        {
+            oper = PCode.MOD12;
+            oper2 = PCode.MOD12u;
+        }
+        else if (await frontEnd.MatchAsync(">>=").ConfigureAwait(false))
+        {
+            oper2 = PCode.ASR12;
+            oper = oper2;
+        }
+        else if (await frontEnd.MatchAsync("<<=").ConfigureAwait(false))
+        {
+            oper2 = PCode.ASL12;
+            oper = oper2;
+        }
+        else if (await frontEnd.MatchAsync("=").ConfigureAwait(false))
+        {
+            oper2 = null;
+            oper = oper2;
+        }
+        else
+        {
+            return k;
+        }
+
+        // have an assignment operator
+        if (!k.HasValue)
+        {
+            ErrorUseCases.NeedLVal();
+            return null;
+        }
+
+        is3.SymbolTableEntry = @is.SymbolTableEntry;
+        is3.IndirectType = @is.IndirectType;
+
+        // indirect target
+        if (@is.IndirectType.HasValue)
+        {
+            // ?=
+            if (oper.HasValue)
+            {
+                // save address
+                await backEnd.GenAsync(PCode.PUSH1, null).ConfigureAwait(false);
+
+                // fetch left side
+                await this.FetchAsync(@is).ConfigureAwait(false);
+            }
+
+            // parse right side
+            await this.Down2Async(oper, oper2, this.Level1Async, @is, is2)
+                .ConfigureAwait(false);
+
+            // retrieve address
+            await backEnd.GenAsync(PCode.POP2, null).ConfigureAwait(false);
+        }
+
+        // direct target
+        else
+        {
+            // ?=
+            if (oper.HasValue)
+            {
+                // fetch left side
+                await this.FetchAsync(@is).ConfigureAwait(false);
+
+                // parse right side
+                await this.Down2Async(oper, oper2, this.Level1Async, @is, is2)
+                    .ConfigureAwait(false);
+            }
+
+            // =
+            else
+            {
+                // parse right side
+                if ((await this.Level1Async(@is2).ConfigureAwait(false))
+                    .HasValue)
+                {
+                    await this.FetchAsync(is2).ConfigureAwait(false);
+                }
+            }
+        }
+
+        // store result
+        await this.StoreAsync(is3).ConfigureAwait(false);
+        return null;
+    }
+
+    /// <summary>
+    /// Analyze level 1.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> Level2Async(ExpressionAnalysis @is)
+    {
+        _ = storage;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Store result.
+    /// </summary>
+    /// <param name="is">Expression analysis for result.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task StoreAsync(ExpressionAnalysis @is)
     {
         _ = storage;
         _ = @is;
@@ -197,6 +351,7 @@ public class Analyzer(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public Task FetchAsync(ExpressionAnalysis @is)
     {
+        _ = storage;
         _ = storage;
         _ = @is;
         throw new NotImplementedException();
@@ -284,5 +439,36 @@ public class Analyzer(
         }
 
         return i == 2 ? frontEnd.Gch() : oct;
+    }
+
+    /// <summary>
+    /// Unary drop to a lower level.
+    /// </summary>
+    private Task<int> Down1Async(
+        Func<ExpressionAnalysis, Task<int?>> levelAsync, ExpressionAnalysis @is)
+    {
+        _ = storage;
+        _ = levelAsync;
+        _ = @is;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Binary drop to a lower level.
+    /// </summary>
+    private Task Down2Async(
+        PCode? oper,
+        PCode? oper2,
+        Func<ExpressionAnalysis, Task<int?>> levelAsync,
+        ExpressionAnalysis @is,
+        ExpressionAnalysis is2)
+    {
+        _ = storage;
+        _ = oper;
+        _ = oper2;
+        _ = levelAsync;
+        _ = @is;
+        _ = is2;
+        throw new NotImplementedException();
     }
 }

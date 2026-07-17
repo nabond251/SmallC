@@ -20,14 +20,14 @@ public class ExpressionAnalysis(
     int? stageIndex)
 {
     /// <summary>
-    /// Gets symbol table entry, if any.
+    /// Gets or sets symbol table entry, if any.
     /// </summary>
-    public SymbolTableEntry? SymbolTableEntry { get; } = symbolTableEntry;
+    public SymbolTableEntry? SymbolTableEntry { get; set; } = symbolTableEntry;
 
     /// <summary>
-    /// Gets data type of indirectly referenced object, if any.
+    /// Gets or sets data type of indirectly referenced object, if any.
     /// </summary>
-    public SymbolType? IndirectType { get; } = indirectType;
+    public SymbolType? IndirectType { get; set; } = indirectType;
 
     /// <summary>
     /// Gets data type of address, if any.

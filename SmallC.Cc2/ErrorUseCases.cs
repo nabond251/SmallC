@@ -27,6 +27,14 @@ public static class ErrorUseCases
     }
 
     /// <summary>
+    /// Output missing l-value error.
+    /// </summary>
+    public static void NeedLVal()
+    {
+        throw new InvalidOperationException("must be lvalue");
+    }
+
+    /// <summary>
     /// Output no #if... error.
     /// </summary>
     public static void NoIfError()
