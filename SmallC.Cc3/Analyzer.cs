@@ -39,6 +39,16 @@ public class Analyzer(
     }
 
     /// <summary>
+    /// Analyzes expression.
+    /// </summary>
+    /// <returns>Constant value, if any.</returns>
+    public Task<int?> ExpressionAsync()
+    {
+        _ = storage;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// Analyzes a test expression.
     /// </summary>
     /// <param name="label">Label to jump to.</param>

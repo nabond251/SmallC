@@ -40,6 +40,7 @@ public class Storage(
     int fileArg,
     TextReader? input,
     TextReader? input2,
+    bool useXpr,
     bool cCode,
     int sLast,
     TextWriter? listFp,
@@ -137,6 +138,7 @@ public class Storage(
             fileArg: 0,
             input: input,
             input2: null,
+            useXpr: true,
             cCode: cCode ?? true,
             sLast: sLast ?? StagingBuffer.StageSize,
             listFp: null,
@@ -339,6 +341,11 @@ public class Storage(
     /// Gets or sets fd for "#include" file.
     /// </summary>
     public TextReader? Input2 { get; set; } = input2;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether value of expression is used.
+    /// </summary>
+    public bool UseXpr { get; set; } = useXpr;
 
     /// <summary>
     /// Gets or sets a value indicating whether parsing C code.

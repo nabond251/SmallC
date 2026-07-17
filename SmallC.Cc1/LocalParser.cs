@@ -781,32 +781,22 @@ public class LocalParser(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task DoExprAsync(bool use)
     {
-        _ = storage;
-        _ = use;
+        int? before, start;
 
-        await frontEnd.NeedAsync("(").ConfigureAwait(false);
-
-        var level = 1;
-
-        while (level != 0)
+        storage.UseXpr = use; // tell isfree() whether expression value is used
+        while (true)
         {
-            switch (storage.Ch)
+            (before, start) = backEnd.SetStage();
+            _ = await analyzer.ExpressionAsync().ConfigureAwait(false);
+            await backEnd.ClearStageAsync(before, start).ConfigureAwait(false);
+            if (storage.Ch != ',')
             {
-                case '(':
-                    level++;
-                    _ = frontEnd.Gch();
-                    break;
-                case ')':
-                    level--;
-                    _ = frontEnd.Gch();
-                    break;
-                case null:
-                    await frontEnd.PreprocessAsync().ConfigureAwait(false);
-                    break;
-                default:
-                    _ = frontEnd.Gch();
-                    break;
+                break;
             }
+
+            frontEnd.Bump(1);
         }
+
+        storage.UseXpr = true; // return to normal value
     }
 }
