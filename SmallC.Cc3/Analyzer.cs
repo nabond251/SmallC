@@ -444,13 +444,20 @@ public class Analyzer(
     /// <summary>
     /// Unary drop to a lower level.
     /// </summary>
-    private Task<int> Down1Async(
+    private async Task<int?> Down1Async(
         Func<ExpressionAnalysis, Task<int?>> levelAsync, ExpressionAnalysis @is)
     {
-        _ = storage;
-        _ = levelAsync;
-        _ = @is;
-        throw new NotImplementedException();
+        int? k, before;
+
+        (before, _) = backEnd.SetStage();
+        k = await levelAsync(@is).ConfigureAwait(false);
+        if (@is.ConstantType.HasValue)
+        {
+            // load constant later
+            await backEnd.ClearStageAsync(before, 0).ConfigureAwait(false);
+        }
+
+        return k;
     }
 
     /// <summary>
