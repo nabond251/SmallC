@@ -60,44 +60,122 @@ public class Analyzer(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TestAsync(int label, bool parens)
     {
+        var @is = new ExpressionAnalysis(null, null, null, null, 0, null, null);
         int? before, start;
 
         if (parens)
         {
             await frontEnd.NeedAsync("(").ConfigureAwait(false);
         }
-        else
+
+        while (true)
         {
-            throw new NotImplementedException();
-        }
+            (before, start) = backEnd.SetStage();
 
-        (before, start) = backEnd.SetStage();
-
-        var level = 1;
-
-        while (level != 0)
-        {
-            switch (storage.Ch)
+            if ((await this.Level1Async(@is).ConfigureAwait(false)).HasValue)
             {
-                case '(':
-                    level++;
-                    _ = frontEnd.Gch();
-                    break;
-                case ')':
-                    level--;
-                    _ = frontEnd.Gch();
-                    break;
-                case null:
-                    await frontEnd.PreprocessAsync().ConfigureAwait(false);
-                    break;
-                default:
-                    _ = frontEnd.Gch();
-                    break;
+                await this.FetchAsync(@is).ConfigureAwait(false);
+            }
+
+            if (await frontEnd.MatchAsync(",").ConfigureAwait(false))
+            {
+                await backEnd.ClearStageAsync(before, start)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                break;
             }
         }
 
-        await backEnd.GenAsync(PCode.NE10f, label).ConfigureAwait(false);
+        if (parens)
+        {
+            await frontEnd.NeedAsync(")").ConfigureAwait(false);
+        }
+
+        if (@is.ConstantType.HasValue)
+        {
+            // constant expression
+            await backEnd.ClearStageAsync(before, 0).ConfigureAwait(false);
+            if (@is.ConstantValue != 0)
+            {
+                return;
+            }
+
+            await backEnd.GenAsync(PCode.JMPm, label).ConfigureAwait(false);
+            return;
+        }
+
+        // stage index of "oper 0" code
+        if (@is.StageIndex.HasValue)
+        {
+            // operator code
+#pragma warning disable IDE0010 // Add missing cases
+            switch (@is.HighestBinaryOp)
+            {
+                case PCode.EQ12:
+                case PCode.LE12u:
+                    await this.ZeroJumpAsync(PCode.EQ10f, label, @is)
+                        .ConfigureAwait(false);
+                    break;
+                case PCode.NE12:
+                case PCode.GT12u:
+                    await this.ZeroJumpAsync(PCode.NE10f, label, @is)
+                        .ConfigureAwait(false);
+                    break;
+                case PCode.GT12:
+                    await this.ZeroJumpAsync(PCode.GT10f, label, @is)
+                        .ConfigureAwait(false);
+                    break;
+                case PCode.GE12:
+                    await this.ZeroJumpAsync(PCode.GE10f, label, @is)
+                        .ConfigureAwait(false);
+                    break;
+                case PCode.GE12u:
+                    await backEnd.ClearStageAsync(@is.StageIndex, 0)
+                        .ConfigureAwait(false);
+                    break;
+                case PCode.LT12:
+                    await this.ZeroJumpAsync(PCode.LT10f, label, @is)
+                        .ConfigureAwait(false);
+                    break;
+                case PCode.LT12u:
+                    await this.ZeroJumpAsync(PCode.JMPm, label, @is)
+                        .ConfigureAwait(false);
+                    break;
+                case PCode.LE12:
+                    await this.ZeroJumpAsync(PCode.LE10f, label, @is)
+                        .ConfigureAwait(false);
+                    break;
+                default:
+                    await backEnd.GenAsync(PCode.NE10f, label)
+                        .ConfigureAwait(false);
+                    break;
+            }
+#pragma warning restore IDE0010 // Add missing cases
+        }
+        else
+        {
+            await backEnd.GenAsync(PCode.NE10f, label).ConfigureAwait(false);
+        }
+
         await backEnd.ClearStageAsync(before, start).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Test primary register against zero and jump if false.
+    /// </summary>
+    /// <param name="oper">Operator to use.</param>
+    /// <param name="label">Label to jump to if false.</param>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task ZeroJumpAsync(PCode oper, int label, ExpressionAnalysis @is)
+    {
+        _ = storage;
+        _ = oper;
+        _ = label;
+        _ = @is;
+        throw new NotImplementedException();
     }
 
     /// <summary>
