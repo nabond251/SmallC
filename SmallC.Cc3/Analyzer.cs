@@ -418,6 +418,8 @@ public class Analyzer(
     /// <returns>Expression operand.</returns>
     public async Task<int?> Level3Async(ExpressionAnalysis @is)
     {
+        ArgumentNullException.ThrowIfNull(@is);
+
         return await this.SkimAsync(
             ["||"], PCode.EQ10f, 1, 0, this.Level4Async, @is)
             .ConfigureAwait(false);
@@ -546,22 +548,58 @@ public class Analyzer(
     /// <summary>
     /// Skim over terms adjoining || and &amp;&amp; operators.
     /// </summary>
-    private Task<int?> SkimAsync(
-        IEnumerable<string> ops,
+    private async Task<int?> SkimAsync(
+        IList<string> ops,
         PCode tCode,
         int dropVal,
         int endVal,
         Func<ExpressionAnalysis, Task<int?>> levelAsync,
         ExpressionAnalysis @is)
     {
-        _ = storage;
-        _ = ops;
-        _ = tCode;
-        _ = dropVal;
-        _ = endVal;
-        _ = levelAsync;
-        _ = @is;
-        throw new NotImplementedException();
+        int? k;
+        int dropLab, endLab;
+
+        dropLab = 0;
+        while (true)
+        {
+            k = await this.Down1Async(levelAsync, @is).ConfigureAwait(false);
+            if (await frontEnd.NextOpAsync(ops).ConfigureAwait(false))
+            {
+                frontEnd.Bump(storage.OpSize);
+                if (dropLab == 0)
+                {
+                    dropLab = utility.GetLabel();
+                    await this.DropOutAsync(k, tCode, dropLab, @is)
+                        .ConfigureAwait(false);
+                }
+            }
+            else if (dropLab != 0)
+            {
+                await this.DropOutAsync(k, tCode, dropLab, @is)
+                    .ConfigureAwait(false);
+                await backEnd.GenAsync(PCode.GETw1n, endVal)
+                    .ConfigureAwait(false);
+                endLab = utility.GetLabel();
+                await backEnd.GenAsync(PCode.JMPm, endLab)
+                    .ConfigureAwait(false);
+                await backEnd.GenAsync(PCode.LABm, dropLab)
+                    .ConfigureAwait(false);
+                await backEnd.GenAsync(PCode.GETw1n, dropVal)
+                    .ConfigureAwait(false);
+                await backEnd.GenAsync(PCode.LABm, endLab)
+                    .ConfigureAwait(false);
+                @is.IndirectType = null;
+                @is.AddressType = null;
+                @is.ConstantType = null;
+                @is.ConstantValue = 0;
+                @is.StageIndex = null;
+                return null;
+            }
+            else
+            {
+                return k;
+            }
+        }
     }
 
     /// <summary>
