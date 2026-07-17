@@ -444,7 +444,20 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level5Async(ExpressionAnalysis @is)
+    public async Task<int?> Level5Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync(["|"], 1, this.Level6Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 6.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> Level6Async(ExpressionAnalysis @is)
     {
         _ = storage;
         throw new NotImplementedException();
@@ -626,6 +639,23 @@ public class Analyzer(
         _ = k;
         _ = tCode;
         _ = exit1;
+        _ = @is;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Drop to a lower level.
+    /// </summary>
+    private Task<int?> DownAsync(
+        IList<string> ops,
+        int opOff,
+        Func<ExpressionAnalysis, Task<int?>> levelAsync,
+        ExpressionAnalysis @is)
+    {
+        _ = storage;
+        _ = ops;
+        _ = opOff;
+        _ = levelAsync;
         _ = @is;
         throw new NotImplementedException();
     }
