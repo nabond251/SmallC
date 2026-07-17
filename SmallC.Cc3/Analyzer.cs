@@ -21,21 +21,17 @@ public class Analyzer(
     /// Gets constant expression, if any.
     /// </summary>
     /// <returns>Constant expression from next tokens, if any.</returns>
-    public int? ConstExpr()
+    public async Task<int?> ConstExprAsync()
     {
-        int? e = null;
-        if (storage.Ch is char c && char.IsDigit(c))
-        {
-            e = 0;
-            while (storage.Ch is char d && char.IsDigit(d))
-            {
-                e *= 10;
-                e += d - '0';
-                _ = frontEnd.Gch();
-            }
-        }
+        int? before;
 
-        return e;
+        (before, _) = backEnd.SetStage();
+        var val = await this.ExpressionAsync().ConfigureAwait(false);
+
+        // scratch generated code
+        await backEnd.ClearStageAsync(before, 0).ConfigureAwait(false);
+        return val ?? throw new InvalidOperationException(
+            "must be constant expression");
     }
 
     /// <summary>

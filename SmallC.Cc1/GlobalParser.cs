@@ -273,7 +273,8 @@ public class GlobalParser(
                 await backEnd.PointAsync().ConfigureAwait(false);
             }
         }
-        else if (analyzer.ConstExpr() is int value)
+        else if (await analyzer.ConstExprAsync().ConfigureAwait(false)
+            is int value)
         {
             if (ident == SymbolIdentity.Pointer)
             {

@@ -35,7 +35,7 @@ public class LocalParser(
             return 0; // null size
         }
 
-        val = analyzer.ConstExpr() ?? 1;
+        val = await analyzer.ConstExprAsync().ConfigureAwait(false) ?? 1;
         if (val < 0)
         {
             throw new InvalidCastException("negative size illegal");
@@ -576,8 +576,8 @@ public class LocalParser(
 
         var label = utility.GetLabel();
         await backEnd.GenAsync(PCode.LABm, label).ConfigureAwait(false);
-        storage.SwNext[label] = analyzer.ConstExpr() ??
-            throw new InvalidOperationException();
+        storage.SwNext[label] = await analyzer.ConstExprAsync()
+            .ConfigureAwait(false) ?? throw new InvalidOperationException();
         await frontEnd.NeedAsync(":").ConfigureAwait(false);
     }
 
