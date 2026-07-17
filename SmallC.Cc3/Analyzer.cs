@@ -448,7 +448,7 @@ public class Analyzer(
     {
         ArgumentNullException.ThrowIfNull(@is);
 
-        return await this.DownAsync(["|"], 1, this.Level6Async, @is)
+        return await this.DownAsync(["|"], 0, this.Level6Async, @is)
             .ConfigureAwait(false);
     }
 
@@ -457,7 +457,98 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level6Async(ExpressionAnalysis @is)
+    public async Task<int?> Level6Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync(["^"], 1, this.Level7Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 7.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public async Task<int?> Level7Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync(["&"], 2, this.Level8Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 8.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public async Task<int?> Level8Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync(["==", "!="], 3, this.Level9Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 9.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public async Task<int?> Level9Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync(["<=", ">=", "<", ">"], 5, this.Level10Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 10.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public async Task<int?> Level10Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync([">>", "<<"], 9, this.Level11Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 11.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public async Task<int?> Level11Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync(["+", "-"], 11, this.Level12Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 12.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public async Task<int?> Level12Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        return await this.DownAsync(["*", "/", "%"], 13, this.Level13Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 13.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> Level13Async(ExpressionAnalysis @is)
     {
         _ = storage;
         throw new NotImplementedException();
