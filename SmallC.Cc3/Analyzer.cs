@@ -412,11 +412,23 @@ public class Analyzer(
     }
 
     /// <summary>
-    /// Analyze level 2.
+    /// Analyze level 3.
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level3Async(ExpressionAnalysis @is)
+    public async Task<int?> Level3Async(ExpressionAnalysis @is)
+    {
+        return await this.SkimAsync(
+            ["||"], PCode.EQ10f, 1, 0, this.Level4Async, @is)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Analyze level 4.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> Level4Async(ExpressionAnalysis @is)
     {
         _ = storage;
         throw new NotImplementedException();
@@ -529,6 +541,27 @@ public class Analyzer(
         }
 
         return i == 2 ? frontEnd.Gch() : oct;
+    }
+
+    /// <summary>
+    /// Skim over terms adjoining || and &amp;&amp; operators.
+    /// </summary>
+    private Task<int?> SkimAsync(
+        IEnumerable<string> ops,
+        PCode tCode,
+        int dropVal,
+        int endVal,
+        Func<ExpressionAnalysis, Task<int?>> levelAsync,
+        ExpressionAnalysis @is)
+    {
+        _ = storage;
+        _ = ops;
+        _ = tCode;
+        _ = dropVal;
+        _ = endVal;
+        _ = levelAsync;
+        _ = @is;
+        throw new NotImplementedException();
     }
 
     /// <summary>
