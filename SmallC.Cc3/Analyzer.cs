@@ -13,6 +13,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// Expression analyzer.
 /// </summary>
 public class Analyzer(
+    SymbolTableUseCases symbolTable,
     UtilityUseCases utility,
     FrontEnd frontEnd,
     BackEnd backEnd,
@@ -551,6 +552,8 @@ public class Analyzer(
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "not code")]
     public async Task<int?> Level13Async(ExpressionAnalysis @is)
     {
+        ArgumentNullException.ThrowIfNull(@is);
+
         int? k;
 
         // ++lval
@@ -563,6 +566,171 @@ public class Analyzer(
             }
 
             await this.StepAsync(PCode.rINC1, @is, 0).ConfigureAwait(false);
+            return null;
+        }
+
+        // ++lval
+        else if (await frontEnd.MatchAsync("--").ConfigureAwait(false))
+        {
+            if (!(await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            {
+                ErrorUseCases.NeedLVal();
+                return null;
+            }
+
+            await this.StepAsync(PCode.rDEC1, @is, 0).ConfigureAwait(false);
+            return null;
+        }
+
+        // ~
+        else if (await frontEnd.MatchAsync("~").ConfigureAwait(false))
+        {
+            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            {
+                await this.FetchAsync(@is).ConfigureAwait(false);
+            }
+
+            await backEnd.GenAsync(PCode.COM1, null).ConfigureAwait(false);
+            @is.ConstantValue = ~@is.ConstantValue;
+            @is.SymbolTableEntry = null;
+            return null;
+        }
+
+        // !
+        else if (await frontEnd.MatchAsync("!").ConfigureAwait(false))
+        {
+            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            {
+                await this.FetchAsync(@is).ConfigureAwait(false);
+            }
+
+            await backEnd.GenAsync(PCode.LNEG1, null).ConfigureAwait(false);
+            @is.ConstantValue = @is.ConstantValue == 0 ? 1 : 0;
+            @is.SymbolTableEntry = null;
+            return null;
+        }
+
+        // unary -
+        else if (await frontEnd.MatchAsync("-").ConfigureAwait(false))
+        {
+            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            {
+                await this.FetchAsync(@is).ConfigureAwait(false);
+            }
+
+            await backEnd.GenAsync(PCode.ANEG1, null).ConfigureAwait(false);
+            @is.ConstantValue = -@is.ConstantValue;
+            @is.SymbolTableEntry = null;
+            return null;
+        }
+
+        // unary *
+        else if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
+        {
+            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            {
+                await this.FetchAsync(@is).ConfigureAwait(false);
+            }
+
+            @is.IndirectType = @is.SymbolTableEntry is SymbolTableEntry ptr ?
+                ptr.Type : SymbolType.Int;
+            @is.StageIndex = null; // no (op 0) stage index
+            @is.AddressType = null; // not an address
+            @is.ConstantType = null; // not a constant
+            @is.ConstantValue = 1; // omit FetchAsync() on func call
+            return 1;
+        }
+
+        // sizeof()
+        else if (await frontEnd.AMatchAsync("sizeof", 6).ConfigureAwait(false))
+        {
+            int sz;
+            bool p;
+
+            p = await frontEnd.MatchAsync("(").ConfigureAwait(false);
+            sz = 0;
+            if (await frontEnd.AMatchAsync("unsigned", 8).ConfigureAwait(false))
+            {
+                sz = Machine.Bpw;
+            }
+
+            if (await frontEnd.AMatchAsync("int", 3).ConfigureAwait(false))
+            {
+                sz = Machine.Bpw;
+            }
+            else if (await frontEnd.AMatchAsync("char", 4)
+                .ConfigureAwait(false))
+            {
+                sz = 1;
+            }
+
+            if (sz != 0)
+            {
+                if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
+                {
+                    sz = Machine.Bpw;
+                }
+            }
+            else
+            {
+                sz =
+                    await frontEnd.SymNameAsync().ConfigureAwait(false)
+                    is string sName
+                    && (symbolTable.FindLoc(sName)
+                    ?? symbolTable.FindGlb(sName))
+                    is SymbolTableEntry ptr
+                    && ptr.Ident != SymbolIdentity.Function
+                    && ptr.Ident != SymbolIdentity.Label
+                    ? ptr.Size
+                    : throw new InvalidOperationException(
+                        "must be object or type");
+            }
+
+            if (p)
+            {
+                await frontEnd.NeedAsync(")").ConfigureAwait(false);
+            }
+
+            @is.ConstantType = SymbolType.Int;
+            @is.ConstantValue = sz;
+            @is.AddressType = null;
+            @is.IndirectType = null;
+            @is.StageIndex = null;
+            return null;
+        }
+
+        // unary &
+        else if (await frontEnd.MatchAsync("&").ConfigureAwait(false))
+        {
+            if (!(await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            {
+                throw new InvalidOperationException("illegal address");
+            }
+
+            var ptr = @is.SymbolTableEntry ??
+                throw new InvalidOperationException();
+            @is.AddressType = ptr.Type;
+            if (@is.IndirectType.HasValue)
+            {
+                return null;
+            }
+
+            var index = storage.SymTab.Locals.IndexOf(ptr);
+            if (index == -1)
+            {
+                index = storage.SymTab.Globals.IndexOf(ptr);
+                if (index == -1)
+                {
+                    throw new InvalidOperationException();
+                }
+                else
+                {
+                    index += SymbolTable.NumLocs;
+                }
+            }
+
+            await backEnd.GenAsync(PCode.POINT1m, index).ConfigureAwait(false);
+            @is.IndirectType = ptr.Type;
             return null;
         }
         else
@@ -579,6 +747,20 @@ public class Analyzer(
                 }
 
                 await this.StepAsync(PCode.rINC1, @is, PCode.rDEC1)
+                    .ConfigureAwait(false);
+                return null;
+            }
+
+            // lval--
+            else if (await frontEnd.MatchAsync("--").ConfigureAwait(false))
+            {
+                if (!k.HasValue)
+                {
+                    ErrorUseCases.NeedLVal();
+                    return null;
+                }
+
+                await this.StepAsync(PCode.rDEC1, @is, PCode.rINC1)
                     .ConfigureAwait(false);
                 return null;
             }
