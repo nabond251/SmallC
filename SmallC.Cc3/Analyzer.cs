@@ -1024,14 +1024,66 @@ public class Analyzer(
     /// <summary>
     /// Call function.
     /// </summary>
-    /// <param name="ptr">Entry of function to call.</param>
+    /// <param name="ptr">Entry of function to call, if direct call.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "literature")]
-    public Task CallFuncAsync(SymbolTableEntry? ptr)
+    public async Task CallFuncAsync(SymbolTableEntry? ptr)
     {
-        _ = storage;
-        _ = ptr;
-        throw new NotImplementedException();
+        int nArgs;
+
+        nArgs = 0;
+
+        // already saw open paren
+        await frontEnd.BlanksAsync().ConfigureAwait(false);
+        while (storage.LPtr >= storage.Line.Length
+            || FrontEnd.StrEq(storage.Line[storage.LPtr..], ")") == 0)
+        {
+            if (await frontEnd.EndStAsync().ConfigureAwait(false))
+            {
+                break;
+            }
+
+            if (ptr is not null)
+            {
+                _ = await this.ExpressionAsync().ConfigureAwait(false);
+                await backEnd.GenAsync(PCode.PUSH1, null).ConfigureAwait(false);
+            }
+            else
+            {
+                await backEnd.GenAsync(PCode.PUSH1, null).ConfigureAwait(false);
+                _ = await this.ExpressionAsync().ConfigureAwait(false);
+
+                // don't push addr
+                await backEnd.GenAsync(PCode.SWAP1s, null)
+                    .ConfigureAwait(false);
+            }
+
+            nArgs += Machine.Bpw; // count args*BPW
+            if (!await frontEnd.MatchAsync(",").ConfigureAwait(false))
+            {
+                break;
+            }
+        }
+
+        await frontEnd.NeedAsync(")").ConfigureAwait(false);
+        if (FrontEnd.StrEq(ptr?.Name ?? string.Empty, "CCARGC") == 0)
+        {
+            await backEnd.GenAsync(PCode.ARGCNTn, nArgs >> Machine.Lbpw)
+                .ConfigureAwait(false);
+        }
+
+        if (ptr is not null)
+        {
+            await backEnd.GenAsync(PCode.CALLm, storage.SymTab.IndexOf(ptr))
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            await backEnd.GenAsync(PCode.CALL1, null).ConfigureAwait(false);
+        }
+
+        await backEnd.GenAsync(PCode.ADDSP, storage.Csp + nArgs)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
