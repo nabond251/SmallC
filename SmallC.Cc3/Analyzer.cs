@@ -31,7 +31,7 @@ public class Analyzer(
         var (@const, val) = await this.ExpressionAsync().ConfigureAwait(false);
 
         // scratch generated code
-        await backEnd.ClearStageAsync(before, 0).ConfigureAwait(false);
+        await backEnd.ClearStageAsync(before, null).ConfigureAwait(false);
         return !@const.HasValue ?
             throw new InvalidOperationException("must be constant expression") :
             val;
@@ -97,7 +97,7 @@ public class Analyzer(
         if (@is.ConstantType.HasValue)
         {
             // constant expression
-            await backEnd.ClearStageAsync(before, 0).ConfigureAwait(false);
+            await backEnd.ClearStageAsync(before, null).ConfigureAwait(false);
             if (@is.ConstantValue != 0)
             {
                 return;
@@ -133,7 +133,7 @@ public class Analyzer(
                         .ConfigureAwait(false);
                     break;
                 case PCode.GE12u:
-                    await backEnd.ClearStageAsync(@is.StageIndex, 0)
+                    await backEnd.ClearStageAsync(@is.StageIndex, null)
                         .ConfigureAwait(false);
                     break;
                 case PCode.LT12:
@@ -715,20 +715,7 @@ public class Analyzer(
                 return null;
             }
 
-            var index = storage.SymTab.Locals.IndexOf(ptr);
-            if (index == -1)
-            {
-                index = storage.SymTab.Globals.IndexOf(ptr);
-                if (index == -1)
-                {
-                    throw new InvalidOperationException();
-                }
-                else
-                {
-                    index += SymbolTable.NumLocs;
-                }
-            }
-
+            var index = storage.SymTab.IndexOf(ptr);
             await backEnd.GenAsync(PCode.POINT1m, index).ConfigureAwait(false);
             @is.IndirectType = ptr.Type;
             return null;
@@ -776,10 +763,164 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level14Async(ExpressionAnalysis @is)
+    public async Task<int?> Level14Async(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        int? k;
+        SymbolTableEntry? ptr;
+        int? before, start;
+
+        k = await this.PrimaryAsync(@is).ConfigureAwait(false);
+        ptr = @is.SymbolTableEntry;
+        await frontEnd.BlanksAsync().ConfigureAwait(false);
+        if (storage.Ch is '[' or '(')
+        {
+            // allocate only if needed
+            var is2 = new ExpressionAnalysis(
+                null, null, null, null, 0, null, null);
+
+            while (true)
+            {
+                // [subscript]
+                if (await frontEnd.MatchAsync("[").ConfigureAwait(false))
+                {
+                    if (ptr is null)
+                    {
+                        throw new InvalidOperationException("can't subscript");
+                    }
+
+                    if (@is.AddressType.HasValue)
+                    {
+                        if (k.HasValue)
+                        {
+                            await this.FetchAsync(@is).ConfigureAwait(false);
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            "can't subscript");
+                    }
+
+                    (before, start) = backEnd.SetStage();
+                    is2.ConstantType = null;
+                    await this
+                        .Down2Async(null, null, this.Level1Async, is2, is2)
+                        .ConfigureAwait(false);
+                    await frontEnd.NeedAsync("]").ConfigureAwait(false);
+                    if (is2.ConstantType.HasValue)
+                    {
+                        await backEnd.ClearStageAsync(before, null)
+                            .ConfigureAwait(false);
+                        if (is2.ConstantValue != 0)
+                        {
+                            // only add if non-zero
+                            if ((int)ptr.Type >> 2 == Machine.Bpw)
+                            {
+                                await backEnd.GenAsync(
+                                    PCode.GETw2n,
+                                    is2.ConstantValue << Machine.Lbpw)
+                                    .ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                await backEnd.GenAsync(
+                                    PCode.GETw2n,
+                                    is2.ConstantValue).ConfigureAwait(false);
+                            }
+
+                            await backEnd.GenAsync(PCode.ADD12, null)
+                                .ConfigureAwait(false);
+                        }
+                    }
+                    else
+                    {
+                        if ((int)ptr.Type >> 2 == Machine.Bpw)
+                        {
+                            await backEnd.GenAsync(PCode.DBL1, null)
+                                .ConfigureAwait(false);
+                        }
+
+                        await backEnd.GenAsync(PCode.ADD12, null)
+                            .ConfigureAwait(false);
+                    }
+
+                    @is.AddressType = null;
+                    @is.IndirectType = ptr.Type;
+                    k = 1;
+                }
+
+                // function(...)
+                else if (await frontEnd.MatchAsync("(")
+                    .ConfigureAwait(false))
+                {
+                    if (ptr is null)
+                    {
+                        await this.CallFuncAsync(null)
+                            .ConfigureAwait(false);
+                    }
+                    else if (ptr.Ident != SymbolIdentity.Function)
+                    {
+                        if (k.HasValue && @is.ConstantValue == 0)
+                        {
+                            await this.FetchAsync(@is)
+                                .ConfigureAwait(false);
+                        }
+
+                        await this.CallFuncAsync(null)
+                            .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await this.CallFuncAsync(ptr).ConfigureAwait(false);
+                    }
+
+                    k = null;
+                    @is.SymbolTableEntry = null;
+                    @is.ConstantType = null;
+                    @is.ConstantValue = 0;
+                }
+                else
+                {
+                    return k;
+                }
+            }
+        }
+
+        if (ptr?.Ident == SymbolIdentity.Function)
+        {
+            var index = storage.SymTab.IndexOf(ptr);
+            await backEnd.GenAsync(PCode.POINT1m, index).ConfigureAwait(false);
+            @is.SymbolTableEntry = null;
+            return null;
+        }
+
+        return k;
+    }
+
+    /// <summary>
+    /// Analyze primary term.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> PrimaryAsync(ExpressionAnalysis @is)
     {
         _ = storage;
         _ = @is;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Call function.
+    /// </summary>
+    /// <param name="ptr">Entry of function to call.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "literature")]
+    public Task CallFuncAsync(SymbolTableEntry? ptr)
+    {
+        _ = storage;
+        _ = ptr;
         throw new NotImplementedException();
     }
 
@@ -1037,7 +1178,7 @@ public class Analyzer(
         if (@is.ConstantType.HasValue)
         {
             // load constant later
-            await backEnd.ClearStageAsync(before, 0).ConfigureAwait(false);
+            await backEnd.ClearStageAsync(before, null).ConfigureAwait(false);
         }
 
         return k;

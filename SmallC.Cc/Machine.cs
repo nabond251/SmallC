@@ -13,4 +13,9 @@ public static class Machine
     /// Bytes per word.
     /// </summary>
     public const int Bpw = 2;
+
+    /// <summary>
+    /// log2(Bpw).
+    /// </summary>
+    public const int Lbpw = 1;
 }
