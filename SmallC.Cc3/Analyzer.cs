@@ -565,7 +565,7 @@ public class Analyzer(
                 return null;
             }
 
-            await this.StepAsync(PCode.rINC1, @is, 0).ConfigureAwait(false);
+            await this.StepAsync(PCode.rINC1, @is, null).ConfigureAwait(false);
             return null;
         }
 
@@ -578,7 +578,7 @@ public class Analyzer(
                 return null;
             }
 
-            await this.StepAsync(PCode.rDEC1, @is, 0).ConfigureAwait(false);
+            await this.StepAsync(PCode.rDEC1, @is, null).ConfigureAwait(false);
             return null;
         }
 
@@ -1091,15 +1091,23 @@ public class Analyzer(
     /// </summary>
     /// <param name="oper">Operator.</param>
     /// <param name="is">Expression analysis for result.</param>
-    /// <param name="oper2">Second operator.</param>
+    /// <param name="oper2">Second operator, if any.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task StepAsync(PCode oper, ExpressionAnalysis @is, PCode oper2)
+    public async Task StepAsync(
+        PCode oper, ExpressionAnalysis @is, PCode? oper2)
     {
-        _ = storage;
-        _ = oper;
-        _ = @is;
-        _ = oper2;
-        throw new NotImplementedException();
+        await this.FetchAsync(@is).ConfigureAwait(false);
+        await backEnd.GenAsync(
+            oper,
+            @is.AddressType.HasValue ? ((int)@is.AddressType.Value >> 2) : 1)
+            .ConfigureAwait(false);
+        await this.StoreAsync(@is).ConfigureAwait(false);
+        if (oper2.HasValue)
+        {
+            var value = @is.AddressType.HasValue ?
+                ((int)@is.AddressType.Value >> 2) : 1;
+            await backEnd.GenAsync(oper2.Value, value).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
@@ -1107,11 +1115,44 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Expression analysis for result.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task StoreAsync(ExpressionAnalysis @is)
+    public async Task StoreAsync(ExpressionAnalysis @is)
     {
-        _ = storage;
-        _ = @is;
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(@is);
+
+        // putstk
+        if (@is.IndirectType.HasValue)
+        {
+            if ((int)@is.IndirectType.Value >> 2 == 1)
+            {
+                await backEnd.GenAsync(PCode.PUTbp1, null)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                await backEnd.GenAsync(PCode.PUTwp1, null)
+                    .ConfigureAwait(false);
+            }
+        }
+
+        // putmem
+        else
+        {
+            var ptr = @is.SymbolTableEntry ??
+                throw new InvalidOperationException();
+            if (ptr.Ident != SymbolIdentity.Pointer
+                && (int)ptr.Type >> 2 == 1)
+            {
+                await backEnd.GenAsync(
+                    PCode.PUTbm1, storage.SymTab.IndexOf(ptr))
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                await backEnd.GenAsync(
+                    PCode.PUTwm1, storage.SymTab.IndexOf(ptr))
+                    .ConfigureAwait(false);
+            }
+        }
     }
 
     /// <summary>
