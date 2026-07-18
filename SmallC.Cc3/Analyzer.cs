@@ -904,11 +904,121 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> PrimaryAsync(ExpressionAnalysis @is)
+    public async Task<int?> PrimaryAsync(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        string? sName;
+        int? k;
+
+        // (subexpression)
+        if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
+        {
+            do
+            {
+                k = await this.Level1Async(@is).ConfigureAwait(false);
+            }
+            while (await frontEnd.MatchAsync(",").ConfigureAwait(false));
+            await frontEnd.NeedAsync(")").ConfigureAwait(false);
+            return k;
+        }
+
+        @is.SymbolTableEntry = null;
+        @is.IndirectType = null;
+        @is.AddressType = null;
+        @is.ConstantType = null;
+        @is.ConstantValue = 0;
+        @is.HighestBinaryOp = null;
+        @is.StageIndex = null;
+
+        sName = await frontEnd.SymNameAsync().ConfigureAwait(false);
+
+        // is legal symbol
+        if (sName is not null)
+        {
+            // is local
+            if (symbolTable.FindLoc(sName) is SymbolTableEntry ptrLoc)
+            {
+                if (ptrLoc.Ident == SymbolIdentity.Label)
+                {
+                    await this.ExpErrAsync().ConfigureAwait(false);
+                    return null;
+                }
+
+                await backEnd.GenAsync(PCode.POINT1s, ptrLoc.Offset)
+                    .ConfigureAwait(false);
+                @is.SymbolTableEntry = ptrLoc;
+                @is.IndirectType = ptrLoc.Type;
+                if (ptrLoc.Ident == SymbolIdentity.Array)
+                {
+                    @is.AddressType = ptrLoc.Type;
+                    return null;
+                }
+
+                if (ptrLoc.Ident == SymbolIdentity.Pointer)
+                {
+                    @is.IndirectType = SymbolType.UInt;
+                    @is.AddressType = ptrLoc.Type;
+                }
+
+                return 1;
+            }
+
+            // is global
+            if (symbolTable.FindGlb(sName) is SymbolTableEntry ptrGlb)
+            {
+                @is.SymbolTableEntry = ptrGlb;
+                if (ptrGlb.Ident != SymbolIdentity.Function)
+                {
+                    if (ptrGlb.Ident == SymbolIdentity.Array)
+                    {
+                        await backEnd.GenAsync(
+                            PCode.POINT1m, storage.SymTab.IndexOf(ptrGlb))
+                            .ConfigureAwait(false);
+                        @is.IndirectType = ptrGlb.Type;
+                        @is.AddressType = ptrGlb.Type;
+                        return null;
+                    }
+
+                    if (ptrGlb.Ident == SymbolIdentity.Pointer)
+                    {
+                        @is.AddressType = ptrGlb.Type;
+                    }
+
+                    return 1;
+                }
+            }
+            else
+            {
+                @is.SymbolTableEntry = symbolTable.AddSym(
+                    sName,
+                    SymbolIdentity.Function,
+                    SymbolType.Int,
+                    0,
+                    0,
+                    storage.SymTab.Globals,
+                    SymbolClass.AutoExt);
+            }
+
+            return null;
+        }
+
+        if (!this.Constant(@is))
+        {
+            await this.ExpErrAsync().ConfigureAwait(false);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Outputs invalid expression error.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task ExpErrAsync()
     {
         _ = storage;
-        _ = @is;
-        throw new NotImplementedException();
+        throw new InvalidOperationException("invalid expression");
     }
 
     /// <summary>
@@ -960,6 +1070,18 @@ public class Analyzer(
     public Task FetchAsync(ExpressionAnalysis @is)
     {
         _ = storage;
+        _ = storage;
+        _ = @is;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Parses constant.
+    /// </summary>
+    /// <param name="is">Expression analysis.</param>
+    /// <returns>A value indicating whether expression is constant.</returns>
+    public bool Constant(ExpressionAnalysis @is)
+    {
         _ = storage;
         _ = @is;
         throw new NotImplementedException();

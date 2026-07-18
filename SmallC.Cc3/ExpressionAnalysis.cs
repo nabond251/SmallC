@@ -45,9 +45,9 @@ public class ExpressionAnalysis(
     public int ConstantValue { get; set; } = constantValue;
 
     /// <summary>
-    /// Gets p-code of highest binary operator.
+    /// Gets or sets p-code of highest binary operator.
     /// </summary>
-    public PCode? HighestBinaryOp { get; } = highestBinaryOp;
+    public PCode? HighestBinaryOp { get; set; } = highestBinaryOp;
 
     /// <summary>
     /// Gets or sets stage index of "oper 0" code, if any.
