@@ -548,9 +548,72 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public Task<int?> Level13Async(ExpressionAnalysis @is)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "not code")]
+    public async Task<int?> Level13Async(ExpressionAnalysis @is)
+    {
+        int? k;
+
+        // ++lval
+        if (await frontEnd.MatchAsync("++").ConfigureAwait(false))
+        {
+            if (!(await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            {
+                ErrorUseCases.NeedLVal();
+                return null;
+            }
+
+            await this.StepAsync(PCode.rINC1, @is, 0).ConfigureAwait(false);
+            return null;
+        }
+        else
+        {
+            k = await this.Level14Async(@is).ConfigureAwait(false);
+
+            // lval++
+            if (await frontEnd.MatchAsync("++").ConfigureAwait(false))
+            {
+                if (!k.HasValue)
+                {
+                    ErrorUseCases.NeedLVal();
+                    return null;
+                }
+
+                await this.StepAsync(PCode.rINC1, @is, PCode.rDEC1)
+                    .ConfigureAwait(false);
+                return null;
+            }
+            else
+            {
+                return k;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Analyze level 14.
+    /// </summary>
+    /// <param name="is">Analysis results.</param>
+    /// <returns>Expression operand.</returns>
+    public Task<int?> Level14Async(ExpressionAnalysis @is)
     {
         _ = storage;
+        _ = @is;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Step.
+    /// </summary>
+    /// <param name="oper">Operator.</param>
+    /// <param name="is">Expression analysis for result.</param>
+    /// <param name="oper2">Second operator.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public Task StepAsync(PCode oper, ExpressionAnalysis @is, PCode oper2)
+    {
+        _ = storage;
+        _ = oper;
+        _ = @is;
+        _ = oper2;
         throw new NotImplementedException();
     }
 
