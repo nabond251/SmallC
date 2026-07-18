@@ -678,7 +678,7 @@ public class LocalParser(
             cptr = symbolTable.AddSym(
                 storage.SsName,
                 SymbolIdentity.Label,
-                SymbolType.Label,
+                SymbolType.None,
                 0,
                 utility.GetLabel(),
                 storage.SymTab.Locals,

@@ -53,32 +53,38 @@ public class SymbolTableEntry(
     /// <summary>
     /// Defined values for the <see cref="Type"/> field.
     /// </summary>
+    [Flags]
     public enum SymbolType
     {
         /// <summary>
-        /// Not applicable.
+        /// Label - Not applicable.
         /// </summary>
-        Label,
+        None,
 
         /// <summary>
         /// Character data.
         /// </summary>
-        Chr = 4,
+        Chr = 1 << 2,
 
         /// <summary>
         /// Integer data.
         /// </summary>
-        Int = 8,
+        Int = Machine.Bpw << 2,
 
         /// <summary>
         /// Unsigned character data.
         /// </summary>
-        UChr = 5,
+        UChr = (1 << 2) + 1,
 
         /// <summary>
         /// Unsigned integer data.
         /// </summary>
-        UInt = 9,
+        UInt = (Machine.Bpw << 2) + 1,
+
+        /// <summary>
+        /// Unsigned flag.
+        /// </summary>
+        Unsigned = 1,
     }
 
     /// <summary>

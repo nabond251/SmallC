@@ -1119,12 +1119,38 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task FetchAsync(ExpressionAnalysis @is)
+    public async Task FetchAsync(ExpressionAnalysis @is)
     {
-        _ = storage;
-        _ = storage;
-        _ = @is;
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(@is);
+
+        SymbolTableEntry? ptr;
+
+        ptr = @is.SymbolTableEntry ?? throw new InvalidOperationException();
+
+        // indirect
+        if (@is.IndirectType.HasValue)
+        {
+            if ((int)@is.IndirectType.Value >> 2 == Machine.Bpw)
+            {
+                await backEnd.GenAsync(PCode.GETw1p, null)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                if ((ptr.Type & SymbolType.Unsigned) != 0)
+                {
+                    await backEnd.GenAsync(
+                        PCode.GETb1mu, storage.SymTab.IndexOf(ptr))
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    await backEnd.GenAsync(
+                        PCode.GETb1m, storage.SymTab.IndexOf(ptr))
+                        .ConfigureAwait(false);
+                }
+            }
+        }
     }
 
     /// <summary>
