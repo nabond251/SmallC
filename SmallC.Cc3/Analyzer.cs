@@ -1205,8 +1205,8 @@ public class Analyzer(
 
         int? offset;
 
-        (@is.ConstantType, @is.ConstantValue) = await this.NumberAsync()
-            .ConfigureAwait(false);
+        (@is.ConstantType, @is.ConstantValue) = await this.NumberAsync(
+            @is.ConstantValue).ConfigureAwait(false);
         if (@is.ConstantType.HasValue)
         {
             await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
@@ -1242,11 +1242,96 @@ public class Analyzer(
     /// <summary>
     /// Parses number constant.
     /// </summary>
+    /// <param name="value">Current constant value.</param>
     /// <returns>Tuple of constant type, if any, and constant.</returns>
-    public Task<(SymbolType? Type, int Value)> NumberAsync()
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "not quite dead")]
+    public async Task<(SymbolType? Type, int Value)> NumberAsync(int value)
     {
-        _ = storage;
-        throw new NotImplementedException();
+        int k;
+        bool minus;
+
+        k = 0;
+        minus = false;
+        while (true)
+        {
+            if (await frontEnd.MatchAsync("+").ConfigureAwait(false))
+            {
+                // already parsed
+            }
+            else if (await frontEnd.MatchAsync("-").ConfigureAwait(false))
+            {
+                minus = true;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (!storage.Ch.HasValue || !char.IsDigit(storage.Ch.Value))
+        {
+            return (null, value);
+        }
+
+        if (storage.Ch == '0')
+        {
+            while (storage.Ch == '0')
+            {
+                _ = await frontEnd.InByteAsync().ConfigureAwait(false);
+            }
+
+            if (char.ToUpperInvariant(storage.Ch.Value) == 'X')
+            {
+                _ = await frontEnd.InByteAsync().ConfigureAwait(false);
+                while (char.IsAsciiHexDigit(storage.Ch.Value))
+                {
+                    if (char.IsDigit(storage.Ch.Value))
+                    {
+                        k = (k * 16) + (await frontEnd.InByteAsync()
+                            .ConfigureAwait(false) - '0').Value;
+                    }
+                    else
+                    {
+                        var ch = await frontEnd.InByteAsync()
+                            .ConfigureAwait(false) ??
+                            throw new InvalidOperationException();
+                        k = (k * 16) + 10 + (char.ToUpperInvariant(ch) - 'A');
+                    }
+                }
+            }
+            else
+            {
+                while (storage.Ch is >= '0' and <= '7')
+                {
+                    k = (k * 8) + (await frontEnd.InByteAsync()
+                        .ConfigureAwait(false) - '0').Value;
+                }
+            }
+        }
+        else
+        {
+            while (char.IsDigit(storage.Ch.Value))
+            {
+                k = (k * 10) + (await frontEnd.InByteAsync()
+                    .ConfigureAwait(false) - '0').Value;
+            }
+        }
+
+        if (minus)
+        {
+            value = -k;
+            return (SymbolType.Int, value);
+        }
+
+        value = k;
+        if (value > 0x7FFF)
+        {
+            return (SymbolType.UInt, value);
+        }
+        else
+        {
+            return (SymbolType.Int, value);
+        }
     }
 
     /// <summary>
