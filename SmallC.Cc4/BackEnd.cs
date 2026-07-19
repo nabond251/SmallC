@@ -298,6 +298,7 @@ public class BackEnd(
     {
         var valueActual = value ?? 0;
         int newCsp;
+#pragma warning disable IDE0010 // Add missing cases
         switch (pCode)
         {
             case PCode.GETb1pu:
@@ -324,105 +325,10 @@ public class BackEnd(
                 valueActual -= storage.Csp;
                 storage.Csp = newCsp;
                 break;
-            case PCode.None:
-            case PCode.ADD12:
-            case PCode.AND12:
-            case PCode.ANEG1:
-            case PCode.ARGCNTn:
-            case PCode.ASL12:
-            case PCode.ASR12:
-            case PCode.CALL1:
-            case PCode.CALLm:
-            case PCode.BYTE_:
-            case PCode.BYTEn:
-            case PCode.BYTEr0:
-            case PCode.COM1:
-            case PCode.DBL1:
-            case PCode.DBL2:
-            case PCode.ENTER:
-            case PCode.EQ10f:
-            case PCode.EQ12:
-            case PCode.GE10f:
-            case PCode.GE12:
-            case PCode.GE12u:
-            case PCode.POINT1l:
-            case PCode.POINT1m:
-            case PCode.GETb1m:
-            case PCode.GETb1mu:
-            case PCode.GETw1m:
-            case PCode.GETw1n:
-            case PCode.GETw2n:
-            case PCode.GT10f:
-            case PCode.GT12:
-            case PCode.GT12u:
-            case PCode.WORD_:
-            case PCode.WORDn:
-            case PCode.WORDr0:
-            case PCode.JMPm:
-            case PCode.LABm:
-            case PCode.LE10f:
-            case PCode.LE12:
-            case PCode.LE12u:
-            case PCode.LNEG1:
-            case PCode.LT10f:
-            case PCode.LT12:
-            case PCode.LT12u:
-            case PCode.MOVE21:
-            case PCode.MUL12:
-            case PCode.MUL12u:
-            case PCode.NE10f:
-            case PCode.NE12:
-            case PCode.NEARm:
-            case PCode.OR12:
-            case PCode.POINT1s:
-            case PCode.PUTbm1:
-            case PCode.PUTbp1:
-            case PCode.PUTwm1:
-            case PCode.PUTwp1:
-            case PCode.rDEC1:
-            case PCode.REFm:
-            case PCode.rINC1:
-            case PCode.SWAP12:
-            case PCode.SWAP1s:
-            case PCode.SWITCH:
-            case PCode.XOR12:
-            case PCode.ADD1n:
-            case PCode.ADD21:
-            case PCode.ADD2n:
-            case PCode.ADDbpn:
-            case PCode.ADDwpn:
-            case PCode.ADDm_:
-            case PCode.COMMAn:
-            case PCode.DECbp:
-            case PCode.DECwp:
-            case PCode.POINT2m:
-            case PCode.POINT2m_:
-            case PCode.GETb1s:
-            case PCode.GETb1su:
-            case PCode.GETw1m_:
-            case PCode.GETw1s:
-            case PCode.GETw2m:
-            case PCode.GETw2p:
-            case PCode.GETw2s:
-            case PCode.INCbp:
-            case PCode.INCwp:
-            case PCode.PLUSn:
-            case PCode.POINT2s:
-            case PCode.PUSH2:
-            case PCode.PUSHm:
-            case PCode.PUSHp:
-            case PCode.PUSHs:
-            case PCode.PUT_m_:
-            case PCode.rDEC2:
-            case PCode.rINC2:
-            case PCode.SUB_m_:
-            case PCode.SUB1n:
-            case PCode.SUBbpn:
-            case PCode.SUBwpn:
-            case PCode.PCODES:
             default:
                 break;
         }
+#pragma warning restore IDE0010 // Add missing cases
 
         if (storage.Stage is null)
         {

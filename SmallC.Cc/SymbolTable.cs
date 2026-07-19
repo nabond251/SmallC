@@ -33,4 +33,29 @@ public record class SymbolTable(
     /// <returns>Indexed entry.</returns>
     public SymbolTableEntry this[int index] =>
         index < NumLocs ? this.Locals[index] : this.Globals[index - NumLocs];
+
+    /// <summary>
+    /// Gets index of given <see cref="SymbolTableEntry"/>.
+    /// </summary>
+    /// <param name="entry">Entry whose index to find.</param>
+    /// <returns>Index into <see cref="SymbolTable"/>.</returns>
+    public int? IndexOf(SymbolTableEntry entry)
+    {
+        int? index = this.Locals.IndexOf(entry);
+        if (index == -1)
+        {
+            index = this.Globals.IndexOf(entry);
+            if (index == -1)
+            {
+                index = null;
+            }
+            else
+            {
+                index += NumLocs;
+                return index;
+            }
+        }
+
+        return index;
+    }
 }

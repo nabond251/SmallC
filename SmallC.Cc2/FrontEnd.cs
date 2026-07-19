@@ -734,6 +734,36 @@ public class FrontEnd(Storage storage)
     }
 
     /// <summary>
+    /// Skip over next alphanumeric or non-alphanumeric, whichever
+    /// <see cref="Storage.Ch"/> is currently.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task SkipAsync()
+    {
+        if (UtilityUseCases.An(await this.InByteAsync().ConfigureAwait(false)))
+        {
+            while (UtilityUseCases.An(storage.Ch))
+            {
+                _ = this.Gch();
+            }
+        }
+        else
+        {
+            while (!UtilityUseCases.An(storage.Ch))
+            {
+                if (!storage.Ch.HasValue)
+                {
+                    break;
+                }
+
+                _ = this.Gch();
+            }
+        }
+
+        await this.BlanksAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Checks if end of statement.
     /// </summary>
     /// <returns>A value indicating whether at end of statement.</returns>

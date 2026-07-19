@@ -18,7 +18,6 @@ var storage = new Storage(
     stage: null,
     wq: [],
     args: [.. args],
-    wqPtr: 0,
     sLast: StagingBuffer.StageSize,
     symTab: new(
         [],
@@ -35,7 +34,7 @@ var whileQueueMgmt = new WhileQueueUseCases(utility, storage);
 
 var frontEnd = new FrontEnd(storage);
 var backEnd = new BackEnd(symTabMgmt, utility, storage);
-var analyzer = new Analyzer(utility, frontEnd, backEnd, storage);
+var analyzer = new Analyzer(symTabMgmt, utility, frontEnd, backEnd, storage);
 var localParser = new LocalParser(
     symTabMgmt, utility, whileQueueMgmt, frontEnd, analyzer, backEnd, storage);
 var parser = new GlobalParser(

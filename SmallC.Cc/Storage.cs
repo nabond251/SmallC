@@ -21,7 +21,6 @@ public class Storage(
     Collection<KeyValuePair<PCode, int>>? stage,
     Collection<WhileQueueEntry> wq,
     Collection<string> args,
-    int wqPtr,
     char? ch,
     char? nCh,
     int declared,
@@ -40,6 +39,7 @@ public class Storage(
     int fileArg,
     TextReader? input,
     TextReader? input2,
+    bool useXpr,
     bool cCode,
     int sLast,
     TextWriter? listFp,
@@ -57,7 +57,9 @@ public class Storage(
     Storage.BufferLineType lineType,
     int lPtr,
     string? msName,
-    string? ssName)
+    string? ssName,
+    PCode[] op,
+    PCode[] op2)
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Storage"/> class.
@@ -67,10 +69,11 @@ public class Storage(
     /// <param name="stage">Staging buffer.</param>
     /// <param name="wq">While queue.</param>
     /// <param name="args">Static args.</param>
-    /// <param name="wqPtr">Index to next entry.</param>
     /// <param name="csp">Compiler relative stk ptr.</param>
     /// <param name="output">Fd for output file.</param>
-    /// <param name="files">A value indicating whether file list specified on cmd line.</param>
+    /// <param name="files">
+    /// A value indicating whether file list specified on cmd line.
+    /// </param>
     /// <param name="input">Fd for input file.</param>
     /// <param name="cCode">A value indicating whether parsing C code.</param>
     /// <param name="sLast">Last index in stage.</param>
@@ -91,7 +94,6 @@ public class Storage(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         Collection<WhileQueueEntry>? wq = null,
         Collection<string>? args = null,
-        int? wqPtr = null,
         int? csp = null,
         TextWriter? output = null,
         bool? files = null,
@@ -118,7 +120,6 @@ public class Storage(
             stage: stage,
             wq: wq ?? [],
             args: args ?? [],
-            wqPtr: wqPtr ?? 0,
             ch: null,
             nCh: null,
             declared: 0,
@@ -137,6 +138,7 @@ public class Storage(
             fileArg: 0,
             input: input,
             input2: null,
+            useXpr: true,
             cCode: cCode ?? true,
             sLast: sLast ?? StagingBuffer.StageSize,
             listFp: null,
@@ -154,7 +156,27 @@ public class Storage(
             lineType: lineType ?? BufferLineType.None,
             lPtr: 0,
             msName: null,
-            ssName: ssName)
+            ssName: ssName,
+            op: [
+                PCode.OR12, // level5
+                PCode.XOR12, // level6
+                PCode.AND12, // level7
+                PCode.EQ12, PCode.NE12, // level8
+                PCode.LE12, PCode.GE12, PCode.LT12, PCode.GT12, // level9
+                PCode.ASR12, PCode.ASL12, // level10
+                PCode.ADD12, PCode.SUB12, // level11
+                PCode.MUL12, PCode.DIV12, PCode.MOD12, // level12
+            ],
+            op2: [
+                PCode.OR12, // level5
+                PCode.XOR12, // level6
+                PCode.AND12, // level7
+                PCode.EQ12, PCode.NE12, // level8
+                PCode.LE12u, PCode.GE12u, PCode.LT12u, PCode.GT12u, // level9
+                PCode.ASR12, PCode.ASL12, // level10
+                PCode.ADD12, PCode.SUB12, // level11
+                PCode.MUL12u, PCode.DIV12u, PCode.MOD12u, // level12
+            ])
     {
     }
 
@@ -238,7 +260,7 @@ public class Storage(
     /// <summary>
     /// Gets index to next entry.
     /// </summary>
-    public int WqPtr { get; } = wqPtr;
+    public int WqPtr => this.Wq.Count;
 
     /// <summary>
     /// Gets index to next <see cref="LitQ"/> entry.
@@ -339,6 +361,11 @@ public class Storage(
     /// Gets or sets fd for "#include" file.
     /// </summary>
     public TextReader? Input2 { get; set; } = input2;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether value of expression is used.
+    /// </summary>
+    public bool UseXpr { get; set; } = useXpr;
 
     /// <summary>
     /// Gets or sets a value indicating whether parsing C code.
@@ -478,6 +505,16 @@ public class Storage(
     /// Gets or sets static symbol name.
     /// </summary>
     public string? SsName { get; set; } = ssName;
+
+    /// <summary>
+    /// Gets P-codes of signed binary operations.
+    /// </summary>
+    public Collection<PCode> Op { get; } = [.. op];
+
+    /// <summary>
+    /// Gets P-codes of unsigned binary operations.
+    /// </summary>
+    public Collection<PCode> Op2 { get; } = [.. op2];
 
     /// <summary>
     /// Sets stage if not already active.

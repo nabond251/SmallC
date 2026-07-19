@@ -35,7 +35,7 @@ public class LocalParser(
             return 0; // null size
         }
 
-        val = analyzer.ConstExpr() ?? 1;
+        val = await analyzer.ConstExprAsync().ConfigureAwait(false) ?? 1;
         if (val < 0)
         {
             throw new InvalidCastException("negative size illegal");
@@ -576,8 +576,8 @@ public class LocalParser(
 
         var label = utility.GetLabel();
         await backEnd.GenAsync(PCode.LABm, label).ConfigureAwait(false);
-        storage.SwNext[label] = analyzer.ConstExpr() ??
-            throw new InvalidOperationException();
+        storage.SwNext[label] = await analyzer.ConstExprAsync()
+            .ConfigureAwait(false) ?? throw new InvalidOperationException();
         await frontEnd.NeedAsync(":").ConfigureAwait(false);
     }
 
@@ -678,7 +678,7 @@ public class LocalParser(
             cptr = symbolTable.AddSym(
                 storage.SsName,
                 SymbolIdentity.Label,
-                SymbolType.Label,
+                SymbolType.None,
                 0,
                 utility.GetLabel(),
                 storage.SymTab.Locals,
@@ -781,32 +781,22 @@ public class LocalParser(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task DoExprAsync(bool use)
     {
-        _ = storage;
-        _ = use;
+        int? before, start;
 
-        await frontEnd.NeedAsync("(").ConfigureAwait(false);
-
-        var level = 1;
-
-        while (level != 0)
+        storage.UseXpr = use; // tell isfree() whether expression value is used
+        while (true)
         {
-            switch (storage.Ch)
+            (before, start) = backEnd.SetStage();
+            _ = await analyzer.ExpressionAsync().ConfigureAwait(false);
+            await backEnd.ClearStageAsync(before, start).ConfigureAwait(false);
+            if (storage.Ch != ',')
             {
-                case '(':
-                    level++;
-                    _ = frontEnd.Gch();
-                    break;
-                case ')':
-                    level--;
-                    _ = frontEnd.Gch();
-                    break;
-                case null:
-                    await frontEnd.PreprocessAsync().ConfigureAwait(false);
-                    break;
-                default:
-                    _ = frontEnd.Gch();
-                    break;
+                break;
             }
+
+            frontEnd.Bump(1);
         }
+
+        storage.UseXpr = true; // return to normal value
     }
 }
