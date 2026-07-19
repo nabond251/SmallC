@@ -18,7 +18,6 @@ var storage = new Storage(
     stage: null,
     wq: [],
     args: [.. args],
-    wqPtr: 0,
     sLast: StagingBuffer.StageSize,
     symTab: new(
         [],

@@ -21,7 +21,6 @@ public class Storage(
     Collection<KeyValuePair<PCode, int>>? stage,
     Collection<WhileQueueEntry> wq,
     Collection<string> args,
-    int wqPtr,
     char? ch,
     char? nCh,
     int declared,
@@ -70,10 +69,11 @@ public class Storage(
     /// <param name="stage">Staging buffer.</param>
     /// <param name="wq">While queue.</param>
     /// <param name="args">Static args.</param>
-    /// <param name="wqPtr">Index to next entry.</param>
     /// <param name="csp">Compiler relative stk ptr.</param>
     /// <param name="output">Fd for output file.</param>
-    /// <param name="files">A value indicating whether file list specified on cmd line.</param>
+    /// <param name="files">
+    /// A value indicating whether file list specified on cmd line.
+    /// </param>
     /// <param name="input">Fd for input file.</param>
     /// <param name="cCode">A value indicating whether parsing C code.</param>
     /// <param name="sLast">Last index in stage.</param>
@@ -94,7 +94,6 @@ public class Storage(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         Collection<WhileQueueEntry>? wq = null,
         Collection<string>? args = null,
-        int? wqPtr = null,
         int? csp = null,
         TextWriter? output = null,
         bool? files = null,
@@ -121,7 +120,6 @@ public class Storage(
             stage: stage,
             wq: wq ?? [],
             args: args ?? [],
-            wqPtr: wqPtr ?? 0,
             ch: null,
             nCh: null,
             declared: 0,
@@ -262,7 +260,7 @@ public class Storage(
     /// <summary>
     /// Gets index to next entry.
     /// </summary>
-    public int WqPtr { get; } = wqPtr;
+    public int WqPtr => this.Wq.Count;
 
     /// <summary>
     /// Gets index to next <see cref="LitQ"/> entry.
