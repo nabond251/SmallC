@@ -197,7 +197,7 @@ public class Analyzer(
         k = await this.Down1Async(this.Level2Async, @is).ConfigureAwait(false);
         if (@is.ConstantType.HasValue)
         {
-            await backEnd.GenAsync(PCode.GETw1m, @is.ConstantValue)
+            await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
                 .ConfigureAwait(false);
         }
 
