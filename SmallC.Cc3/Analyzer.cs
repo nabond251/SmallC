@@ -1603,15 +1603,21 @@ public class Analyzer(
     /// <summary>
     /// Test for early dropout from || or &amp;&amp; sequence.
     /// </summary>
-    private Task DropOutAsync(
-        int? k, PCode tCode, int exit1, ExpressionAnalysis @is)
+    private async Task DropOutAsync(
+        int? k, PCode tCode, int exitL, ExpressionAnalysis @is)
     {
-        _ = storage;
-        _ = k;
-        _ = tCode;
-        _ = exit1;
-        _ = @is;
-        throw new NotImplementedException();
+        if (k.HasValue)
+        {
+            await this.FetchAsync(@is).ConfigureAwait(false);
+        }
+        else if (@is.ConstantType.HasValue)
+        {
+            await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
+                .ConfigureAwait(false);
+        }
+
+        // jumps on false
+        await backEnd.GenAsync(tCode, exitL).ConfigureAwait(false);
     }
 
     /// <summary>
