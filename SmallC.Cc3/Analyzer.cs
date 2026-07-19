@@ -1463,15 +1463,84 @@ public class Analyzer(
     /// </summary>
     private static bool NoSign(ExpressionAnalysis @is)
     {
-        throw new NotImplementedException();
+        return @is.AddressType.HasValue
+            || @is.ConstantType == SymbolType.UInt
+            || ((@is.SymbolTableEntry is SymbolTableEntry ptr)
+            && (ptr.Type & SymbolType.Unsigned) != 0);
     }
 
     /// <summary>
     /// Calculate signed constant result.
     /// </summary>
-    private static int Calc(int constantValue1, PCode? oper, int constantValue2)
+    private static int Calc(int left, PCode? oper, int right)
     {
-        throw new NotImplementedException();
+#pragma warning disable IDE0010 // Add missing cases
+        switch (oper)
+        {
+            case PCode.ADD12:
+                return left + right;
+            case PCode.SUB12:
+                return left - right;
+            case PCode.MUL12:
+                return left * right;
+            case PCode.DIV12:
+                return left / right;
+            case PCode.MOD12:
+                return left % right;
+            case PCode.EQ12:
+                return left == right ? 1 : 0;
+            case PCode.NE12:
+                return left != right ? 1 : 0;
+            case PCode.LE12:
+                return left <= right ? 1 : 0;
+            case PCode.GE12:
+                return left >= right ? 1 : 0;
+            case PCode.LT12:
+                return left < right ? 1 : 0;
+            case PCode.GT12:
+                return left > right ? 1 : 0;
+            case PCode.AND12:
+                return left & right;
+            case PCode.OR12:
+                return left | right;
+            case PCode.XOR12:
+                return left ^ right;
+            case PCode.ASR12:
+                return left >> right;
+            case PCode.ASL12:
+                return left << right;
+        }
+#pragma warning restore IDE0010 // Add missing cases
+
+        return Calc2((uint)left, oper, (uint)right);
+    }
+
+    /// <summary>
+    /// Calculate unsigned constant result.
+    /// </summary>
+    private static int Calc2(uint left, PCode? oper, uint right)
+    {
+#pragma warning disable IDE0010 // Add missing cases
+        switch (oper)
+        {
+            case PCode.MUL12u:
+                return (int)(left * right);
+            case PCode.DIV12u:
+                return (int)(left / right);
+            case PCode.MOD12u:
+                return (int)(left % right);
+            case PCode.LE12:
+                return left <= right ? 1 : 0;
+            case PCode.GE12:
+                return left >= right ? 1 : 0;
+            case PCode.LT12:
+                return left < right ? 1 : 0;
+            case PCode.GT12:
+                return left > right ? 1 : 0;
+        }
+#pragma warning restore IDE0010 // Add missing cases
+
+        return 0;
     }
 
     /// <summary>
