@@ -12,6 +12,7 @@ using static SmallC.Cc.SymbolTableEntry;
 /// <summary>
 /// Expression analyzer.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "literature")]
 public class Analyzer(
     SymbolTableUseCases symbolTable,
     UtilityUseCases utility,
@@ -1026,7 +1027,6 @@ public class Analyzer(
     /// </summary>
     /// <param name="ptr">Entry of function to call, if direct call.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "literature")]
     public async Task CallFuncAsync(SymbolTableEntry? ptr)
     {
         int nArgs;
@@ -1291,6 +1291,37 @@ public class Analyzer(
     }
 
     /// <summary>
+    /// True if <paramref name="is2"/>'s operand should be doubled.
+    /// </summary>
+    private static int Double(
+        PCode? oper, ExpressionAnalysis is1, ExpressionAnalysis is2)
+    {
+        ArgumentNullException.ThrowIfNull(is1);
+        ArgumentNullException.ThrowIfNull(is2);
+
+        return ((oper == PCode.ADD12 || oper == PCode.SUB12)
+            && is1.AddressType.HasValue
+            && (int)is1.AddressType >> 2 == Machine.Bpw
+            && !is2.AddressType.HasValue) ? 1 : 0;
+    }
+
+    /// <summary>
+    /// Unsigned operand?.
+    /// </summary>
+    private static bool NoSign(ExpressionAnalysis @is)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Calculate signed constant result.
+    /// </summary>
+    private static int Calc(int constantValue1, PCode? oper, int constantValue2)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// Skim over terms adjoining || and &amp;&amp; operators.
     /// </summary>
     private async Task<int?> SkimAsync(
@@ -1428,19 +1459,172 @@ public class Analyzer(
     /// <summary>
     /// Binary drop to a lower level.
     /// </summary>
-    private Task Down2Async(
+    private async Task Down2Async(
         PCode? oper,
         PCode? oper2,
         Func<ExpressionAnalysis, Task<int?>> levelAsync,
         ExpressionAnalysis @is,
         ExpressionAnalysis is2)
     {
-        _ = storage;
-        _ = oper;
-        _ = oper2;
-        _ = levelAsync;
-        _ = @is;
-        _ = is2;
-        throw new NotImplementedException();
+        int? before, start;
+
+        (before, start) = backEnd.SetStage();
+        @is.StageIndex = null; // not "... op 0" syntax
+
+        // constant op unknown
+        if (@is.ConstantType.HasValue)
+        {
+            if ((await this.Down1Async(levelAsync, is2).ConfigureAwait(false))
+                .HasValue)
+            {
+                await this.FetchAsync(is2).ConfigureAwait(false);
+            }
+
+            if (@is.ConstantValue == 0)
+            {
+                @is.StageIndex = storage.SNext;
+            }
+
+            await backEnd.GenAsync(
+                PCode.GETw2n,
+                @is.ConstantValue << Double(oper, is2, @is))
+                .ConfigureAwait(false);
+        }
+
+        // variable op unknown
+        else
+        {
+            // at start of the buffer
+            await backEnd.GenAsync(PCode.PUSH1, null).ConfigureAwait(false);
+            if ((await this.Down1Async(levelAsync, is2).ConfigureAwait(false))
+                .HasValue)
+            {
+                await this.FetchAsync(is2).ConfigureAwait(false);
+            }
+
+            // variable op constant
+            if (is2.ConstantType.HasValue)
+            {
+                if (is2.ConstantValue == 0)
+                {
+                    @is.StageIndex = start;
+                }
+
+                storage.Csp += Machine.Bpw; // adjust stack and
+
+                // discard the PUSH
+                await backEnd.ClearStageAsync(before, null)
+                    .ConfigureAwait(false);
+
+                // commutative
+                if (oper == PCode.ADD12)
+                {
+                    await backEnd.GenAsync(
+                        PCode.GETw2n,
+                        is2.ConstantValue << Double(oper, @is, is2))
+                        .ConfigureAwait(false);
+                }
+
+                // non-commutative
+                else
+                {
+                    await backEnd.GenAsync(PCode.MOVE21, null)
+                        .ConfigureAwait(false);
+                    await backEnd.GenAsync(
+                        PCode.GETw1n,
+                        is2.ConstantValue << Double(oper, @is, is2))
+                        .ConfigureAwait(false);
+                }
+            }
+
+            // variable op variable
+            else
+            {
+                await backEnd.GenAsync(PCode.POP2, null).ConfigureAwait(false);
+                if (Double(oper, @is, is2) != 0)
+                {
+                    await backEnd.GenAsync(PCode.DBL1, null)
+                        .ConfigureAwait(false);
+                }
+
+                if (Double(oper, is2, @is) != 0)
+                {
+                    await backEnd.GenAsync(PCode.DBL2, null)
+                        .ConfigureAwait(false);
+                }
+            }
+        }
+
+        if (oper.HasValue)
+        {
+            if (NoSign(@is) || NoSign(is2))
+            {
+                oper = oper2;
+            }
+
+            @is.ConstantType &= is2.ConstantType;
+
+            // constant result
+            if (@is.ConstantType.HasValue)
+            {
+                @is.ConstantValue = Calc(
+                    @is.ConstantValue, oper, is2.ConstantValue);
+                await backEnd.ClearStageAsync(before, null)
+                    .ConfigureAwait(false);
+                if (is2.ConstantType == SymbolType.UInt)
+                {
+                    @is.ConstantType = SymbolType.UInt;
+                }
+            }
+
+            // variable result
+            else
+            {
+                await backEnd.GenAsync(
+                    oper ?? throw new InvalidOperationException(), null)
+                    .ConfigureAwait(false);
+
+                // difference of two word addresses
+                if (oper == PCode.SUB12
+                    && @is.AddressType.HasValue
+                    && (int)@is.AddressType.Value >> 2 == Machine.Bpw
+                    && is2.AddressType.HasValue
+                    && (int)is2.AddressType.Value >> 2 == Machine.Bpw)
+                {
+                    await backEnd.GenAsync(PCode.SWAP12, null)
+                        .ConfigureAwait(false);
+                    await backEnd.GenAsync(PCode.GETw1n, 1)
+                        .ConfigureAwait(false);
+                    await backEnd.GenAsync(PCode.ASR12, null) // div by 2
+                        .ConfigureAwait(false);
+                }
+
+                @is.HighestBinaryOp = oper; // identify the operator
+            }
+
+            if (oper is PCode.SUB12 or PCode.ADD12)
+            {
+                // addr +/- addr
+                if (@is.AddressType.HasValue && is2.AddressType.HasValue)
+                {
+                    @is.AddressType = null;
+                }
+
+                // value +/- addr
+                else if (is2.AddressType.HasValue)
+                {
+                    @is.SymbolTableEntry = is2.SymbolTableEntry;
+                    @is.IndirectType = is2.IndirectType;
+                    @is.AddressType = is2.AddressType;
+                }
+            }
+
+            if (@is.SymbolTableEntry is null
+                || ((is2.SymbolTableEntry is SymbolTableEntry ptr)
+                && (ptr.Type & SymbolType.Unsigned) != 0))
+            {
+                @is.SymbolTableEntry = is2.SymbolTableEntry;
+            }
+        }
     }
 }
