@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="CALL.ASM">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="ATOI.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
