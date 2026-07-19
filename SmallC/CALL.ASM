@@ -1,9 +1,9 @@
 ;
 ; Small-C Run Time Library for MS/PC-DOS
 ;
-        extern  __main: near
-        extern   _exit: near
-        extern  __memptr: word
+        extrn   __main: near
+        extrn    _exit: near
+        extrn   __memptr: word
 
 data   segment public
         dw      1
