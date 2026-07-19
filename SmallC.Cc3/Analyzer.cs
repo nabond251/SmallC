@@ -46,7 +46,7 @@ public class Analyzer(
     {
         var @is = new ExpressionAnalysis(null, null, null, null, 0, null, null);
 
-        if ((await this.Level1Async(@is).ConfigureAwait(false)).HasValue)
+        if (await this.Level1Async(@is).ConfigureAwait(false))
         {
             await this.FetchAsync(@is).ConfigureAwait(false);
         }
@@ -74,7 +74,7 @@ public class Analyzer(
         {
             (before, start) = backEnd.SetStage();
 
-            if ((await this.Level1Async(@is).ConfigureAwait(false)).HasValue)
+            if (await this.Level1Async(@is).ConfigureAwait(false))
             {
                 await this.FetchAsync(@is).ConfigureAwait(false);
             }
@@ -187,11 +187,11 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level1Async(ExpressionAnalysis @is)
+    public async Task<bool> Level1Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
-        int? k;
+        bool k;
         var is2 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
         var is3 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
         PCode? oper, oper2;
@@ -264,10 +264,10 @@ public class Analyzer(
         }
 
         // have an assignment operator
-        if (!k.HasValue)
+        if (!k)
         {
             ErrorUseCases.NeedLVal();
-            return null;
+            return false;
         }
 
         is3.SymbolTableEntry = @is.SymbolTableEntry;
@@ -312,8 +312,7 @@ public class Analyzer(
             else
             {
                 // parse right side
-                if ((await this.Level1Async(@is2).ConfigureAwait(false))
-                    .HasValue)
+                if (await this.Level1Async(@is2).ConfigureAwait(false))
                 {
                     await this.FetchAsync(is2).ConfigureAwait(false);
                 }
@@ -322,7 +321,7 @@ public class Analyzer(
 
         // store result
         await this.StoreAsync(is3).ConfigureAwait(false);
-        return null;
+        return false;
     }
 
     /// <summary>
@@ -330,13 +329,13 @@ public class Analyzer(
     /// </summary>
     /// <param name="is1">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level2Async(ExpressionAnalysis is1)
+    public async Task<bool> Level2Async(ExpressionAnalysis is1)
     {
         ArgumentNullException.ThrowIfNull(is1);
 
         var is2 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
         var is3 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
-        int? k;
+        bool k;
         int flab, endLab;
 
         // expression 1
@@ -351,8 +350,7 @@ public class Analyzer(
             .ConfigureAwait(false);
 
         // expression 2
-        if ((await this.Down1Async(this.Level2Async, is2).ConfigureAwait(false))
-            .HasValue)
+        if (await this.Down1Async(this.Level2Async, is2).ConfigureAwait(false))
         {
             await this.FetchAsync(is2).ConfigureAwait(false);
         }
@@ -367,8 +365,7 @@ public class Analyzer(
         await backEnd.GenAsync(PCode.JMPm, flab).ConfigureAwait(false);
 
         // expression 3
-        if ((await this.Down1Async(this.Level2Async, is3).ConfigureAwait(false))
-            .HasValue)
+        if (await this.Down1Async(this.Level2Async, is3).ConfigureAwait(false))
         {
             await this.FetchAsync(is3).ConfigureAwait(false);
         }
@@ -412,7 +409,7 @@ public class Analyzer(
             throw new InvalidOperationException("mismatched expressions");
         }
 
-        return null;
+        return false;
     }
 
     /// <summary>
@@ -420,7 +417,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level3Async(ExpressionAnalysis @is)
+    public async Task<bool> Level3Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -434,7 +431,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level4Async(ExpressionAnalysis @is)
+    public async Task<bool> Level4Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -448,7 +445,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level5Async(ExpressionAnalysis @is)
+    public async Task<bool> Level5Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -461,7 +458,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level6Async(ExpressionAnalysis @is)
+    public async Task<bool> Level6Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -474,7 +471,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level7Async(ExpressionAnalysis @is)
+    public async Task<bool> Level7Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -487,7 +484,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level8Async(ExpressionAnalysis @is)
+    public async Task<bool> Level8Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -500,7 +497,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level9Async(ExpressionAnalysis @is)
+    public async Task<bool> Level9Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -513,7 +510,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level10Async(ExpressionAnalysis @is)
+    public async Task<bool> Level10Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -526,7 +523,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level11Async(ExpressionAnalysis @is)
+    public async Task<bool> Level11Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -539,7 +536,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level12Async(ExpressionAnalysis @is)
+    public async Task<bool> Level12Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -553,42 +550,42 @@ public class Analyzer(
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "not code")]
-    public async Task<int?> Level13Async(ExpressionAnalysis @is)
+    public async Task<bool> Level13Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
-        int? k;
+        bool k;
 
         // ++lval
         if (await frontEnd.MatchAsync("++").ConfigureAwait(false))
         {
-            if (!(await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            if (!await this.Level13Async(@is).ConfigureAwait(false))
             {
                 ErrorUseCases.NeedLVal();
-                return null;
+                return false;
             }
 
             await this.StepAsync(PCode.rINC1, @is, null).ConfigureAwait(false);
-            return null;
+            return false;
         }
 
         // ++lval
         else if (await frontEnd.MatchAsync("--").ConfigureAwait(false))
         {
-            if (!(await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            if (!await this.Level13Async(@is).ConfigureAwait(false))
             {
                 ErrorUseCases.NeedLVal();
-                return null;
+                return false;
             }
 
             await this.StepAsync(PCode.rDEC1, @is, null).ConfigureAwait(false);
-            return null;
+            return false;
         }
 
         // ~
         else if (await frontEnd.MatchAsync("~").ConfigureAwait(false))
         {
-            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            if (await this.Level13Async(@is).ConfigureAwait(false))
             {
                 await this.FetchAsync(@is).ConfigureAwait(false);
             }
@@ -596,13 +593,13 @@ public class Analyzer(
             await backEnd.GenAsync(PCode.COM1, null).ConfigureAwait(false);
             @is.ConstantValue = ~@is.ConstantValue;
             @is.SymbolTableEntry = null;
-            return null;
+            return false;
         }
 
         // !
         else if (await frontEnd.MatchAsync("!").ConfigureAwait(false))
         {
-            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            if (await this.Level13Async(@is).ConfigureAwait(false))
             {
                 await this.FetchAsync(@is).ConfigureAwait(false);
             }
@@ -610,13 +607,13 @@ public class Analyzer(
             await backEnd.GenAsync(PCode.LNEG1, null).ConfigureAwait(false);
             @is.ConstantValue = @is.ConstantValue == 0 ? 1 : 0;
             @is.SymbolTableEntry = null;
-            return null;
+            return false;
         }
 
         // unary -
         else if (await frontEnd.MatchAsync("-").ConfigureAwait(false))
         {
-            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            if (await this.Level13Async(@is).ConfigureAwait(false))
             {
                 await this.FetchAsync(@is).ConfigureAwait(false);
             }
@@ -624,13 +621,13 @@ public class Analyzer(
             await backEnd.GenAsync(PCode.ANEG1, null).ConfigureAwait(false);
             @is.ConstantValue = -@is.ConstantValue;
             @is.SymbolTableEntry = null;
-            return null;
+            return false;
         }
 
         // unary *
         else if (await frontEnd.MatchAsync("*").ConfigureAwait(false))
         {
-            if ((await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            if (await this.Level13Async(@is).ConfigureAwait(false))
             {
                 await this.FetchAsync(@is).ConfigureAwait(false);
             }
@@ -641,7 +638,7 @@ public class Analyzer(
             @is.AddressType = null; // not an address
             @is.ConstantType = null; // not a constant
             @is.ConstantValue = 1; // omit FetchAsync() on func call
-            return 1;
+            return true;
         }
 
         // sizeof()
@@ -699,13 +696,13 @@ public class Analyzer(
             @is.AddressType = null;
             @is.IndirectType = null;
             @is.StageIndex = null;
-            return null;
+            return false;
         }
 
         // unary &
         else if (await frontEnd.MatchAsync("&").ConfigureAwait(false))
         {
-            if (!(await this.Level13Async(@is).ConfigureAwait(false)).HasValue)
+            if (!await this.Level13Async(@is).ConfigureAwait(false))
             {
                 throw new InvalidOperationException("illegal address");
             }
@@ -715,13 +712,13 @@ public class Analyzer(
             @is.AddressType = ptr.Type;
             if (@is.IndirectType.HasValue)
             {
-                return null;
+                return false;
             }
 
             var index = storage.SymTab.IndexOf(ptr);
             await backEnd.GenAsync(PCode.POINT1m, index).ConfigureAwait(false);
             @is.IndirectType = ptr.Type;
-            return null;
+            return false;
         }
         else
         {
@@ -730,29 +727,29 @@ public class Analyzer(
             // lval++
             if (await frontEnd.MatchAsync("++").ConfigureAwait(false))
             {
-                if (!k.HasValue)
+                if (!k)
                 {
                     ErrorUseCases.NeedLVal();
-                    return null;
+                    return false;
                 }
 
                 await this.StepAsync(PCode.rINC1, @is, PCode.rDEC1)
                     .ConfigureAwait(false);
-                return null;
+                return false;
             }
 
             // lval--
             else if (await frontEnd.MatchAsync("--").ConfigureAwait(false))
             {
-                if (!k.HasValue)
+                if (!k)
                 {
                     ErrorUseCases.NeedLVal();
-                    return null;
+                    return false;
                 }
 
                 await this.StepAsync(PCode.rDEC1, @is, PCode.rINC1)
                     .ConfigureAwait(false);
-                return null;
+                return false;
             }
             else
             {
@@ -766,11 +763,11 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> Level14Async(ExpressionAnalysis @is)
+    public async Task<bool> Level14Async(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
-        int? k;
+        bool k;
         SymbolTableEntry? ptr;
         int? before, start;
 
@@ -795,7 +792,7 @@ public class Analyzer(
 
                     if (@is.AddressType.HasValue)
                     {
-                        if (k.HasValue)
+                        if (k)
                         {
                             await this.FetchAsync(@is).ConfigureAwait(false);
                         }
@@ -851,7 +848,7 @@ public class Analyzer(
 
                     @is.AddressType = null;
                     @is.IndirectType = ptr.Type;
-                    k = 1;
+                    k = true;
                 }
 
                 // function(...)
@@ -865,7 +862,7 @@ public class Analyzer(
                     }
                     else if (ptr.Ident != SymbolIdentity.Function)
                     {
-                        if (k.HasValue && @is.ConstantValue == 0)
+                        if (k && @is.ConstantValue == 0)
                         {
                             await this.FetchAsync(@is)
                                 .ConfigureAwait(false);
@@ -879,7 +876,7 @@ public class Analyzer(
                         await this.CallFuncAsync(ptr).ConfigureAwait(false);
                     }
 
-                    k = null;
+                    k = false;
                     @is.SymbolTableEntry = null;
                     @is.ConstantType = null;
                     @is.ConstantValue = 0;
@@ -896,7 +893,7 @@ public class Analyzer(
             var index = storage.SymTab.IndexOf(ptr);
             await backEnd.GenAsync(PCode.POINT1m, index).ConfigureAwait(false);
             @is.SymbolTableEntry = null;
-            return null;
+            return false;
         }
 
         return k;
@@ -907,12 +904,12 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<int?> PrimaryAsync(ExpressionAnalysis @is)
+    public async Task<bool> PrimaryAsync(ExpressionAnalysis @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
         string? sName;
-        int? k;
+        bool k;
 
         // (subexpression)
         if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
@@ -945,7 +942,7 @@ public class Analyzer(
                 if (ptrLoc.Ident == SymbolIdentity.Label)
                 {
                     await this.ExpErrAsync().ConfigureAwait(false);
-                    return null;
+                    return false;
                 }
 
                 await backEnd.GenAsync(PCode.POINT1s, ptrLoc.Offset)
@@ -955,7 +952,7 @@ public class Analyzer(
                 if (ptrLoc.Ident == SymbolIdentity.Array)
                 {
                     @is.AddressType = ptrLoc.Type;
-                    return null;
+                    return false;
                 }
 
                 if (ptrLoc.Ident == SymbolIdentity.Pointer)
@@ -964,7 +961,7 @@ public class Analyzer(
                     @is.AddressType = ptrLoc.Type;
                 }
 
-                return 1;
+                return true;
             }
 
             // is global
@@ -980,7 +977,7 @@ public class Analyzer(
                             .ConfigureAwait(false);
                         @is.IndirectType = ptrGlb.Type;
                         @is.AddressType = ptrGlb.Type;
-                        return null;
+                        return false;
                     }
 
                     if (ptrGlb.Ident == SymbolIdentity.Pointer)
@@ -988,7 +985,7 @@ public class Analyzer(
                         @is.AddressType = ptrGlb.Type;
                     }
 
-                    return 1;
+                    return true;
                 }
             }
             else
@@ -1003,7 +1000,7 @@ public class Analyzer(
                     SymbolClass.AutoExt);
             }
 
-            return null;
+            return false;
         }
 
         if (!await this.ConstantAsync(@is).ConfigureAwait(false))
@@ -1011,7 +1008,7 @@ public class Analyzer(
             await this.ExpErrAsync().ConfigureAwait(false);
         }
 
-        return null;
+        return false;
     }
 
     /// <summary>
@@ -1548,15 +1545,15 @@ public class Analyzer(
     /// <summary>
     /// Skim over terms adjoining || and &amp;&amp; operators.
     /// </summary>
-    private async Task<int?> SkimAsync(
+    private async Task<bool> SkimAsync(
         IList<string> ops,
         PCode tCode,
         int dropVal,
         int endVal,
-        Func<ExpressionAnalysis, Task<int?>> levelAsync,
+        Func<ExpressionAnalysis, Task<bool>> levelAsync,
         ExpressionAnalysis @is)
     {
-        int? k;
+        bool k;
         int dropLab, endLab;
 
         dropLab = 0;
@@ -1593,7 +1590,7 @@ public class Analyzer(
                 @is.ConstantType = null;
                 @is.ConstantValue = 0;
                 @is.StageIndex = null;
-                return null;
+                return false;
             }
             else
             {
@@ -1606,9 +1603,9 @@ public class Analyzer(
     /// Test for early dropout from || or &amp;&amp; sequence.
     /// </summary>
     private async Task DropOutAsync(
-        int? k, PCode tCode, int exitL, ExpressionAnalysis @is)
+        bool k, PCode tCode, int exitL, ExpressionAnalysis @is)
     {
-        if (k.HasValue)
+        if (k)
         {
             await this.FetchAsync(@is).ConfigureAwait(false);
         }
@@ -1625,13 +1622,13 @@ public class Analyzer(
     /// <summary>
     /// Drop to a lower level.
     /// </summary>
-    private async Task<int?> DownAsync(
+    private async Task<bool> DownAsync(
         IList<string> ops,
         int opOff,
-        Func<ExpressionAnalysis, Task<int?>> levelAsync,
+        Func<ExpressionAnalysis, Task<bool>> levelAsync,
         ExpressionAnalysis @is)
     {
-        int? k;
+        bool k;
 
         k = await this.Down1Async(levelAsync, @is).ConfigureAwait(false);
         if (!await frontEnd.NextOpAsync(ops).ConfigureAwait(false))
@@ -1639,7 +1636,7 @@ public class Analyzer(
             return k;
         }
 
-        if (k.HasValue)
+        if (k)
         {
             await this.FetchAsync(@is).ConfigureAwait(false);
         }
@@ -1662,7 +1659,7 @@ public class Analyzer(
             }
             else
             {
-                return null;
+                return false;
             }
         }
     }
@@ -1670,10 +1667,11 @@ public class Analyzer(
     /// <summary>
     /// Unary drop to a lower level.
     /// </summary>
-    private async Task<int?> Down1Async(
-        Func<ExpressionAnalysis, Task<int?>> levelAsync, ExpressionAnalysis @is)
+    private async Task<bool> Down1Async(
+        Func<ExpressionAnalysis, Task<bool>> levelAsync, ExpressionAnalysis @is)
     {
-        int? k, before;
+        bool k;
+        int? before;
 
         (before, _) = backEnd.SetStage();
         k = await levelAsync(@is).ConfigureAwait(false);
@@ -1692,7 +1690,7 @@ public class Analyzer(
     private async Task Down2Async(
         PCode? oper,
         PCode? oper2,
-        Func<ExpressionAnalysis, Task<int?>> levelAsync,
+        Func<ExpressionAnalysis, Task<bool>> levelAsync,
         ExpressionAnalysis @is,
         ExpressionAnalysis is2)
     {
@@ -1704,8 +1702,7 @@ public class Analyzer(
         // constant op unknown
         if (@is.ConstantType.HasValue)
         {
-            if ((await this.Down1Async(levelAsync, is2).ConfigureAwait(false))
-                .HasValue)
+            if (await this.Down1Async(levelAsync, is2).ConfigureAwait(false))
             {
                 await this.FetchAsync(is2).ConfigureAwait(false);
             }
@@ -1726,8 +1723,7 @@ public class Analyzer(
         {
             // at start of the buffer
             await backEnd.GenAsync(PCode.PUSH1, null).ConfigureAwait(false);
-            if ((await this.Down1Async(levelAsync, is2).ConfigureAwait(false))
-                .HasValue)
+            if (await this.Down1Async(levelAsync, is2).ConfigureAwait(false))
             {
                 await this.FetchAsync(is2).ConfigureAwait(false);
             }
