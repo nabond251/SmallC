@@ -33,7 +33,7 @@ public class Analyzer(
 
         // scratch generated code
         await backEnd.ClearStageAsync(before, null).ConfigureAwait(false);
-        return !@const.HasValue ?
+        return !@const ?
             throw new InvalidOperationException("must be constant expression") :
             val;
     }
@@ -42,7 +42,7 @@ public class Analyzer(
     /// Analyzes expression.
     /// </summary>
     /// <returns>Constant value, if any.</returns>
-    public async Task<(SymbolType? Con, int Val)> ExpressionAsync()
+    public async Task<(bool Con, int Val)> ExpressionAsync()
     {
         var @is = new ExpressionAnalysis(null, null, null, null, 0, null, null);
 
@@ -51,7 +51,7 @@ public class Analyzer(
             await this.FetchAsync(@is).ConfigureAwait(false);
         }
 
-        return (@is.ConstantType, @is.ConstantValue);
+        return (@is.ConstantType.HasValue, @is.ConstantValue);
     }
 
     /// <summary>
