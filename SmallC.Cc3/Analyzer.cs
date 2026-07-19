@@ -1004,7 +1004,7 @@ public class Analyzer(
             return null;
         }
 
-        if (!this.Constant(@is))
+        if (!await this.ConstantAsync(@is).ConfigureAwait(false))
         {
             await this.ExpErrAsync().ConfigureAwait(false);
         }
@@ -1199,10 +1199,64 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Expression analysis.</param>
     /// <returns>A value indicating whether expression is constant.</returns>
-    public bool Constant(ExpressionAnalysis @is)
+    public async Task<bool> ConstantAsync(ExpressionAnalysis @is)
+    {
+        ArgumentNullException.ThrowIfNull(@is);
+
+        int? offset;
+
+        (@is.ConstantType, @is.ConstantValue) = await this.NumberAsync()
+            .ConfigureAwait(false);
+        if (@is.ConstantType.HasValue)
+        {
+            await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
+                .ConfigureAwait(false);
+        }
+        else
+        {
+            (@is.ConstantType, @is.ConstantValue) = await this.ChrConAsync()
+                .ConfigureAwait(false);
+            if (@is.ConstantType.HasValue)
+            {
+                await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                offset = await this.StringAsync().ConfigureAwait(false);
+                if (offset.HasValue)
+                {
+                    await backEnd.GenAsync(PCode.POINT1l, offset)
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Parses number constant.
+    /// </summary>
+    /// <returns>Tuple of constant type, if any, and constant.</returns>
+    public Task<(SymbolType? Type, int Value)> NumberAsync()
     {
         _ = storage;
-        _ = @is;
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Parses character constant.
+    /// </summary>
+    /// <returns>Tuple of constant type, if any, and constant.</returns>
+    public Task<(SymbolType? Type, int Value)> ChrConAsync()
+    {
+        _ = storage;
+        _ = storage;
         throw new NotImplementedException();
     }
 
