@@ -1214,8 +1214,8 @@ public class Analyzer(
         }
         else
         {
-            (@is.ConstantType, @is.ConstantValue) = await this.ChrConAsync()
-                .ConfigureAwait(false);
+            (@is.ConstantType, @is.ConstantValue) = await this.ChrConAsync(
+                @is.ConstantValue).ConfigureAwait(false);
             if (@is.ConstantType.HasValue)
             {
                 await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
@@ -1337,12 +1337,26 @@ public class Analyzer(
     /// <summary>
     /// Parses character constant.
     /// </summary>
+    /// <param name="value">Current constant value.</param>
     /// <returns>Tuple of constant type, if any, and constant.</returns>
-    public Task<(SymbolType? Type, int Value)> ChrConAsync()
+    public async Task<(SymbolType? Type, int Value)> ChrConAsync(int value)
     {
-        _ = storage;
-        _ = storage;
-        throw new NotImplementedException();
+        int k;
+
+        k = 0;
+        if (!await frontEnd.MatchAsync("'").ConfigureAwait(false))
+        {
+            return (null, value);
+        }
+
+        while (storage.Ch != '\'')
+        {
+            k = (k << 8) + ((this.LitChar() ?? 0) & 255);
+        }
+
+        _ = frontEnd.Gch();
+        value = k;
+        return (SymbolType.Int, value);
     }
 
     /// <summary>
