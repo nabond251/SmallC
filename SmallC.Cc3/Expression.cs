@@ -1,4 +1,4 @@
-﻿// <copyright file="ExpressionAnalysis.cs" company="Soli Deo Gloria Apps">
+﻿// <copyright file="Expression.cs" company="Soli Deo Gloria Apps">
 // Copyright (c) Soli Deo Gloria Apps. All rights reserved.
 // </copyright>
 
@@ -8,9 +8,9 @@ using SmallC.Cc;
 using static SmallC.Cc.SymbolTableEntry;
 
 /// <summary>
-/// Results of expression analysis.
+/// Expression attributes determined from analysis.
 /// </summary>
-public class ExpressionAnalysis(
+public class Expression(
     SymbolTableEntry? symbolTableEntry,
     SymbolType? indirectType,
     SymbolType? addressType,

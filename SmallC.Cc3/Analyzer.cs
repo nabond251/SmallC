@@ -44,7 +44,7 @@ public class Analyzer(
     /// <returns>Constant value, if any.</returns>
     public async Task<(bool Con, int Val)> ExpressionAsync()
     {
-        var @is = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        var @is = new Expression(null, null, null, null, 0, null, null);
 
         if (await this.Level1Async(@is).ConfigureAwait(false))
         {
@@ -62,7 +62,7 @@ public class Analyzer(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TestAsync(int label, bool parens)
     {
-        var @is = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        var @is = new Expression(null, null, null, null, 0, null, null);
         int? before, start;
 
         if (parens)
@@ -172,7 +172,7 @@ public class Analyzer(
     /// <param name="is">Analysis results.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task ZeroJumpAsync(
-        PCode oper, int label, ExpressionAnalysis @is)
+        PCode oper, int label, Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -187,13 +187,13 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level1Async(ExpressionAnalysis @is)
+    public async Task<bool> Level1Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
         bool k;
-        var is2 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
-        var is3 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        var is2 = new Expression(null, null, null, null, 0, null, null);
+        var is3 = new Expression(null, null, null, null, 0, null, null);
         PCode? oper, oper2;
 
         k = await this.Down1Async(this.Level2Async, @is).ConfigureAwait(false);
@@ -329,12 +329,12 @@ public class Analyzer(
     /// </summary>
     /// <param name="is1">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level2Async(ExpressionAnalysis is1)
+    public async Task<bool> Level2Async(Expression is1)
     {
         ArgumentNullException.ThrowIfNull(is1);
 
-        var is2 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
-        var is3 = new ExpressionAnalysis(null, null, null, null, 0, null, null);
+        var is2 = new Expression(null, null, null, null, 0, null, null);
+        var is3 = new Expression(null, null, null, null, 0, null, null);
         bool k;
         int flab, endLab;
 
@@ -417,7 +417,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level3Async(ExpressionAnalysis @is)
+    public async Task<bool> Level3Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -431,7 +431,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level4Async(ExpressionAnalysis @is)
+    public async Task<bool> Level4Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -445,7 +445,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level5Async(ExpressionAnalysis @is)
+    public async Task<bool> Level5Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -458,7 +458,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level6Async(ExpressionAnalysis @is)
+    public async Task<bool> Level6Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -471,7 +471,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level7Async(ExpressionAnalysis @is)
+    public async Task<bool> Level7Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -484,7 +484,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level8Async(ExpressionAnalysis @is)
+    public async Task<bool> Level8Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -497,7 +497,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level9Async(ExpressionAnalysis @is)
+    public async Task<bool> Level9Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -510,7 +510,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level10Async(ExpressionAnalysis @is)
+    public async Task<bool> Level10Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -523,7 +523,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level11Async(ExpressionAnalysis @is)
+    public async Task<bool> Level11Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -536,7 +536,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level12Async(ExpressionAnalysis @is)
+    public async Task<bool> Level12Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -550,7 +550,7 @@ public class Analyzer(
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "not code")]
-    public async Task<bool> Level13Async(ExpressionAnalysis @is)
+    public async Task<bool> Level13Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -763,7 +763,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> Level14Async(ExpressionAnalysis @is)
+    public async Task<bool> Level14Async(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -777,7 +777,7 @@ public class Analyzer(
         if (storage.Ch is '[' or '(')
         {
             // allocate only if needed
-            var is2 = new ExpressionAnalysis(
+            var is2 = new Expression(
                 null, null, null, null, 0, null, null);
 
             while (true)
@@ -904,7 +904,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>Expression operand.</returns>
-    public async Task<bool> PrimaryAsync(ExpressionAnalysis @is)
+    public async Task<bool> PrimaryAsync(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -1093,7 +1093,7 @@ public class Analyzer(
     /// <param name="oper2">Second operator, if any.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task StepAsync(
-        PCode oper, ExpressionAnalysis @is, PCode? oper2)
+        PCode oper, Expression @is, PCode? oper2)
     {
         await this.FetchAsync(@is).ConfigureAwait(false);
         await backEnd.GenAsync(
@@ -1114,7 +1114,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Expression analysis for result.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task StoreAsync(ExpressionAnalysis @is)
+    public async Task StoreAsync(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -1159,7 +1159,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Analysis results.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task FetchAsync(ExpressionAnalysis @is)
+    public async Task FetchAsync(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -1198,7 +1198,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="is">Expression analysis.</param>
     /// <returns>A value indicating whether expression is constant.</returns>
-    public async Task<bool> ConstantAsync(ExpressionAnalysis @is)
+    public async Task<bool> ConstantAsync(Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
@@ -1446,7 +1446,7 @@ public class Analyzer(
     /// True if <paramref name="is2"/>'s operand should be doubled.
     /// </summary>
     private static int Double(
-        PCode? oper, ExpressionAnalysis is1, ExpressionAnalysis is2)
+        PCode? oper, Expression is1, Expression is2)
     {
         ArgumentNullException.ThrowIfNull(is1);
         ArgumentNullException.ThrowIfNull(is2);
@@ -1460,7 +1460,7 @@ public class Analyzer(
     /// <summary>
     /// Unsigned operand?.
     /// </summary>
-    private static bool NoSign(ExpressionAnalysis @is)
+    private static bool NoSign(Expression @is)
     {
         return @is.AddressType.HasValue
             || @is.ConstantType == SymbolType.UInt
@@ -1550,8 +1550,8 @@ public class Analyzer(
         PCode tCode,
         int dropVal,
         int endVal,
-        Func<ExpressionAnalysis, Task<bool>> levelAsync,
-        ExpressionAnalysis @is)
+        Func<Expression, Task<bool>> levelAsync,
+        Expression @is)
     {
         bool k;
         int dropLab, endLab;
@@ -1603,7 +1603,7 @@ public class Analyzer(
     /// Test for early dropout from || or &amp;&amp; sequence.
     /// </summary>
     private async Task DropOutAsync(
-        bool k, PCode tCode, int exitL, ExpressionAnalysis @is)
+        bool k, PCode tCode, int exitL, Expression @is)
     {
         if (k)
         {
@@ -1625,8 +1625,8 @@ public class Analyzer(
     private async Task<bool> DownAsync(
         IList<string> ops,
         int opOff,
-        Func<ExpressionAnalysis, Task<bool>> levelAsync,
-        ExpressionAnalysis @is)
+        Func<Expression, Task<bool>> levelAsync,
+        Expression @is)
     {
         bool k;
 
@@ -1646,7 +1646,7 @@ public class Analyzer(
             if (await frontEnd.NextOpAsync(ops).ConfigureAwait(false))
             {
                 // allocate only if needed
-                var is2 = new ExpressionAnalysis(
+                var is2 = new Expression(
                     null, null, null, null, 0, null, null);
                 frontEnd.Bump(storage.OpSize);
                 storage.OpIndex += opOff;
@@ -1668,7 +1668,7 @@ public class Analyzer(
     /// Unary drop to a lower level.
     /// </summary>
     private async Task<bool> Down1Async(
-        Func<ExpressionAnalysis, Task<bool>> levelAsync, ExpressionAnalysis @is)
+        Func<Expression, Task<bool>> levelAsync, Expression @is)
     {
         bool k;
         int? before;
@@ -1690,9 +1690,9 @@ public class Analyzer(
     private async Task Down2Async(
         PCode? oper,
         PCode? oper2,
-        Func<ExpressionAnalysis, Task<bool>> levelAsync,
-        ExpressionAnalysis @is,
-        ExpressionAnalysis is2)
+        Func<Expression, Task<bool>> levelAsync,
+        Expression @is,
+        Expression is2)
     {
         int? before, start;
 
