@@ -171,13 +171,15 @@ public class Analyzer(
     /// <param name="label">Label to jump to if false.</param>
     /// <param name="is">Analysis results.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task ZeroJumpAsync(PCode oper, int label, ExpressionAnalysis @is)
+    public async Task ZeroJumpAsync(
+        PCode oper, int label, ExpressionAnalysis @is)
     {
-        _ = storage;
-        _ = oper;
-        _ = label;
-        _ = @is;
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(@is);
+
+        // purge conventional code
+        await backEnd.ClearStageAsync(@is.StageIndex, null)
+            .ConfigureAwait(false);
+        await backEnd.GenAsync(oper, label).ConfigureAwait(false);
     }
 
     /// <summary>
