@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="EXIT.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="CALL.ASM">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
