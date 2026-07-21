@@ -93,3 +93,21 @@ _parse() {
       }
     }
   }
+
+/*
+** Allocate n bytes of (possibly zeroed) memory.
+** Entry: n = Size of the items in bytes.
+**    clear = "true" if clearing is desired.
+** Returns the address of the allocated block of memory
+** or NULL if the requested amount of space is not available.
+*/
+_alloc(n, clear) unsigned n, clear; {
+  char *oldptr;
+  if(n < avail(YES)) {
+    if(clear) pad(_memptr, NULL, n);
+    oldptr = _memptr;
+    _memptr += n;
+    return (oldptr);
+    }
+  return (NULL);
+  }
