@@ -1179,6 +1179,31 @@ public class Analyzer(
             {
                 if ((ptr.Type & SymbolType.Unsigned) != 0)
                 {
+                    await backEnd.GenAsync(PCode.GETb1pu, null)
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    await backEnd.GenAsync(PCode.GETb1p, null)
+                        .ConfigureAwait(false);
+                }
+            }
+        }
+
+        // direct
+        else
+        {
+            if (ptr.Ident == SymbolIdentity.Pointer
+                || (int)ptr.Type >> 2 == Machine.Bpw)
+            {
+                await backEnd.GenAsync(
+                    PCode.GETw1m, storage.SymTab.IndexOf(ptr))
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                if ((ptr.Type & SymbolType.Unsigned) != 0)
+                {
                     await backEnd.GenAsync(
                         PCode.GETb1mu, storage.SymTab.IndexOf(ptr))
                         .ConfigureAwait(false);
