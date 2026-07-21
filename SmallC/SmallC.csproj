@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="CSYSLIB.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="EXIT.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
