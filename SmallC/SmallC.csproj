@@ -41,6 +41,9 @@
     <None Update="CSYSLIB.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="ITOU.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="FPUTC.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
