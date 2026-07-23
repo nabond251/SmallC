@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="AUXBUF.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="AVAIL.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
