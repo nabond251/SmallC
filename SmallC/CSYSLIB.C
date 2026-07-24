@@ -95,6 +95,57 @@ _parse() {
   }
 
 /*
+** Binary-Stream output of one byte to fd.
+*/
+_write(ch, fd) int ch, fd; {
+  if(_bufuse[fd]) return(_writebuf(ch, fd));
+  if(_bdos2(WRITE<<8, fd, 1, &ch) != 1) {
+    _seterr(fd);
+    return (EOF);
+    }
+  return (ch);
+  }
+
+/*
+** Empty buffer if necessary, and store ch in buffer.
+*/
+_writebuf(ch, fd) int ch, fd; {
+  char *ptr;
+  if(_bufuse[fd] == IN && _backup(fd)) return (EOF);
+  while(YES) {
+    ptr = _bufnxt[fd];
+    if(ptr < (_bufptr[fd] + _bufsiz[fd])) {
+      *ptr = ch;
+      ++_bufnxt[fd];
+      _bufuse[fd] = OUT;
+      return (ch);
+      }
+    if(_flush(fd)) return (EOF);
+    }
+  }
+
+/*
+** Flush buffer to DOS if dirty buffer.
+** Reset buffer pointers in any case.
+*/
+_flush(fd) int fd; {
+  int i, j, k, chunk;
+  if(_bufuse[fd] == OUT) {
+    i = _bufnxt[fd] - _bufptr[fd];
+    k = 0;
+    while(i > 0) {     /* avoid DMA problem on physical 64K boundary */
+      if(i < 512) chunk = i;
+      else        chunk = 512;
+      k += (j = _bdos2(WRITE<<8, fd, chunk, _bufptr[fd] + k));
+      if (j < chunk) {_seterr(fd); return (EOF);}
+      i -= j;
+      }
+    }
+  _empty(fd, YES);
+  return (NULL);
+  }
+
+/*
 ** Allocate n bytes of (possibly zeroed) memory.
 ** Entry: n = Size of the items in bytes.
 **    clear = "true" if clearing is desired.
