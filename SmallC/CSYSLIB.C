@@ -146,6 +146,38 @@ _flush(fd) int fd; {
   }
 
 /*
+** Backup DOS file position to current point.
+*/
+_backup(fd) int fd; {
+  int hi, lo;
+  if(lo = _bufnxt[fd] - _bufend[fd]) {
+    hi = -1;
+    if(!_seek(FROM_CUR, fd, &hi, &lo)) {
+      _seterr(fd);
+      return (EOF);
+      }
+    }
+  _empty(fd, YES);
+  return (NULL);
+  }
+
+/*
+** Set buffer controls to empty status.
+*/
+_empty(fd, mt) int fd, mt; {
+  _bufnxt[fd] = _bufend[fd] = _bufptr[fd];
+  _bufeof[fd] = NO;
+  if(mt) _bufuse[fd] = EMPTY;
+  }
+
+/*
+** Set error status for fd.
+*/
+_seterr(fd) int fd; {
+  _status[fd] &=  ERRBIT;
+  }
+
+/*
 ** Allocate n bytes of (possibly zeroed) memory.
 ** Entry: n = Size of the items in bytes.
 **    clear = "true" if clearing is desired.
@@ -161,4 +193,52 @@ _alloc(n, clear) unsigned n, clear; {
     return (oldptr);
     }
   return (NULL);
+  }
+
+/*
+** Issue extended BDOS function and return result.
+** Entry: ax = function code and sub-function
+**        bx, cx, dx = other parameters
+*/
+_bdos2(ax, bx, cx, dx) int ax, bx, cx, dx; {
+#asm
+  push bx         ; preserve secondary register
+  mov  dx,[bp+4]
+  mov  cx,[bp+6]
+  mov  bx,[bp+8]
+  mov  ax,[bp+10] ; load DOS function number
+  int  21h        ; call bdos
+  jnc  __bdos21   ; no error
+  neg  ax         ; make error code negative
+__bdos21:
+  pop  bx         ; restore secondary register
+#endasm
+  }
+
+/*
+** Issue LSEEK call
+*/
+_seek(org, fd, hi, lo) int org, fd, hi, lo; {
+#asm
+  push bx         ; preserve secondary register
+  mov  bx,[bp+4]
+  mov  dx,[bx]    ; get lo part of destination
+  mov  bx,[bp+6]
+  mov  cx,[bx]    ; get hi part of destination
+  mov  bx,[bp+8]  ; get file descriptor
+  mov  al,[bp+10] ; get origin code for seek
+  mov  ah,42h     ; move-file-pointer function
+  int  21h        ; call bdos
+  jnc  __seek1    ; error?
+  xor  ax,ax      ; yes, return false
+  jmp  __seek2
+__seek1:          ; no, set hi and lo
+  mov  bx,[bp+4]  ; get address of lo
+  mov  [bx],ax    ; store low part of new position
+  mov  bx,[bp+6]  ; get address of hi
+  mov  [bx],dx    ; store high part of new position
+  mov  ax,1       ; return true
+__seek2:
+  pop  bx         ; restore secondary register
+#endasm
   }
