@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="IS.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="PUTCHAR.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
