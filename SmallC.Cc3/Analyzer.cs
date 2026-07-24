@@ -1307,7 +1307,7 @@ public class Analyzer(
             if (char.ToUpperInvariant(storage.Ch.Value) == 'X')
             {
                 _ = await frontEnd.InByteAsync().ConfigureAwait(false);
-                while (char.IsAsciiHexDigit(storage.Ch.Value))
+                while (storage.Ch is char ch && char.IsAsciiHexDigit(ch))
                 {
                     if (char.IsDigit(storage.Ch.Value))
                     {
@@ -1316,7 +1316,7 @@ public class Analyzer(
                     }
                     else
                     {
-                        var ch = await frontEnd.InByteAsync()
+                        ch = await frontEnd.InByteAsync()
                             .ConfigureAwait(false) ??
                             throw new InvalidOperationException();
                         k = (k * 16) + 10 + (char.ToUpperInvariant(ch) - 'A');
