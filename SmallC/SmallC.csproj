@@ -44,6 +44,9 @@
     <None Update="AVAIL.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="FCLOSE.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="PAD.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -171,6 +171,14 @@ _empty(fd, mt) int fd, mt; {
   }
 
 /*
+** Return fd's open mode, else NULL.
+*/
+_mode(fd) char *fd; {
+  if(fd < MAXFILES) return (_status[fd]);
+  return (NULL);
+  }
+
+/*
 ** Set error status for fd.
 */
 _seterr(fd) int fd; {
