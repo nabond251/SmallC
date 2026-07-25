@@ -44,6 +44,6 @@ isgraph (c) int c; {return (_is[c] & GRAPH );} /* '!'-'~' */
 islower (c) int c; {return (_is[c] & LOWER );} /* 'a'-'z' */
 isprint (c) int c; {return (_is[c] & PRINT );} /* ' '-'~' */
 ispunct (c) int c; {return (_is[c] & PUNCT );} /* !alnum && !cntrl && !space && */
-isspace (c) int c; {return (_is[c] & SPACE );} /* HT, LF, VT, FF, CR, ' ' */
+isspace (c) int c; {return (_is[c] & BLANK );} /* HT, LF, VT, FF, CR, ' ' */
 isupper (c) int c; {return (_is[c] & UPPER );} /* 'A'-'Z' */
 isxdigit(c) int c; {return (_is[c] & XDIGIT);} /* '0'-'9', 'a'-'f', 'A'-'F' */
