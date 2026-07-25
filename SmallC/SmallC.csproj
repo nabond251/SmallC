@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ISATTY.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="LEFT.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
