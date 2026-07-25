@@ -104,6 +104,9 @@
     <None Update="ABS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="HELLO.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="WORDS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
