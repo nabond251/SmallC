@@ -95,6 +95,49 @@ _parse() {
   }
 
 /*
+** Binary-stream input of one byte from fd.
+*/
+_read(fd) int fd; {
+  unsigned char ch;
+  if(_nextc[fd] != EOF) {
+    ch = _nextc[fd];
+    _nextc[fd] = EOF;
+    return (ch);
+    }
+  if(iscons(fd))  return (_getkey());
+  if(_bufuse[fd]) return (_readbuf(fd));
+  switch(_bdos2(READ<<8, fd, 1, &ch)) {
+     case 1:  return (ch);
+     case 0: _seteof(fd); return (EOF);
+    default: _seterr(fd); return (EOF);
+    }
+  }
+
+/*
+** Fill buffer if necessary, and return next byte.
+*/
+_readbuf(fd) int fd; {
+  int got, chunk;
+  char *ptr, *max;
+  if(_bufuse[fd] == OUT && _flush(fd)) return (EOF);
+  while(YES) {
+    ptr = _bufnxt[fd];
+    if(ptr < _bufend[fd]) {++_bufnxt[fd]; return (*ptr);}
+    if(_bufeof[fd]) {_seteof(fd); return (EOF);}
+    max = (ptr = _bufend[fd] = _bufptr[fd]) + _bufsiz[fd];
+    do {         /* avoid DMA problem on physical 64K boundary */
+      if((max - ptr) < 512) chunk = max - ptr;
+      else                  chunk = 512;
+      ptr += (got = _bdos2(READ<<8, fd, chunk, ptr));
+      if(got < chunk) {_bufeof[fd] = YES; break;}
+      } while(ptr < max);
+    _bufend[fd] = ptr;
+    _bufnxt[fd] = _bufptr[fd];
+    _bufuse[fd] = IN;
+    }
+  }
+
+/*
 ** Binary-Stream output of one byte to fd.
 */
 _write(ch, fd) int ch, fd; {
@@ -179,10 +222,17 @@ _mode(fd) char *fd; {
   }
 
 /*
+** Set EOF status for fd.
+*/
+_seteof(fd) int fd; {
+  _status[fd] |= EOFBIT;
+  }
+
+/*
 ** Set error status for fd.
 */
 _seterr(fd) int fd; {
-  _status[fd] &=  ERRBIT;
+  _status[fd] |= ERRBIT;
   }
 
 /*
@@ -248,5 +298,26 @@ __seek1:          ; no, set hi and lo
   mov  ax,1       ; return true
 __seek2:
   pop  bx         ; restore secondary register
+#endasm
+  }
+
+/*
+** Return next keyboard character
+*/
+_getkey() {
+#asm
+  mov  ah,0       ; sub-service = read keyboard
+  int  16h        ; call bdos keyboard service
+  or   al,al      ; special character?
+  jnz  __get2     ; no
+  mov  al,ah      ; yes, move it to al
+  cmp  al,3       ; ctrl-2 (simulated null)?
+  jne  __get1     ; no
+  xor  al,al      ; yes, report zero
+  jmp  __get2
+__get1:
+  add  al,113     ; offset to range 128-245
+__get2:
+  xor  ah,ah      ; zero ah
 #endasm
   }
