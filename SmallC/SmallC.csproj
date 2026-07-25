@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ISCONS.C">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="FGETC.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
