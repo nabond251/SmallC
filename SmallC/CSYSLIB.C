@@ -95,6 +95,42 @@ _parse() {
   }
 
 /*
+** Open file on specified fd.
+*/
+_open(fn, model, fd) char *fn, *mode; int *fd; {
+  int rw, tfd;
+  switch(mode[0]) {
+    case 'r': {
+      if(mode[1] == '+') rw = 2; else rw = 0;
+      if ((tfd = _bdos2((OPEN<<8)|rw, NULL, NULL, fn)) < 0) return (NO);
+      break;
+      }
+    case 'w': {
+      if(mode[1] == '+') rw = 2; else rw = 1;
+    create:
+      if((tfd = _bdos2((CREATE<<8), NULL, ARCHIVE, fn)) < 0) return (NO);
+      _bdos2(CLOSE<<8, tfd, NULL, NULL);
+      if((tfd = _bdos2((OPEN<<)|rw, NULL, NULL, fn)) < 0) return (NO);
+      break;
+      }
+    case 'a': {
+      if(mode[1] == '+') rw = 2; else rw = 1;
+      if((tfd = _bdos2((OPEN<<8)|rw, NULL, NULL, fn)) < 0) goto create;
+      if(_bdos2((SEEK<<8)|FROM_END, tfd, NULL, 0) < 0) return (NO);
+      break;
+      }
+    default: return (NO);
+    }
+  _empty(tfd, YES);
+  if(isatty(tfd)) _bufuse[tfd] = NULL;
+  *fd = tfd;
+  _cons  [tfd] = NULL;
+  _nextc [tfd] = EOF;
+  _status[tfd] = OPNBIT;
+  return (YES);
+  }
+
+/*
 ** Binary-stream input of one byte from fd.
 */
 _read(fd) int fd; {
