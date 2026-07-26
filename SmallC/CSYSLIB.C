@@ -225,6 +225,14 @@ _flush(fd) int fd; {
   }
 
 /*
+** Adjust DOS file position to current point.
+*/
+_adjust(fd) int fd; {
+  if(_bufuse[fd] == OUT) return (_flush(fd));
+  if(_bufuse[fd] == IN ) return (_backup(fd));
+  }
+
+/*
 ** Backup DOS file position to current point.
 */
 _backup(fd) int fd; {
@@ -265,10 +273,24 @@ _seteof(fd) int fd; {
   }
 
 /*
+** Clear EOF status for fd.
+*/
+_clreof(fd) int fd; {
+  _status[fd] &= ~EOFBIT;
+  }
+
+/*
 ** Set error status for fd.
 */
 _seterr(fd) int fd; {
   _status[fd] |= ERRBIT;
+  }
+
+/*
+** Clear error status for fd.
+*/
+_clrerr(fd) int fd; {
+  _status[fd] &= ~ERRBIT;
   }
 
 /*
