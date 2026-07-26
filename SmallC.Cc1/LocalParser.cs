@@ -645,7 +645,7 @@ public class LocalParser(
         {
             if (frontEnd.Gch() == ':')
             {
-                await backEnd.GenAsync(PCode.JMPm, this.AddLabel())
+                await backEnd.GenAsync(PCode.LABm, this.AddLabel())
                     .ConfigureAwait(false);
                 return true;
             }

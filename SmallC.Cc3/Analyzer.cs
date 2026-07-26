@@ -290,8 +290,11 @@ public class Analyzer(
             await this.Down2Async(oper, oper2, this.Level1Async, @is, is2)
                 .ConfigureAwait(false);
 
-            // retrieve address
-            await backEnd.GenAsync(PCode.POP2, null).ConfigureAwait(false);
+            if (oper.HasValue)
+            {
+                // retrieve address
+                await backEnd.GenAsync(PCode.POP2, null).ConfigureAwait(false);
+            }
         }
 
         // direct target
@@ -1179,6 +1182,31 @@ public class Analyzer(
             {
                 if ((ptr.Type & SymbolType.Unsigned) != 0)
                 {
+                    await backEnd.GenAsync(PCode.GETb1pu, null)
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    await backEnd.GenAsync(PCode.GETb1p, null)
+                        .ConfigureAwait(false);
+                }
+            }
+        }
+
+        // direct
+        else
+        {
+            if (ptr.Ident == SymbolIdentity.Pointer
+                || (int)ptr.Type >> 2 == Machine.Bpw)
+            {
+                await backEnd.GenAsync(
+                    PCode.GETw1m, storage.SymTab.IndexOf(ptr))
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                if ((ptr.Type & SymbolType.Unsigned) != 0)
+                {
                     await backEnd.GenAsync(
                         PCode.GETb1mu, storage.SymTab.IndexOf(ptr))
                         .ConfigureAwait(false);
@@ -1282,7 +1310,7 @@ public class Analyzer(
             if (char.ToUpperInvariant(storage.Ch.Value) == 'X')
             {
                 _ = await frontEnd.InByteAsync().ConfigureAwait(false);
-                while (char.IsAsciiHexDigit(storage.Ch.Value))
+                while (storage.Ch is char ch && char.IsAsciiHexDigit(ch))
                 {
                     if (char.IsDigit(storage.Ch.Value))
                     {
@@ -1291,7 +1319,7 @@ public class Analyzer(
                     }
                     else
                     {
-                        var ch = await frontEnd.InByteAsync()
+                        ch = await frontEnd.InByteAsync()
                             .ConfigureAwait(false) ??
                             throw new InvalidOperationException();
                         k = (k * 16) + 10 + (char.ToUpperInvariant(ch) - 'A');

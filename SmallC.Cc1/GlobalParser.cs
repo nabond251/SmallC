@@ -463,7 +463,7 @@ public class GlobalParser(
             await frontEnd.BlanksAsync().ConfigureAwait(false);
             if ((storage.LPtr >= storage.Line.Length
                 || FrontEnd.StrEq(storage.Line[storage.LPtr..], ")") == 0)
-                && (await frontEnd.MatchAsync(",").ConfigureAwait(false)))
+                && (!await frontEnd.MatchAsync(",").ConfigureAwait(false)))
             {
                 throw new InvalidOperationException("no comma");
             }
