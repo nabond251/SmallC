@@ -290,8 +290,11 @@ public class Analyzer(
             await this.Down2Async(oper, oper2, this.Level1Async, @is, is2)
                 .ConfigureAwait(false);
 
-            // retrieve address
-            await backEnd.GenAsync(PCode.POP2, null).ConfigureAwait(false);
+            if (oper.HasValue)
+            {
+                // retrieve address
+                await backEnd.GenAsync(PCode.POP2, null).ConfigureAwait(false);
+            }
         }
 
         // direct target
