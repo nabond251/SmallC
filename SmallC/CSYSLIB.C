@@ -97,7 +97,7 @@ _parse() {
 /*
 ** Open file on specified fd.
 */
-_open(fn, model, fd) char *fn, *mode; int *fd; {
+_open(fn, mode, fd) char *fn, *mode; int *fd; {
   int rw, tfd;
   switch(mode[0]) {
     case 'r': {
@@ -110,7 +110,7 @@ _open(fn, model, fd) char *fn, *mode; int *fd; {
     create:
       if((tfd = _bdos2((CREATE<<8), NULL, ARCHIVE, fn)) < 0) return (NO);
       _bdos2(CLOSE<<8, tfd, NULL, NULL);
-      if((tfd = _bdos2((OPEN<<)|rw, NULL, NULL, fn)) < 0) return (NO);
+      if((tfd = _bdos2((OPEN<<8)|rw, NULL, NULL, fn)) < 0) return (NO);
       break;
       }
     case 'a': {
