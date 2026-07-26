@@ -360,6 +360,22 @@ __seek2:
   }
 
 /*
+** Test for keyboard input
+*/
+_hitkey() {
+#asm
+  mov  ah,1       ; sub-service = test keyboard
+  int  16h        ; call bdos keyboard service
+  jnz  __hit1
+  xor  ax,ax      ; nothing there, return false
+  jmp  __hit2
+__hit1:
+  mov  ax,1       ; character ready, return true
+__hit2:
+#endasm
+  }
+
+/*
 ** Return next keyboard character
 */
 _getkey() {
