@@ -38,79 +38,79 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="EMPTY.C">
+    <None Update="C\EMPTY.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ISCONS.C">
+    <None Update="C\CLIB\ISCONS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="FGETC.C">
+    <None Update="C\CLIB\FGETC.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ISATTY.C">
+    <None Update="C\CLIB\ISATTY.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="LEFT.C">
+    <None Update="C\CLIB\LEFT.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="IS.C">
+    <None Update="C\CLIB\IS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="GETCHAR.C">
+    <None Update="C\CLIB\GETCHAR.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PUTCHAR.C">
+    <None Update="C\CLIB\PUTCHAR.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="MALLOC.C">
+    <None Update="C\CLIB\MALLOC.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="AUXBUF.C">
+    <None Update="C\CLIB\AUXBUF.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="AVAIL.C">
+    <None Update="C\CLIB\AVAIL.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="FCLOSE.C">
+    <None Update="C\CLIB\FCLOSE.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="PAD.C">
+    <None Update="C\CLIB\PAD.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CSYSLIB.C">
+    <None Update="C\CLIB\CSYSLIB.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ITOU.C">
+    <None Update="C\CLIB\ITOU.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="FPUTC.C">
+    <None Update="C\CLIB\FPUTC.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="FPUTS.C">
+    <None Update="C\CLIB\FPUTS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="EXIT.C">
+    <None Update="C\CLIB\EXIT.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CALL.ASM">
+    <None Update="C\CLIB\CALL.ASM">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ATOI.C">
+    <None Update="C\CLIB\ATOI.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CLIB.H">
+    <None Update="C\CLIB\CLIB.H">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="STDIO.H">
+    <None Update="C\STDIO.H">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ABS.C">
+    <None Update="C\CLIB\ABS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="HELLO.C">
+    <None Update="C\HELLO.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="WORDS.C">
+    <None Update="C\WORDS.C">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
