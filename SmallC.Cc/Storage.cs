@@ -69,6 +69,8 @@ public class Storage(
     /// <param name="stage">Staging buffer.</param>
     /// <param name="wq">While queue.</param>
     /// <param name="args">Static args.</param>
+    /// <param name="ch">Current character of input line.</param>
+    /// <param name="nCh">Next character of input line.</param>
     /// <param name="csp">Compiler relative stk ptr.</param>
     /// <param name="output">Fd for output file.</param>
     /// <param name="files">
@@ -87,6 +89,7 @@ public class Storage(
     /// A value indicating whether <see cref="Line"/> points to
     /// <see cref="PLine"/> or <see cref="MLine"/>.
     /// </param>
+    /// <param name="lPtr">Index to <see cref="Line"/>.</param>
     /// <param name="ssName">Static symbol name.</param>
     public Storage(
         Dictionary<int, int>? swNext = null,
@@ -94,6 +97,8 @@ public class Storage(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         Collection<WhileQueueEntry>? wq = null,
         Collection<string>? args = null,
+        char? ch = null,
+        char? nCh = null,
         int? csp = null,
         TextWriter? output = null,
         bool? files = null,
@@ -107,6 +112,7 @@ public class Storage(
         string? pLine = null,
         string? mLine = null,
         BufferLineType? lineType = null,
+        int? lPtr = null,
         string? ssName = null)
         : this(
             noGo: false,
@@ -120,8 +126,8 @@ public class Storage(
             stage: stage,
             wq: wq ?? [],
             args: args ?? [],
-            ch: null,
-            nCh: null,
+            ch: ch,
+            nCh: nCh,
             declared: 0,
             ifLevel: 0,
             skipLevel: 0,
@@ -154,7 +160,7 @@ public class Storage(
             pLine: pLine ?? string.Empty,
             mLine: mLine ?? string.Empty,
             lineType: lineType ?? BufferLineType.None,
-            lPtr: 0,
+            lPtr: lPtr ?? 0,
             msName: null,
             ssName: ssName,
             op: [

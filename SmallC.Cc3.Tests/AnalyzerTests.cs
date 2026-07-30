@@ -8,7 +8,6 @@ using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc4;
 using System.Collections.ObjectModel;
-using System.Text;
 using static SmallC.Cc.Storage;
 
 /// <summary>
@@ -19,24 +18,19 @@ public class AnalyzerTests
     /// <summary>
     /// Tests that can get character literal.
     /// </summary>
-    /// <param name="inputText">Input stream text.</param>
+    /// <param name="ch">Current character of input line.</param>
+    /// <param name="nCh">Next character of input line.</param>
+    /// <param name="pLine">Parsing buffer.</param>
+    /// <param name="lPtr">Index to <see cref="Storage.Line"/>.</param>
     /// <param name="expected">Expected character literal.</param>
     [Theory]
-    [InlineData("", null)]
-    public void GetsCharacterLiteral(string inputText, char? expected)
+    [InlineData(null, null, "", 0, null)]
+    [InlineData(' ', null, " ", 0, ' ')]
+    [InlineData(' ', ' ', "  ", 0, ' ')]
+    public void GetsCharacterLiteral(
+        char? ch, char? nCh, string pLine, int lPtr, char? expected)
     {
-        using var outputStream = new MemoryStream();
-        using var output = new StreamWriter(outputStream);
-        var byteArray = Encoding.ASCII.GetBytes(inputText);
-        var inputStream = new MemoryStream(byteArray);
-        using var input = new StreamReader(inputStream);
-        var mac = new Dictionary<string, string>
-        {
-            { "FOO", "BAR" },
-            { "FOOBARBA", "QUUX" },
-        };
-        var (sut, _) = Arrange(
-            output: output, input: input, mac: mac);
+        var (sut, _) = Arrange(ch: ch, nCh: nCh, pLine: pLine, lPtr: lPtr);
 
         var actual = sut.LitChar();
 
@@ -45,6 +39,8 @@ public class AnalyzerTests
 
     private static (Analyzer Sut, Storage Storage) Arrange(
         Collection<KeyValuePair<PCode, int>>? stage = null,
+        char? ch = null,
+        char? nCh = null,
         StreamWriter? output = null,
         StreamReader? input = null,
         bool cCode = true,
@@ -52,11 +48,15 @@ public class AnalyzerTests
         SymbolTable? symTab = null,
         Collection<sbyte>? litQ = null,
         Dictionary<string, string>? mac = null,
+        string? pLine = null,
         BufferLineType? lineType = null,
+        int? lPtr = null,
         string? ssName = null)
     {
         var storage = new Storage(
             stage: stage,
+            ch: ch,
+            nCh: nCh,
             output: output,
             files: input != null,
             input: input,
@@ -65,7 +65,9 @@ public class AnalyzerTests
             symTab: symTab ?? new([], []),
             litQ: litQ ?? [],
             mac: mac ?? [],
+            pLine: pLine,
             lineType: lineType ?? BufferLineType.Parsing,
+            lPtr: lPtr,
             ssName: ssName);
 
         var symTabMgmt = new SymbolTableUseCases(storage);
