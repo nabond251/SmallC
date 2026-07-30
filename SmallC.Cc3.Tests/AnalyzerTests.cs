@@ -37,6 +37,17 @@ public class AnalyzerTests
     [InlineData(' ', 'a', " a", 0, ' ', 'a', null, 1)]
     [InlineData('a', null, " a", 1, 'a', null, null, 2)]
     [InlineData(null, null, " a", 2, null, null, null, 2)]
+    [InlineData('\\', null, "\\", 0, '\\', null, null, 1)]
+    [InlineData('\\', 'n', "\\n", 0, '\n', null, null, 2)]
+    [InlineData('\\', 't', "\\t", 0, '\t', null, null, 2)]
+    [InlineData('\\', 'b', "\\b", 0, '\b', null, null, 2)]
+    [InlineData('\\', 'f', "\\f", 0, '\f', null, null, 2)]
+    [InlineData('\\', '0', "\\0", 0, '\0', null, null, 2)]
+    [InlineData('\\', '1', "\\1", 0, (char)1, null, null, 2)]
+    [InlineData('\\', '1', "\\9", 0, '9', null, null, 2)]
+    [InlineData('\\', '1', "\\12", 0, (char)10, null, null, 3)]
+    [InlineData('\\', '1', "\\123", 0, (char)83, null, null, 4)]
+    [InlineData('\\', '1', "\\1234", 0, (char)83, '4', null, 4)]
     public void GetsCharacterLiteral(
         char? ch,
         char? nCh,
