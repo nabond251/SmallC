@@ -25,8 +25,11 @@ public class AnalyzerTests
     /// <param name="expected">Expected character literal.</param>
     [Theory]
     [InlineData(null, null, "", 0, null)]
-    [InlineData(' ', null, " ", 0, ' ')]
-    [InlineData(' ', ' ', "  ", 0, ' ')]
+    [InlineData('a', null, "a", 0, 'a')]
+    [InlineData(null, null, "a", 1, null)]
+    [InlineData(' ', 'a', " a", 0, ' ')]
+    [InlineData('a', null, " a", 1, 'a')]
+    [InlineData(null, null, " a", 2, null)]
     public void GetsCharacterLiteral(
         char? ch, char? nCh, string pLine, int lPtr, char? expected)
     {
