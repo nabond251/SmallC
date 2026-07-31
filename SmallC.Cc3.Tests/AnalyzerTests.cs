@@ -28,9 +28,20 @@ public class AnalyzerTests
     [InlineData("", null, 0)]
     [InlineData("if", null, 0)]
     [InlineData("0", SymbolType.Int, 0)]
+    [InlineData("00", SymbolType.Int, 0)]
     [InlineData("-1", SymbolType.Int, -1)]
+    [InlineData("01", SymbolType.Int, 1)]
     [InlineData(" 1", SymbolType.Int, 1)]
     [InlineData("10", SymbolType.Int, 10)]
+    [InlineData("000", SymbolType.Int, 0)]
+    [InlineData("001", SymbolType.Int, 1)]
+    [InlineData("010", SymbolType.Int, 8)]
+    [InlineData("018", SymbolType.Int, 1)]
+    [InlineData("077", SymbolType.Int, 63)]
+    [InlineData("00x0", SymbolType.Int, 0)]
+    [InlineData("0x10", SymbolType.Int, 16)]
+    [InlineData("0xFF", SymbolType.Int, 255)]
+    [InlineData("0xFG", SymbolType.Int, 15)]
     public async Task ParsesNumberAsync(
         string inputText,
         SymbolType? expectedType,
