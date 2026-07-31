@@ -168,18 +168,25 @@ public class AnalyzerTests
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
     /// <param name="expected">Expected lit pool offset.</param>
+    /// <param name="expectedConstantType">Expected constant type.</param>
+    /// <param name="expectedConstantValue">Expected constant value.</param>
+    /// <param name="expectedPCode">Expected generated p-code.</param>
+    /// <param name="expectedCodeValue">Expected generated code value.</param>
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("", false, "")]
-    [InlineData("if", false, "")]
-    [InlineData("\"\"", true, "")]
-    [InlineData("\"a\"", true, "a")]
-    [InlineData(" \"a\"", true, "a")]
-    [InlineData("\"abc\"", true, "abc")]
+    [InlineData("", false, null, 0, PCode.None, 0, "")]
+    [InlineData("if", false, null, 0, PCode.None, 0, "")]
+    [InlineData("0xFFFF", true, SymbolType.UInt, 65535, PCode.GETw1n, 65535, "")]
+    [InlineData("'a'", true, SymbolType.Int, 'a', PCode.GETw1n, 'a', "")]
+    [InlineData("\"abc\"", true, null, 0, PCode.POINT1l, 0, "abc")]
     public async Task ParsesConstantAsync(
         string inputText,
         bool expected,
+        SymbolType? expectedConstantType,
+        int expectedConstantValue,
+        PCode expectedPCode,
+        int expectedCodeValue,
         string expectedLits)
     {
         var byteArray = Encoding.ASCII.GetBytes(inputText);
@@ -192,6 +199,10 @@ public class AnalyzerTests
         var actual = await sut.ConstantAsync(@is);
 
         Assert.Equal(expected, actual);
+        Assert.Equal(expectedConstantType, @is.ConstantType);
+        Assert.Equal(expectedConstantValue, @is.ConstantValue);
+        Assert.Equal(expectedPCode, storage.Stage?.FirstOrDefault().Key);
+        Assert.Equal(expectedCodeValue, storage.Stage?.FirstOrDefault().Value);
         Assert.All(expectedLits, (lit, litPtr) =>
         {
             Assert.Equal((sbyte)lit, storage.LitQ[litPtr]);
