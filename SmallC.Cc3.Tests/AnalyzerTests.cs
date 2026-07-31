@@ -18,6 +18,36 @@ using static SmallC.Cc.SymbolTableEntry;
 public class AnalyzerTests
 {
     /// <summary>
+    /// Tests that can parse number.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expectedType">Expected type of character constant.</param>
+    /// <param name="expectedValue">Expected number.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("", null, 0)]
+    [InlineData("if", null, 0)]
+    [InlineData("0", SymbolType.Int, 0)]
+    [InlineData("-1", SymbolType.Int, -1)]
+    [InlineData(" 1", SymbolType.Int, 1)]
+    [InlineData("10", SymbolType.Int, 10)]
+    public async Task ParsesNumberAsync(
+        string inputText,
+        SymbolType? expectedType,
+        int expectedValue)
+    {
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, _) = Arrange(input: input);
+
+        var (actualType, actualValue) = await sut.NumberAsync(0);
+
+        Assert.Equal(expectedType, actualType);
+        Assert.Equal(expectedValue, actualValue);
+    }
+
+    /// <summary>
     /// Tests that can parse character constant.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
