@@ -59,6 +59,39 @@ public class AnalyzerTests
         Assert.Equal(expectedValue, actualValue);
     }
 
+    /// <summary>
+    /// Tests that can parse character constant.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expected">Expected lit pool offset.</param>
+    /// <param name="expectedLits">String of expected lit pool bytes.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("", null, "")]
+    [InlineData("if", null, "")]
+    [InlineData("\"\"", 0, "")]
+    [InlineData("\"a\"", 0, "a")]
+    [InlineData(" \"a\"", 0, "a")]
+    [InlineData("\"abc\"", 0, "abc")]
+    public async Task ParsesStringAsync(
+        string inputText,
+        int? expected,
+        string expectedLits)
+    {
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, storage) = Arrange(input: input);
+
+        var actual = await sut.StringAsync();
+
+        Assert.Equal(expected, actual);
+        Assert.All(expectedLits, (lit, litPtr) =>
+        {
+            Assert.Equal((sbyte)lit, storage.LitQ[litPtr]);
+        });
+    }
+
     private static (Analyzer Sut, Storage Storage) Arrange(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         char? ch = null,
