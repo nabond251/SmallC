@@ -26,6 +26,7 @@ public class AnalyzerTests
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
     [InlineData("", null, 0)]
+    [InlineData("if", null, 0)]
     [InlineData("''", SymbolType.Int, 0)]
     [InlineData("'a'", SymbolType.Int, 'a')]
     [InlineData(" 'a'", SymbolType.Int, 'a')]
@@ -40,6 +41,8 @@ public class AnalyzerTests
     [InlineData("'\\12'", SymbolType.Int, (char)10)]
     [InlineData("'\\123'", SymbolType.Int, (char)83)]
     [InlineData("'\\1234'", SymbolType.Int, ((char)83 << 8) + '4')]
+    [InlineData("'12'", SymbolType.Int, ('1' << 8) + '2')]
+    [InlineData("'123'", SymbolType.Int, ('2' << 8) + '3')]
     public async Task ParsesCharacterConstantAsync(
         string inputText,
         SymbolType? expectedType,
