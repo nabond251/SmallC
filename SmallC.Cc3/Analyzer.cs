@@ -1274,7 +1274,7 @@ public class Analyzer(
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "not quite dead")]
     public async Task<(SymbolType? Type, int Value)> NumberAsync(int value)
     {
-        int k;
+        ushort k;
         bool minus;
 
         k = 0;
@@ -1314,15 +1314,16 @@ public class Analyzer(
                 {
                     if (char.IsDigit(chex))
                     {
-                        k = (k * 16) + (await frontEnd.InByteAsync()
-                            .ConfigureAwait(false) - '0').Value;
+                        k = (ushort)((k * 16) + (await frontEnd.InByteAsync()
+                            .ConfigureAwait(false) - '0').Value);
                     }
                     else
                     {
                         var chx = await frontEnd.InByteAsync()
                             .ConfigureAwait(false) ??
                             throw new InvalidOperationException();
-                        k = (k * 16) + 10 + (char.ToUpperInvariant(chx) - 'A');
+                        k = (ushort)((k * 16) + 10 + (char
+                            .ToUpperInvariant(chx) - 'A'));
                     }
                 }
             }
@@ -1330,8 +1331,8 @@ public class Analyzer(
             {
                 while (storage.Ch is >= '0' and <= '7')
                 {
-                    k = (k * 8) + (await frontEnd.InByteAsync()
-                        .ConfigureAwait(false) - '0').Value;
+                    k = (ushort)((k * 8) + (await frontEnd.InByteAsync()
+                        .ConfigureAwait(false) - '0').Value);
                 }
             }
         }
@@ -1339,14 +1340,14 @@ public class Analyzer(
         {
             while (storage.Ch is char ch && char.IsDigit(ch))
             {
-                k = (k * 10) + (await frontEnd.InByteAsync()
-                    .ConfigureAwait(false) - '0').Value;
+                k = (ushort)((k * 10) + (await frontEnd.InByteAsync()
+                    .ConfigureAwait(false) - '0').Value);
             }
         }
 
         if (minus)
         {
-            value = -k;
+            value = (short)-k;
             return (SymbolType.Int, value);
         }
 
