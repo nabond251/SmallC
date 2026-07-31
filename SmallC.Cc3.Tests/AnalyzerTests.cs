@@ -80,7 +80,7 @@ public class AnalyzerTests
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, _) = Arrange(input: input);
+        var (sut, _, _) = Arrange(input: input);
 
         var (actualType, actualValue) = await sut.NumberAsync(0);
 
@@ -122,7 +122,7 @@ public class AnalyzerTests
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, _) = Arrange(input: input);
+        var (sut, _, _) = Arrange(input: input);
 
         var (actualType, actualValue) = await sut.ChrConAsync(0);
 
@@ -152,7 +152,7 @@ public class AnalyzerTests
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, storage) = Arrange(input: input);
+        var (sut, _, storage) = Arrange(input: input);
 
         var actual = await sut.StringAsync();
 
@@ -163,7 +163,46 @@ public class AnalyzerTests
         });
     }
 
-    private static (Analyzer Sut, Storage Storage) Arrange(
+    /// <summary>
+    /// Tests that can parse constant primary.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expected">Expected lit pool offset.</param>
+    /// <param name="expectedLits">String of expected lit pool bytes.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData("", false, "")]
+    [InlineData("if", false, "")]
+    [InlineData("\"\"", true, "")]
+    [InlineData("\"a\"", true, "a")]
+    [InlineData(" \"a\"", true, "a")]
+    [InlineData("\"abc\"", true, "abc")]
+    public async Task ParsesConstantAsync(
+        string inputText,
+        bool expected,
+        string expectedLits)
+    {
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, backEnd, storage) = Arrange(input: input);
+        var @is = new Expression();
+        _ = backEnd.SetStage();
+
+        var actual = await sut.ConstantAsync(@is);
+
+        Assert.Equal(expected, actual);
+        Assert.All(expectedLits, (lit, litPtr) =>
+        {
+            Assert.Equal((sbyte)lit, storage.LitQ[litPtr]);
+        });
+    }
+
+    private static (
+        Analyzer Sut,
+        BackEnd BackEnd,
+        Storage Storage)
+        Arrange(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         char? ch = null,
         char? nCh = null,
@@ -203,6 +242,6 @@ public class AnalyzerTests
         var backEnd = new BackEnd(symTabMgmt, utility, storage);
         var sut = new Analyzer(symTabMgmt, utility, frontEnd, backEnd, storage);
 
-        return (sut, storage);
+        return (sut, backEnd, storage);
     }
 }
