@@ -1368,7 +1368,7 @@ public class Analyzer(
     /// <returns>Tuple of constant type, if any, and constant.</returns>
     public async Task<(SymbolType? Type, int Value)> ChrConAsync(int value)
     {
-        int k;
+        short k;
 
         k = 0;
         if (!await frontEnd.MatchAsync("'").ConfigureAwait(false))
@@ -1378,7 +1378,7 @@ public class Analyzer(
 
         while (storage.Ch != '\'')
         {
-            k = (k << 8) + ((this.LitChar() ?? 0) & 255);
+            k = (short)((k << 8) + ((this.LitChar() ?? 0) & 255));
         }
 
         _ = frontEnd.Gch();
@@ -1432,13 +1432,13 @@ public class Analyzer(
     /// Parses character literal.
     /// </summary>
     /// <returns>Parsed literal.</returns>
-    public int? LitChar()
+    public short? LitChar()
     {
-        int i, oct;
+        short i, oct;
 
         if (storage.Ch != '\\' || !storage.NCh.HasValue)
         {
-            return frontEnd.Gch();
+            return (short?)frontEnd.Gch();
         }
 
         _ = frontEnd.Gch();
@@ -1446,7 +1446,7 @@ public class Analyzer(
         {
             case 'n':
                 _ = frontEnd.Gch();
-                return '\n';
+                return (short)'\n';
             case 't':
                 _ = frontEnd.Gch();
                 return 9; // HT
@@ -1464,10 +1464,10 @@ public class Analyzer(
         oct = 0;
         while (i-- > 0 && storage.Ch >= '0' && storage.Ch <= '7')
         {
-            oct = (oct << 3) + (frontEnd.Gch() ?? 0) - '0';
+            oct = (short)((oct << 3) + (frontEnd.Gch() ?? 0) - '0');
         }
 
-        return i == 2 ? frontEnd.Gch() : oct;
+        return i == 2 ? (short?)frontEnd.Gch() : oct;
     }
 
     /// <summary>
