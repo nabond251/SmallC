@@ -8,6 +8,7 @@ using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc4;
 using System.Collections.ObjectModel;
+using System.Text;
 using static SmallC.Cc.Storage;
 using static SmallC.Cc.SymbolTableEntry;
 
@@ -73,60 +74,40 @@ public class AnalyzerTests
     /// <summary>
     /// Tests that can parse character constant.
     /// </summary>
-    /// <param name="ch">Current character of input line.</param>
-    /// <param name="nCh">Next character of input line.</param>
-    /// <param name="pLine">Parsing buffer.</param>
-    /// <param name="lPtr">Index to <see cref="Storage.Line"/>.</param>
+    /// <param name="inputText">Input stream text.</param>
     /// <param name="expectedType">Expected type of character constant.</param>
     /// <param name="expectedValue">Expected character constant.</param>
-    /// <param name="expectedCh">
-    /// Expected current character of input line.
-    /// </param>
-    /// <param name="expectedNCh">Expected next character of input line.</param>
-    /// <param name="expectedLPtr">
-    /// Expected index to <see cref="Storage.Line"/>.
-    /// </param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData(null, null, "''", 0, null, 0, null, null, 0)]
-    [InlineData('a', null, "'a'", 0, SymbolType.Int, 'a', null, null, 3)]
-    [InlineData(null, null, "'a'", 3, null, 0, null, null, 0)]
-    [InlineData(' ', 'a', " 'a'", 0, SymbolType.Int, 'a', null, null, 4)]
-    [InlineData('a', null, " 'a'", 1, SymbolType.Int, 'a', null, null, 4)]
-    [InlineData(null, null, " 'a'", 4, null, 0, null, null, 0)]
-    [InlineData('\\', '\\', "'\\\\'", 0, SymbolType.Int, '\\', null, null, 4)]
-    [InlineData('\\', 'n', "'\\n'", 0, SymbolType.Int, '\n', null, null, 4)]
-    [InlineData('\\', 't', "'\\t'", 0, SymbolType.Int, '\t', null, null, 4)]
-    [InlineData('\\', 'b', "'\\b'", 0, SymbolType.Int, '\b', null, null, 4)]
-    [InlineData('\\', 'f', "'\\f'", 0, SymbolType.Int, '\f', null, null, 4)]
-    [InlineData('\\', '0', "'\\0'", 0, SymbolType.Int, '\0', null, null, 4)]
-    [InlineData('\\', '1', "'\\1'", 0, SymbolType.Int, (char)1, null, null, 4)]
-    [InlineData('\\', '1', "'\\9'", 0, SymbolType.Int, '9', null, null, 4)]
-    [InlineData('\\', '1', "'\\12'", 0, SymbolType.Int, (char)10, null, null, 5)]
-    [InlineData('\\', '1', "'\\123'", 0, SymbolType.Int, (char)83, null, null, 6)]
-    [InlineData('\\', '1', "'\\1234'", 0, SymbolType.Int, ((char)83 << 8) + '4', null, null, 7)]
+    [InlineData("", null, 0)]
+    [InlineData("''", SymbolType.Int, 0)]
+    [InlineData("'a'", SymbolType.Int, 'a')]
+    [InlineData(" 'a'", SymbolType.Int, 'a')]
+    [InlineData("'\\\\'", SymbolType.Int, '\\')]
+    [InlineData("'\\n'", SymbolType.Int, '\n')]
+    [InlineData("'\\t'", SymbolType.Int, '\t')]
+    [InlineData("'\\b'", SymbolType.Int, '\b')]
+    [InlineData("'\\f'", SymbolType.Int, '\f')]
+    [InlineData("'\\0'", SymbolType.Int, '\0')]
+    [InlineData("'\\1'", SymbolType.Int, (char)1)]
+    [InlineData("'\\9'", SymbolType.Int, '9')]
+    [InlineData("'\\12'", SymbolType.Int, (char)10)]
+    [InlineData("'\\123'", SymbolType.Int, (char)83)]
+    [InlineData("'\\1234'", SymbolType.Int, ((char)83 << 8) + '4')]
     public async Task ParsesCharacterConstantAsync(
-        char? ch,
-        char? nCh,
-        string pLine,
-        int lPtr,
+        string inputText,
         SymbolType? expectedType,
-        int expectedValue,
-        char? expectedCh,
-        char? expectedNCh,
-        int expectedLPtr)
+        int expectedValue)
     {
-        using var input = StreamReader.Null;
-        var (sut, storage) =
-            Arrange(ch: ch, nCh: nCh, input: input, pLine: pLine, lPtr: lPtr);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, _) = Arrange(input: input);
 
         var (actualType, actualValue) = await sut.ChrConAsync(0);
 
         Assert.Equal(expectedType, actualType);
         Assert.Equal(expectedValue, actualValue);
-        Assert.Equal(expectedCh, storage.Ch);
-        Assert.Equal(expectedNCh, storage.NCh);
-        Assert.Equal(expectedLPtr, storage.LPtr);
     }
 
     private static (Analyzer Sut, Storage Storage) Arrange(
