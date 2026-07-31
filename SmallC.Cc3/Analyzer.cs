@@ -1307,22 +1307,22 @@ public class Analyzer(
                 _ = await frontEnd.InByteAsync().ConfigureAwait(false);
             }
 
-            if (char.ToUpperInvariant(storage.Ch.Value) == 'X')
+            if (storage.Ch is char ch && char.ToUpperInvariant(ch) == 'X')
             {
                 _ = await frontEnd.InByteAsync().ConfigureAwait(false);
-                while (storage.Ch is char ch && char.IsAsciiHexDigit(ch))
+                while (storage.Ch is char chex && char.IsAsciiHexDigit(chex))
                 {
-                    if (char.IsDigit(storage.Ch.Value))
+                    if (char.IsDigit(chex))
                     {
                         k = (k * 16) + (await frontEnd.InByteAsync()
                             .ConfigureAwait(false) - '0').Value;
                     }
                     else
                     {
-                        ch = await frontEnd.InByteAsync()
+                        var chx = await frontEnd.InByteAsync()
                             .ConfigureAwait(false) ??
                             throw new InvalidOperationException();
-                        k = (k * 16) + 10 + (char.ToUpperInvariant(ch) - 'A');
+                        k = (k * 16) + 10 + (char.ToUpperInvariant(chx) - 'A');
                     }
                 }
             }
@@ -1337,7 +1337,7 @@ public class Analyzer(
         }
         else
         {
-            while (char.IsDigit(storage.Ch.Value))
+            while (storage.Ch is char ch && char.IsDigit(ch))
             {
                 k = (k * 10) + (await frontEnd.InByteAsync()
                     .ConfigureAwait(false) - '0').Value;
