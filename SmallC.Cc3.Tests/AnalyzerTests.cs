@@ -18,77 +18,6 @@ using static SmallC.Cc.SymbolTableEntry;
 public class AnalyzerTests
 {
     /// <summary>
-    /// Tests that can parse number.
-    /// </summary>
-    /// <param name="inputText">Input stream text.</param>
-    /// <param name="expectedType">Expected type of character constant.</param>
-    /// <param name="expectedValue">Expected number.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [Theory]
-    [InlineData("", null, 0)]
-    [InlineData("if", null, 0)]
-    [InlineData("0", SymbolType.Int, 0)]
-    [InlineData("00", SymbolType.Int, 0)]
-    [InlineData("-0", SymbolType.Int, 0)]
-    [InlineData("+0", SymbolType.Int, 0)]
-    [InlineData("-1", SymbolType.Int, -1)]
-    [InlineData("+1", SymbolType.Int, 1)]
-    [InlineData("01", SymbolType.Int, 1)]
-    [InlineData(" 1", SymbolType.Int, 1)]
-    [InlineData("10", SymbolType.Int, 10)]
-    [InlineData("-32769", SymbolType.Int, 32767)]
-    [InlineData("-32768", SymbolType.Int, -32768)]
-    [InlineData("32767", SymbolType.Int, 32767)]
-    [InlineData("32768", SymbolType.UInt, 32768)]
-    [InlineData("65535", SymbolType.UInt, 65535)]
-    [InlineData("65536", SymbolType.Int, 0)]
-    [InlineData("131071", SymbolType.UInt, 65535)]
-    [InlineData("000", SymbolType.Int, 0)]
-    [InlineData("-00", SymbolType.Int, 0)]
-    [InlineData("-01", SymbolType.Int, -1)]
-    [InlineData("001", SymbolType.Int, 1)]
-    [InlineData("010", SymbolType.Int, 8)]
-    [InlineData("018", SymbolType.Int, 1)]
-    [InlineData("077", SymbolType.Int, 63)]
-    [InlineData("0777", SymbolType.Int, 511)]
-    [InlineData("-0100001", SymbolType.Int, 32767)]
-    [InlineData("-0100000", SymbolType.Int, -32768)]
-    [InlineData("077777", SymbolType.Int, 32767)]
-    [InlineData("0100000", SymbolType.UInt, 32768)]
-    [InlineData("0177777", SymbolType.UInt, 65535)]
-    [InlineData("0200000", SymbolType.Int, 0)]
-    [InlineData("0377777", SymbolType.UInt, 65535)]
-    [InlineData("00x0", SymbolType.Int, 0)]
-    [InlineData("-0x00", SymbolType.Int, 0)]
-    [InlineData("-0x01", SymbolType.Int, -1)]
-    [InlineData("0x10", SymbolType.Int, 16)]
-    [InlineData("0x1G", SymbolType.Int, 1)]
-    [InlineData("0xFF", SymbolType.Int, 255)]
-    [InlineData("0xFG", SymbolType.Int, 15)]
-    [InlineData("-0x8001", SymbolType.Int, 32767)]
-    [InlineData("-0x8000", SymbolType.Int, -32768)]
-    [InlineData("0x7FFF", SymbolType.Int, 32767)]
-    [InlineData("0x8000", SymbolType.UInt, 32768)]
-    [InlineData("0xFFFF", SymbolType.UInt, 65535)]
-    [InlineData("0x10000", SymbolType.Int, 0)]
-    [InlineData("0x1FFFF", SymbolType.UInt, 65535)]
-    public async Task ParsesNumberAsync(
-        string inputText,
-        SymbolType? expectedType,
-        int expectedValue)
-    {
-        var byteArray = Encoding.ASCII.GetBytes(inputText);
-        var inputStream = new MemoryStream(byteArray);
-        using var input = new StreamReader(inputStream);
-        var (sut, _, _) = Arrange(input: input);
-
-        var (actualType, actualValue) = await sut.NumberAsync(0);
-
-        Assert.Equal(expectedType, actualType);
-        Assert.Equal(expectedValue, actualValue);
-    }
-
-    /// <summary>
     /// Tests that can parse character constant.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
@@ -185,7 +114,51 @@ public class AnalyzerTests
     [Theory]
     [InlineData("", false, null, null, null, null, 0, null, null, "", "")]
     [InlineData("if", false, null, null, null, null, 0, null, null, "", "")]
+    [InlineData("0", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("00", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("-0", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("+0", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("-1", true, null, null, null, SymbolType.Int, -1, null, null, "MOV AX,-1\r\n", "")]
+    [InlineData("+1", true, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
+    [InlineData("01", true, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
+    [InlineData(" 1", true, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
+    [InlineData("10", true, null, null, null, SymbolType.Int, 10, null, null, "MOV AX,10\r\n", "")]
+    [InlineData("-32769", true, null, null, null, SymbolType.Int, 32767, null, null, "MOV AX,32767\r\n", "")]
+    [InlineData("-32768", true, null, null, null, SymbolType.Int, -32768, null, null, "MOV AX,-32768\r\n", "")]
+    [InlineData("32767", true, null, null, null, SymbolType.Int, 32767, null, null, "MOV AX,32767\r\n", "")]
+    [InlineData("32768", true, null, null, null, SymbolType.UInt, 32768, null, null, "MOV AX,32768\r\n", "")]
+    [InlineData("65535", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
+    [InlineData("65536", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("131071", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
+    [InlineData("000", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("-00", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("-01", true, null, null, null, SymbolType.Int, -1, null, null, "MOV AX,-1\r\n", "")]
+    [InlineData("001", true, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
+    [InlineData("010", true, null, null, null, SymbolType.Int, 8, null, null, "MOV AX,8\r\n", "")]
+    [InlineData("018", true, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
+    [InlineData("077", true, null, null, null, SymbolType.Int, 63, null, null, "MOV AX,63\r\n", "")]
+    [InlineData("0777", true, null, null, null, SymbolType.Int, 511, null, null, "MOV AX,511\r\n", "")]
+    [InlineData("-0100001", true, null, null, null, SymbolType.Int, 32767, null, null, "MOV AX,32767\r\n", "")]
+    [InlineData("-0100000", true, null, null, null, SymbolType.Int, -32768, null, null, "MOV AX,-32768\r\n", "")]
+    [InlineData("077777", true, null, null, null, SymbolType.Int, 32767, null, null, "MOV AX,32767\r\n", "")]
+    [InlineData("0100000", true, null, null, null, SymbolType.UInt, 32768, null, null, "MOV AX,32768\r\n", "")]
+    [InlineData("0177777", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
+    [InlineData("0200000", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("0377777", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
+    [InlineData("00x0", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("-0x00", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("-0x01", true, null, null, null, SymbolType.Int, -1, null, null, "MOV AX,-1\r\n", "")]
+    [InlineData("0x10", true, null, null, null, SymbolType.Int, 16, null, null, "MOV AX,16\r\n", "")]
+    [InlineData("0x1G", true, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
+    [InlineData("0xFF", true, null, null, null, SymbolType.Int, 255, null, null, "MOV AX,255\r\n", "")]
+    [InlineData("0xFG", true, null, null, null, SymbolType.Int, 15, null, null, "MOV AX,15\r\n", "")]
+    [InlineData("-0x8001", true, null, null, null, SymbolType.Int, 32767, null, null, "MOV AX,32767\r\n", "")]
+    [InlineData("-0x8000", true, null, null, null, SymbolType.Int, -32768, null, null, "MOV AX,-32768\r\n", "")]
+    [InlineData("0x7FFF", true, null, null, null, SymbolType.Int, 32767, null, null, "MOV AX,32767\r\n", "")]
+    [InlineData("0x8000", true, null, null, null, SymbolType.UInt, 32768, null, null, "MOV AX,32768\r\n", "")]
     [InlineData("0xFFFF", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
+    [InlineData("0x10000", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("0x1FFFF", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
     [InlineData("'a'", true, null, null, null, SymbolType.Int, 'a', null, null, "MOV AX,97\r\n", "")]
     [InlineData("\"abc\"", true, null, null, null, null, 0, null, null, "MOV AX,OFFSET _0+0\r\n", "abc")]
     public async Task ParsesConstantAsync(
