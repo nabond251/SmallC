@@ -21,48 +21,6 @@ public class AnalyzerTests
     /// Tests that can parse character constant.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
-    /// <param name="expectedType">Expected type of character constant.</param>
-    /// <param name="expectedValue">Expected character constant.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [Theory]
-    [InlineData("", null, 0)]
-    [InlineData("if", null, 0)]
-    [InlineData("''", SymbolType.Int, 0)]
-    [InlineData("'a'", SymbolType.Int, 'a')]
-    [InlineData(" 'a'", SymbolType.Int, 'a')]
-    [InlineData("'\\\\'", SymbolType.Int, '\\')]
-    [InlineData("'\\n'", SymbolType.Int, '\n')]
-    [InlineData("'\\t'", SymbolType.Int, '\t')]
-    [InlineData("'\\b'", SymbolType.Int, '\b')]
-    [InlineData("'\\f'", SymbolType.Int, '\f')]
-    [InlineData("'\\0'", SymbolType.Int, '\0')]
-    [InlineData("'\\1'", SymbolType.Int, (char)1)]
-    [InlineData("'\\9'", SymbolType.Int, '9')]
-    [InlineData("'\\12'", SymbolType.Int, (char)10)]
-    [InlineData("'\\123'", SymbolType.Int, (char)83)]
-    [InlineData("'\\1234'", SymbolType.Int, ((char)83 << 8) + '4')]
-    [InlineData("'12'", SymbolType.Int, ('1' << 8) + '2')]
-    [InlineData("'123'", SymbolType.Int, ('2' << 8) + '3')]
-    public async Task ParsesCharacterConstantAsync(
-        string inputText,
-        SymbolType? expectedType,
-        int expectedValue)
-    {
-        var byteArray = Encoding.ASCII.GetBytes(inputText);
-        var inputStream = new MemoryStream(byteArray);
-        using var input = new StreamReader(inputStream);
-        var (sut, _, _) = Arrange(input: input);
-
-        var (actualType, actualValue) = await sut.ChrConAsync(0);
-
-        Assert.Equal(expectedType, actualType);
-        Assert.Equal(expectedValue, actualValue);
-    }
-
-    /// <summary>
-    /// Tests that can parse character constant.
-    /// </summary>
-    /// <param name="inputText">Input stream text.</param>
     /// <param name="expected">Expected lit pool offset.</param>
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -159,7 +117,22 @@ public class AnalyzerTests
     [InlineData("0xFFFF", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
     [InlineData("0x10000", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
     [InlineData("0x1FFFF", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
+    [InlineData("''", true, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
     [InlineData("'a'", true, null, null, null, SymbolType.Int, 'a', null, null, "MOV AX,97\r\n", "")]
+    [InlineData(" 'a'", true, null, null, null, SymbolType.Int, 'a', null, null, "MOV AX,97\r\n", "")]
+    [InlineData("'\\\\'", true, null, null, null, SymbolType.Int, '\\', null, null, "MOV AX,92\r\n", "")]
+    [InlineData("'\\n'", true, null, null, null, SymbolType.Int, '\n', null, null, "MOV AX,10\r\n", "")]
+    [InlineData("'\\t'", true, null, null, null, SymbolType.Int, '\t', null, null, "MOV AX,9\r\n", "")]
+    [InlineData("'\\b'", true, null, null, null, SymbolType.Int, '\b', null, null, "MOV AX,8\r\n", "")]
+    [InlineData("'\\f'", true, null, null, null, SymbolType.Int, '\f', null, null, "MOV AX,12\r\n", "")]
+    [InlineData("'\\0'", true, null, null, null, SymbolType.Int, '\0', null, null, "XOR AX,AX\r\n", "")]
+    [InlineData("'\\1'", true, null, null, null, SymbolType.Int, (char)1, null, null, "MOV AX,1\r\n", "")]
+    [InlineData("'\\9'", true, null, null, null, SymbolType.Int, '9', null, null, "MOV AX,57\r\n", "")]
+    [InlineData("'\\12'", true, null, null, null, SymbolType.Int, (char)10, null, null, "MOV AX,10\r\n", "")]
+    [InlineData("'\\123'", true, null, null, null, SymbolType.Int, (char)83, null, null, "MOV AX,83\r\n", "")]
+    [InlineData("'\\1234'", true, null, null, null, SymbolType.Int, ((char)83 << 8) + '4', null, null, "MOV AX,21300\r\n", "")]
+    [InlineData("'12'", true, null, null, null, SymbolType.Int, ('1' << 8) + '2', null, null, "MOV AX,12594\r\n", "")]
+    [InlineData("'123'", true, null, null, null, SymbolType.Int, ('2' << 8) + '3', null, null, "MOV AX,12851\r\n", "")]
     [InlineData("\"abc\"", true, null, null, null, null, 0, null, null, "MOV AX,OFFSET _0+0\r\n", "abc")]
     public async Task ParsesConstantAsync(
         string inputText,
