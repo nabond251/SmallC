@@ -18,39 +18,6 @@ using static SmallC.Cc.SymbolTableEntry;
 public class AnalyzerTests
 {
     /// <summary>
-    /// Tests that can parse character constant.
-    /// </summary>
-    /// <param name="inputText">Input stream text.</param>
-    /// <param name="expected">Expected lit pool offset.</param>
-    /// <param name="expectedLits">String of expected lit pool bytes.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [Theory]
-    [InlineData("", null, "")]
-    [InlineData("if", null, "")]
-    [InlineData("\"\"", 0, "")]
-    [InlineData("\"a\"", 0, "a")]
-    [InlineData(" \"a\"", 0, "a")]
-    [InlineData("\"abc\"", 0, "abc")]
-    public async Task ParsesStringAsync(
-        string inputText,
-        int? expected,
-        string expectedLits)
-    {
-        var byteArray = Encoding.ASCII.GetBytes(inputText);
-        var inputStream = new MemoryStream(byteArray);
-        using var input = new StreamReader(inputStream);
-        var (sut, _, storage) = Arrange(input: input);
-
-        var actual = await sut.StringAsync();
-
-        Assert.Equal(expected, actual);
-        Assert.All(expectedLits, (lit, litPtr) =>
-        {
-            Assert.Equal((sbyte)lit, storage.LitQ[litPtr]);
-        });
-    }
-
-    /// <summary>
     /// Tests that can parse constant primary.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
@@ -133,6 +100,9 @@ public class AnalyzerTests
     [InlineData("'\\1234'", true, null, null, null, SymbolType.Int, ((char)83 << 8) + '4', null, null, "MOV AX,21300\r\n", "")]
     [InlineData("'12'", true, null, null, null, SymbolType.Int, ('1' << 8) + '2', null, null, "MOV AX,12594\r\n", "")]
     [InlineData("'123'", true, null, null, null, SymbolType.Int, ('2' << 8) + '3', null, null, "MOV AX,12851\r\n", "")]
+    [InlineData("\"\"", true, null, null, null, null, 0, null, null, "MOV AX,OFFSET _0+0\r\n", "")]
+    [InlineData("\"a\"", true, null, null, null, null, 0, null, null, "MOV AX,OFFSET _0+0\r\n", "a")]
+    [InlineData(" \"a\"", true, null, null, null, null, 0, null, null, "MOV AX,OFFSET _0+0\r\n", "a")]
     [InlineData("\"abc\"", true, null, null, null, null, 0, null, null, "MOV AX,OFFSET _0+0\r\n", "abc")]
     public async Task ParsesConstantAsync(
         string inputText,
