@@ -168,22 +168,36 @@ public class AnalyzerTests
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
     /// <param name="expected">Expected is expression flag.</param>
+    /// <param name="expectedSymbolTableEntry">
+    /// Expected symbol table entry.
+    /// </param>
+    /// <param name="expectedIndirectType">Expected indirect type.</param>
+    /// <param name="expectedAddressType">Expected address type.</param>
     /// <param name="expectedConstantType">Expected constant type.</param>
     /// <param name="expectedConstantValue">Expected constant value.</param>
+    /// <param name="expectedHighestBinaryOp">
+    /// Expected highest binary op.
+    /// </param>
+    /// <param name="expectedStageIndex">Expected stage index.</param>
     /// <param name="expectedCode">Expected generated code.</param>
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("", false, null, 0, "", "")]
-    [InlineData("if", false, null, 0, "", "")]
-    [InlineData("0xFFFF", true, SymbolType.UInt, 65535, "MOV AX,65535\r\n", "")]
-    [InlineData("'a'", true, SymbolType.Int, 'a', "MOV AX,97\r\n", "")]
-    [InlineData("\"abc\"", true, null, 0, "MOV AX,OFFSET _0+0\r\n", "abc")]
+    [InlineData("", false, null, null, null, null, 0, null, null, "", "")]
+    [InlineData("if", false, null, null, null, null, 0, null, null, "", "")]
+    [InlineData("0xFFFF", true, null, null, null, SymbolType.UInt, 65535, null, null, "MOV AX,65535\r\n", "")]
+    [InlineData("'a'", true, null, null, null, SymbolType.Int, 'a', null, null, "MOV AX,97\r\n", "")]
+    [InlineData("\"abc\"", true, null, null, null, null, 0, null, null, "MOV AX,OFFSET _0+0\r\n", "abc")]
     public async Task ParsesConstantAsync(
         string inputText,
         bool expected,
+        SymbolTableEntry? expectedSymbolTableEntry,
+        SymbolType? expectedIndirectType,
+        SymbolType? expectedAddressType,
         SymbolType? expectedConstantType,
         int expectedConstantValue,
+        PCode? expectedHighestBinaryOp,
+        int? expectedStageIndex,
         string expectedCode,
         string expectedLits)
     {
@@ -204,8 +218,13 @@ public class AnalyzerTests
         var actualOutput = await reader.ReadToEndAsync();
 
         Assert.Equal(expected, actual);
+        Assert.Equal(expectedSymbolTableEntry, @is.SymbolTableEntry);
+        Assert.Equal(expectedIndirectType, @is.IndirectType);
+        Assert.Equal(expectedAddressType, @is.AddressType);
         Assert.Equal(expectedConstantType, @is.ConstantType);
         Assert.Equal(expectedConstantValue, @is.ConstantValue);
+        Assert.Equal(expectedHighestBinaryOp, @is.HighestBinaryOp);
+        Assert.Equal(expectedStageIndex, @is.StageIndex);
         Assert.Equal(expectedCode, actualOutput);
         Assert.All(expectedLits, (lit, litPtr) =>
         {
