@@ -167,53 +167,53 @@ public class AnalyzerTests
     /// Tests that can parse constant primary.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
-    /// <param name="expected">Expected lit pool offset.</param>
+    /// <param name="expected">Expected is expression flag.</param>
     /// <param name="expectedConstantType">Expected constant type.</param>
     /// <param name="expectedConstantValue">Expected constant value.</param>
-    /// <param name="expectedPCode">Expected generated p-code.</param>
-    /// <param name="expectedCodeValue">Expected generated code value.</param>
+    /// <param name="expectedCode">Expected generated code.</param>
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("", false, null, 0, PCode.None, 0, "")]
-    [InlineData("if", false, null, 0, PCode.None, 0, "")]
-    [InlineData("0xFFFF", true, SymbolType.UInt, 65535, PCode.GETw1n, 65535, "")]
-    [InlineData("'a'", true, SymbolType.Int, 'a', PCode.GETw1n, 'a', "")]
-    [InlineData("\"abc\"", true, null, 0, PCode.POINT1l, 0, "abc")]
+    [InlineData("", false, null, 0, "", "")]
+    [InlineData("if", false, null, 0, "", "")]
+    [InlineData("0xFFFF", true, SymbolType.UInt, 65535, "MOV AX,65535\r\n", "")]
+    [InlineData("'a'", true, SymbolType.Int, 'a', "MOV AX,97\r\n", "")]
+    [InlineData("\"abc\"", true, null, 0, "MOV AX,OFFSET _0+0\r\n", "abc")]
     public async Task ParsesConstantAsync(
         string inputText,
         bool expected,
         SymbolType? expectedConstantType,
         int expectedConstantValue,
-        PCode expectedPCode,
-        int expectedCodeValue,
+        string expectedCode,
         string expectedLits)
     {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var (sut, backEnd, storage) = Arrange(input: input);
+        var (sut, backEnd, storage) = Arrange(output: output, input: input);
         var @is = new Expression();
-        _ = backEnd.SetStage();
+        var (before, start) = backEnd.SetStage();
 
         var actual = await sut.ConstantAsync(@is);
+        await backEnd.ClearStageAsync(before, start);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actualOutput = await reader.ReadToEndAsync();
 
         Assert.Equal(expected, actual);
         Assert.Equal(expectedConstantType, @is.ConstantType);
         Assert.Equal(expectedConstantValue, @is.ConstantValue);
-        Assert.Equal(expectedPCode, storage.Stage?.FirstOrDefault().Key);
-        Assert.Equal(expectedCodeValue, storage.Stage?.FirstOrDefault().Value);
+        Assert.Equal(expectedCode, actualOutput);
         Assert.All(expectedLits, (lit, litPtr) =>
         {
             Assert.Equal((sbyte)lit, storage.LitQ[litPtr]);
         });
     }
 
-    private static (
-        Analyzer Sut,
-        BackEnd BackEnd,
-        Storage Storage)
-        Arrange(
+    private static (Analyzer Sut, BackEnd BackEnd, Storage Storage) Arrange(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         char? ch = null,
         char? nCh = null,
@@ -251,6 +251,7 @@ public class AnalyzerTests
 
         var frontEnd = new FrontEnd(storage);
         var backEnd = new BackEnd(symTabMgmt, utility, storage);
+        backEnd.SetCodes();
         var sut = new Analyzer(symTabMgmt, utility, frontEnd, backEnd, storage);
 
         return (sut, backEnd, storage);
