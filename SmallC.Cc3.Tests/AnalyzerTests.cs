@@ -40,6 +40,8 @@ public class AnalyzerTests
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
+    [InlineData("cp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "cp", null, SymbolType.Chr, null, 0, null, null, "", "")]
+    [InlineData("uip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Static, 2, 0, "uip", null, SymbolType.UInt, null, 0, null, null, "", "")]
     [InlineData("c", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "c", null, null, null, 0, null, null, "", "")]
     [InlineData("ec", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.External, 1, 0, "ec", null, null, null, 0, null, null, "", "")]
     [InlineData("i", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "i", null, null, null, 0, null, null, "", "")]
@@ -200,6 +202,22 @@ public class AnalyzerTests
 
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
+        _ = symTabMgmt.AddSym(
+            "cp",
+            SymbolIdentity.Pointer,
+            SymbolType.Chr,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "uip",
+            SymbolIdentity.Pointer,
+            SymbolType.UInt,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
         _ = symTabMgmt.AddSym(
             "c",
             SymbolIdentity.Variable,
