@@ -40,6 +40,18 @@ public class AnalyzerTests
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
+    [InlineData("c", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null, "LEA AX,-10[BP]\r\n", "")]
+    [InlineData("ca3", false, SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Automatic, 3, -8, "ca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null, "LEA AX,-8[BP]\r\n", "")]
+    [InlineData("cp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Automatic, 2, -6, "cp", SymbolType.UInt, SymbolType.Chr, null, 0, null, null, "LEA AX,-6[BP]\r\n", "")]
+    [InlineData("uc", true, SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.Automatic, 1, -4, "uc", SymbolType.UChr, null, null, 0, null, null, "LEA AX,-4[BP]\r\n", "")]
+    [InlineData("uca3", false, SymbolIdentity.Array, SymbolType.UChr, SymbolClass.Automatic, 3, -2, "uca3", SymbolType.UChr, SymbolType.UChr, null, 0, null, null, "LEA AX,-2[BP]\r\n", "")]
+    [InlineData("ucp", true, SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, SymbolType.UChr, null, 0, null, null, "LEA AX,0[BP]\r\n", "")]
+    [InlineData("i", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null, "LEA AX,2[BP]\r\n", "")]
+    [InlineData("ia3", false, SymbolIdentity.Array, SymbolType.Int, SymbolClass.Automatic, 6, 4, "ia3", SymbolType.Int, SymbolType.Int, null, 0, null, null, "LEA AX,4[BP]\r\n", "")]
+    [InlineData("ip", true, SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", SymbolType.UInt, SymbolType.Int, null, 0, null, null, "LEA AX,6[BP]\r\n", "")]
+    [InlineData("ui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, null, null, 0, null, null, "LEA AX,8[BP]\r\n", "")]
+    [InlineData("uia3", false, SymbolIdentity.Array, SymbolType.UInt, SymbolClass.Automatic, 6, 10, "uia3", SymbolType.UInt, SymbolType.UInt, null, 0, null, null, "LEA AX,10[BP]\r\n", "")]
+    [InlineData("uip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Automatic, 2, 12, "uip", SymbolType.UInt, SymbolType.UInt, null, 0, null, null, "LEA AX,12[BP]\r\n", "")]
     [InlineData("gc", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null, "", "")]
     [InlineData("gca3", false, SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Static, 3, 0, "gca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null, "MOV AX,OFFSET _GCA3\r\n", "")]
     [InlineData("gcp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "gcp", null, SymbolType.Chr, null, 0, null, null, "", "")]
@@ -220,6 +232,102 @@ public class AnalyzerTests
 
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
+        _ = symTabMgmt.AddSym(
+            "c",
+            SymbolIdentity.Variable,
+            SymbolType.Chr,
+            1,
+            -10,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "ca3",
+            SymbolIdentity.Array,
+            SymbolType.Chr,
+            3,
+            -8,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "cp",
+            SymbolIdentity.Pointer,
+            SymbolType.Chr,
+            2,
+            -6,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "uc",
+            SymbolIdentity.Variable,
+            SymbolType.UChr,
+            1,
+            -4,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "uca3",
+            SymbolIdentity.Array,
+            SymbolType.UChr,
+            3,
+            -2,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "ucp",
+            SymbolIdentity.Pointer,
+            SymbolType.UChr,
+            2,
+            0,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "i",
+            SymbolIdentity.Variable,
+            SymbolType.Int,
+            2,
+            2,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "ia3",
+            SymbolIdentity.Array,
+            SymbolType.Int,
+            6,
+            4,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "ip",
+            SymbolIdentity.Pointer,
+            SymbolType.Int,
+            2,
+            6,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "ui",
+            SymbolIdentity.Variable,
+            SymbolType.UInt,
+            2,
+            8,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "uia3",
+            SymbolIdentity.Array,
+            SymbolType.UInt,
+            6,
+            10,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
+        _ = symTabMgmt.AddSym(
+            "uip",
+            SymbolIdentity.Pointer,
+            SymbolType.UInt,
+            2,
+            12,
+            storage.SymTab.Locals,
+            SymbolClass.Automatic);
         _ = symTabMgmt.AddSym(
             "gc",
             SymbolIdentity.Variable,
