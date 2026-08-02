@@ -40,12 +40,22 @@ public class AnalyzerTests
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("cp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "cp", null, SymbolType.Chr, null, 0, null, null, "", "")]
-    [InlineData("uip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Static, 2, 0, "uip", null, SymbolType.UInt, null, 0, null, null, "", "")]
-    [InlineData("c", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "c", null, null, null, 0, null, null, "", "")]
+    [InlineData("gc", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null, "", "")]
+    [InlineData("gcp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "gcp", null, SymbolType.Chr, null, 0, null, null, "", "")]
+    [InlineData("guc", true, SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.Static, 1, 0, "guc", null, null, null, 0, null, null, "", "")]
+    [InlineData("gucp", true, SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Static, 2, 0, "gucp", null, SymbolType.UChr, null, 0, null, null, "", "")]
+    [InlineData("gi", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "gi", null, null, null, 0, null, null, "", "")]
+    [InlineData("gip", true, SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Static, 2, 0, "gip", null, SymbolType.Int, null, 0, null, null, "", "")]
+    [InlineData("gui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "gui", null, null, null, 0, null, null, "", "")]
+    [InlineData("guip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Static, 2, 0, "guip", null, SymbolType.UInt, null, 0, null, null, "", "")]
     [InlineData("ec", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.External, 1, 0, "ec", null, null, null, 0, null, null, "", "")]
-    [InlineData("i", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "i", null, null, null, 0, null, null, "", "")]
-    [InlineData("ui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "ui", null, null, null, 0, null, null, "", "")]
+    [InlineData("ecp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.External, 2, 0, "ecp", null, SymbolType.Chr, null, 0, null, null, "", "")]
+    [InlineData("euc", true, SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.External, 1, 0, "euc", null, null, null, 0, null, null, "", "")]
+    [InlineData("eucp", true, SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.External, 2, 0, "eucp", null, SymbolType.UChr, null, 0, null, null, "", "")]
+    [InlineData("ei", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.External, 2, 0, "ei", null, null, null, 0, null, null, "", "")]
+    [InlineData("eip", true, SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.External, 2, 0, "eip", null, SymbolType.Int, null, 0, null, null, "", "")]
+    [InlineData("eui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.External, 2, 0, "eui", null, null, null, 0, null, null, "", "")]
+    [InlineData("euip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.External, 2, 0, "euip", null, SymbolType.UInt, null, 0, null, null, "", "")]
     [InlineData("foo", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 0, 0, "foo", null, null, null, 0, null, null, "", "")]
     [InlineData("bar", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 0, 0, "bar", null, null, null, 0, null, null, "", "")]
     [InlineData("0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
@@ -203,7 +213,15 @@ public class AnalyzerTests
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
         _ = symTabMgmt.AddSym(
-            "cp",
+            "gc",
+            SymbolIdentity.Variable,
+            SymbolType.Chr,
+            1,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "gcp",
             SymbolIdentity.Pointer,
             SymbolType.Chr,
             2,
@@ -211,18 +229,50 @@ public class AnalyzerTests
             storage.SymTab.Globals,
             SymbolClass.Static);
         _ = symTabMgmt.AddSym(
-            "uip",
+            "guc",
+            SymbolIdentity.Variable,
+            SymbolType.UChr,
+            1,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "gucp",
             SymbolIdentity.Pointer,
+            SymbolType.UChr,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "gi",
+            SymbolIdentity.Variable,
+            SymbolType.Int,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "gip",
+            SymbolIdentity.Pointer,
+            SymbolType.Int,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "gui",
+            SymbolIdentity.Variable,
             SymbolType.UInt,
             2,
             0,
             storage.SymTab.Globals,
             SymbolClass.Static);
         _ = symTabMgmt.AddSym(
-            "c",
-            SymbolIdentity.Variable,
-            SymbolType.Chr,
-            1,
+            "guip",
+            SymbolIdentity.Pointer,
+            SymbolType.UInt,
+            2,
             0,
             storage.SymTab.Globals,
             SymbolClass.Static);
@@ -235,21 +285,61 @@ public class AnalyzerTests
             storage.SymTab.Globals,
             SymbolClass.External);
         _ = symTabMgmt.AddSym(
-            "i",
+            "ecp",
+            SymbolIdentity.Pointer,
+            SymbolType.Chr,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "euc",
+            SymbolIdentity.Variable,
+            SymbolType.UChr,
+            1,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "eucp",
+            SymbolIdentity.Pointer,
+            SymbolType.UChr,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "ei",
             SymbolIdentity.Variable,
             SymbolType.Int,
             2,
             0,
             storage.SymTab.Globals,
-            SymbolClass.Static);
+            SymbolClass.External);
         _ = symTabMgmt.AddSym(
-            "ui",
+            "eip",
+            SymbolIdentity.Pointer,
+            SymbolType.Int,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "eui",
             SymbolIdentity.Variable,
             SymbolType.UInt,
             2,
             0,
             storage.SymTab.Globals,
-            SymbolClass.Static);
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "euip",
+            SymbolIdentity.Pointer,
+            SymbolType.UInt,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
         _ = symTabMgmt.AddSym(
             "foo",
             SymbolIdentity.Function,
