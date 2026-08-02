@@ -21,7 +21,7 @@ public class AnalyzerTests
     /// Tests that can parse primary.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
-    /// <param name="expected">Expected is expression flag.</param>
+    /// <param name="expected">Expected fetch flag.</param>
     /// <param name="expectedSymbolIdent">Expected symbol identity.</param>
     /// <param name="expectedSymbolType">Expected symbol type.</param>
     /// <param name="expectedSymbolClass">Expected symbol storage class.</param>
@@ -40,6 +40,10 @@ public class AnalyzerTests
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
+    [InlineData("c", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "c", null, null, null, 0, null, null, "", "")]
+    [InlineData("ec", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.External, 1, 0, "ec", null, null, null, 0, null, null, "", "")]
+    [InlineData("i", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "i", null, null, null, 0, null, null, "", "")]
+    [InlineData("ui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "ui", null, null, null, 0, null, null, "", "")]
     [InlineData("foo", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 0, 0, "foo", null, null, null, 0, null, null, "", "")]
     [InlineData("bar", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 0, 0, "bar", null, null, null, 0, null, null, "", "")]
     [InlineData("0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
@@ -196,6 +200,38 @@ public class AnalyzerTests
 
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
+        _ = symTabMgmt.AddSym(
+            "c",
+            SymbolIdentity.Variable,
+            SymbolType.Chr,
+            1,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "ec",
+            SymbolIdentity.Variable,
+            SymbolType.Chr,
+            1,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "i",
+            SymbolIdentity.Variable,
+            SymbolType.Int,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "ui",
+            SymbolIdentity.Variable,
+            SymbolType.UInt,
+            2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
         _ = symTabMgmt.AddSym(
             "foo",
             SymbolIdentity.Function,
