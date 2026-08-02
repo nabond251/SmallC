@@ -1312,10 +1312,10 @@ public class Analyzer(
                 _ = await frontEnd.InByteAsync().ConfigureAwait(false);
                 while (storage.Ch is char chex && char.IsAsciiHexDigit(chex))
                 {
-                    if (char.IsDigit(chex))
+                    if (char.IsDigit(chex) && await frontEnd.InByteAsync()
+                            .ConfigureAwait(false) is char chexIn)
                     {
-                        k = (ushort)((k * 16) + (await frontEnd.InByteAsync()
-                            .ConfigureAwait(false) - '0').Value);
+                        k = (ushort)((k * 16) + chexIn - '0');
                     }
                     else
                     {
@@ -1329,19 +1329,21 @@ public class Analyzer(
             }
             else
             {
-                while (storage.Ch is >= '0' and <= '7')
+                while (storage.Ch is >= '0' and <= '7' &&
+                    await frontEnd.InByteAsync().ConfigureAwait(false)
+                    is char chin)
                 {
-                    k = (ushort)((k * 8) + (await frontEnd.InByteAsync()
-                        .ConfigureAwait(false) - '0').Value);
+                    k = (ushort)((k * 8) + chin - '0');
                 }
             }
         }
         else
         {
-            while (storage.Ch is char ch && char.IsDigit(ch))
+            while (storage.Ch is char ch && char.IsDigit(ch) &&
+                await frontEnd.InByteAsync().ConfigureAwait(false)
+                is char chin)
             {
-                k = (ushort)((k * 10) + (await frontEnd.InByteAsync()
-                    .ConfigureAwait(false) - '0').Value);
+                k = (ushort)((k * 10) + chin - '0');
             }
         }
 
