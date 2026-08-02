@@ -40,7 +40,8 @@ public class AnalyzerTests
     /// <param name="expectedLits">String of expected lit pool bytes.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-    [InlineData("foo", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 0, 0, "foo", null, null, null, 0, null, null, "", "")]
+    [InlineData("foo", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 0, 0, "foo", null, null, null, 0, null, null, "", "")]
+    [InlineData("bar", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 0, 0, "bar", null, null, null, 0, null, null, "", "")]
     [InlineData("0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
     [InlineData("00", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
     [InlineData("-0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
@@ -195,6 +196,14 @@ public class AnalyzerTests
 
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
+        _ = symTabMgmt.AddSym(
+            "foo",
+            SymbolIdentity.Function,
+            SymbolType.Int,
+            0,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
 
         var frontEnd = new FrontEnd(storage);
         var backEnd = new BackEnd(symTabMgmt, utility, storage);
