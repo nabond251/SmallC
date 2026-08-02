@@ -41,20 +41,28 @@ public class AnalyzerTests
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
     [InlineData("gc", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null, "", "")]
+    [InlineData("gca3", false, SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Static, 3, 0, "gca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null, "MOV AX,OFFSET _GCA3\r\n", "")]
     [InlineData("gcp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "gcp", null, SymbolType.Chr, null, 0, null, null, "", "")]
     [InlineData("guc", true, SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.Static, 1, 0, "guc", null, null, null, 0, null, null, "", "")]
+    [InlineData("guca3", false, SymbolIdentity.Array, SymbolType.UChr, SymbolClass.Static, 3, 0, "guca3", SymbolType.UChr, SymbolType.UChr, null, 0, null, null, "MOV AX,OFFSET _GUCA3\r\n", "")]
     [InlineData("gucp", true, SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Static, 2, 0, "gucp", null, SymbolType.UChr, null, 0, null, null, "", "")]
     [InlineData("gi", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "gi", null, null, null, 0, null, null, "", "")]
+    [InlineData("gia3", false, SymbolIdentity.Array, SymbolType.Int, SymbolClass.Static, 6, 0, "gia3", SymbolType.Int, SymbolType.Int, null, 0, null, null, "MOV AX,OFFSET _GIA3\r\n", "")]
     [InlineData("gip", true, SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Static, 2, 0, "gip", null, SymbolType.Int, null, 0, null, null, "", "")]
     [InlineData("gui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "gui", null, null, null, 0, null, null, "", "")]
+    [InlineData("guia3", false, SymbolIdentity.Array, SymbolType.UInt, SymbolClass.Static, 6, 0, "guia3", SymbolType.UInt, SymbolType.UInt, null, 0, null, null, "MOV AX,OFFSET _GUIA3\r\n", "")]
     [InlineData("guip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Static, 2, 0, "guip", null, SymbolType.UInt, null, 0, null, null, "", "")]
     [InlineData("ec", true, SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.External, 1, 0, "ec", null, null, null, 0, null, null, "", "")]
+    [InlineData("eca3", false, SymbolIdentity.Array, SymbolType.Chr, SymbolClass.External, 3, 0, "eca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null, "MOV AX,OFFSET _ECA3\r\n", "")]
     [InlineData("ecp", true, SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.External, 2, 0, "ecp", null, SymbolType.Chr, null, 0, null, null, "", "")]
     [InlineData("euc", true, SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.External, 1, 0, "euc", null, null, null, 0, null, null, "", "")]
+    [InlineData("euca3", false, SymbolIdentity.Array, SymbolType.UChr, SymbolClass.External, 3, 0, "euca3", SymbolType.UChr, SymbolType.UChr, null, 0, null, null, "MOV AX,OFFSET _EUCA3\r\n", "")]
     [InlineData("eucp", true, SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.External, 2, 0, "eucp", null, SymbolType.UChr, null, 0, null, null, "", "")]
     [InlineData("ei", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.External, 2, 0, "ei", null, null, null, 0, null, null, "", "")]
+    [InlineData("eia3", false, SymbolIdentity.Array, SymbolType.Int, SymbolClass.External, 6, 0, "eia3", SymbolType.Int, SymbolType.Int, null, 0, null, null, "MOV AX,OFFSET _EIA3\r\n", "")]
     [InlineData("eip", true, SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.External, 2, 0, "eip", null, SymbolType.Int, null, 0, null, null, "", "")]
     [InlineData("eui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.External, 2, 0, "eui", null, null, null, 0, null, null, "", "")]
+    [InlineData("euia3", false, SymbolIdentity.Array, SymbolType.UInt, SymbolClass.External, 6, 0, "euia3", SymbolType.UInt, SymbolType.UInt, null, 0, null, null, "MOV AX,OFFSET _EUIA3\r\n", "")]
     [InlineData("euip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.External, 2, 0, "euip", null, SymbolType.UInt, null, 0, null, null, "", "")]
     [InlineData("foo", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 0, 0, "foo", null, null, null, 0, null, null, "", "")]
     [InlineData("bar", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 0, 0, "bar", null, null, null, 0, null, null, "", "")]
@@ -221,6 +229,14 @@ public class AnalyzerTests
             storage.SymTab.Globals,
             SymbolClass.Static);
         _ = symTabMgmt.AddSym(
+            "gca3",
+            SymbolIdentity.Array,
+            SymbolType.Chr,
+            3,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
             "gcp",
             SymbolIdentity.Pointer,
             SymbolType.Chr,
@@ -233,6 +249,14 @@ public class AnalyzerTests
             SymbolIdentity.Variable,
             SymbolType.UChr,
             1,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "guca3",
+            SymbolIdentity.Array,
+            SymbolType.UChr,
+            3,
             0,
             storage.SymTab.Globals,
             SymbolClass.Static);
@@ -253,6 +277,14 @@ public class AnalyzerTests
             storage.SymTab.Globals,
             SymbolClass.Static);
         _ = symTabMgmt.AddSym(
+            "gia3",
+            SymbolIdentity.Array,
+            SymbolType.Int,
+            6,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
             "gip",
             SymbolIdentity.Pointer,
             SymbolType.Int,
@@ -265,6 +297,14 @@ public class AnalyzerTests
             SymbolIdentity.Variable,
             SymbolType.UInt,
             2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.Static);
+        _ = symTabMgmt.AddSym(
+            "guia3",
+            SymbolIdentity.Array,
+            SymbolType.UInt,
+            6,
             0,
             storage.SymTab.Globals,
             SymbolClass.Static);
@@ -285,6 +325,14 @@ public class AnalyzerTests
             storage.SymTab.Globals,
             SymbolClass.External);
         _ = symTabMgmt.AddSym(
+            "eca3",
+            SymbolIdentity.Array,
+            SymbolType.Chr,
+            3,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
             "ecp",
             SymbolIdentity.Pointer,
             SymbolType.Chr,
@@ -297,6 +345,14 @@ public class AnalyzerTests
             SymbolIdentity.Variable,
             SymbolType.UChr,
             1,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "euca3",
+            SymbolIdentity.Array,
+            SymbolType.UChr,
+            3,
             0,
             storage.SymTab.Globals,
             SymbolClass.External);
@@ -317,6 +373,14 @@ public class AnalyzerTests
             storage.SymTab.Globals,
             SymbolClass.External);
         _ = symTabMgmt.AddSym(
+            "eia3",
+            SymbolIdentity.Array,
+            SymbolType.Int,
+            6,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
             "eip",
             SymbolIdentity.Pointer,
             SymbolType.Int,
@@ -329,6 +393,14 @@ public class AnalyzerTests
             SymbolIdentity.Variable,
             SymbolType.UInt,
             2,
+            0,
+            storage.SymTab.Globals,
+            SymbolClass.External);
+        _ = symTabMgmt.AddSym(
+            "euia3",
+            SymbolIdentity.Array,
+            SymbolType.UInt,
+            6,
             0,
             storage.SymTab.Globals,
             SymbolClass.External);
