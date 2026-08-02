@@ -1356,11 +1356,11 @@ public class Analyzer(
         value = k;
         if (value > 0x7FFF)
         {
-            return (SymbolType.UInt, value);
+            return (SymbolType.UInt, (short)value);
         }
         else
         {
-            return (SymbolType.Int, value);
+            return (SymbolType.Int, (short)value);
         }
     }
 
