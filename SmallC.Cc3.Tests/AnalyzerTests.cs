@@ -76,8 +76,8 @@ public class AnalyzerTests
     [InlineData("eui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.External, 2, 0, "eui", null, null, null, 0, null, null, "", "")]
     [InlineData("euia3", false, SymbolIdentity.Array, SymbolType.UInt, SymbolClass.External, 6, 0, "euia3", SymbolType.UInt, SymbolType.UInt, null, 0, null, null, "MOV AX,OFFSET _EUIA3\r\n", "")]
     [InlineData("euip", true, SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.External, 2, 0, "euip", null, SymbolType.UInt, null, 0, null, null, "", "")]
-    [InlineData("foo", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.Static, 0, 0, "foo", null, null, null, 0, null, null, "", "")]
-    [InlineData("bar", false, SymbolIdentity.Function, SymbolType.Int, SymbolClass.AutoExt, 0, 0, "bar", null, null, null, 0, null, null, "", "")]
+    [InlineData("foo", false, null, null, null, null, null, null, null, null, null, 0, null, null, "MOV AX,OFFSET _FOO\r\n", "")]
+    [InlineData("bar", false, null, null, null, null, null, null, null, null, null, 0, null, null, "MOV AX,OFFSET _BAR\r\n", "")]
     [InlineData("0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
     [InlineData("00", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
     [InlineData("-0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
@@ -170,7 +170,7 @@ public class AnalyzerTests
         var @is = new Expression();
         var (before, start) = backEnd.SetStage();
 
-        var actual = await sut.PrimaryAsync(@is);
+        var actual = await sut.Level14Async(@is);
         await backEnd.ClearStageAsync(before, start);
         await output.FlushAsync();
         outputStream.Position = 0;
