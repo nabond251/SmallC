@@ -1346,7 +1346,7 @@ public class Analyzer(
 
         if (minus)
         {
-            value = (short)-k;
+            value = (short)k;
             return (SymbolType.Int, value);
         }
 
