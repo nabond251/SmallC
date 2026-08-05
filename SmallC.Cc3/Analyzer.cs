@@ -616,6 +616,7 @@ public class Analyzer(
         // unary -
         else if (await frontEnd.MatchAsync("-").ConfigureAwait(false))
         {
+            @is.ConstantValue = -1;
             if (await this.Level13Async(@is).ConfigureAwait(false))
             {
                 await this.FetchAsync(@is).ConfigureAwait(false);
@@ -930,7 +931,7 @@ public class Analyzer(
         @is.IndirectType = null;
         @is.AddressType = null;
         @is.ConstantType = null;
-        @is.ConstantValue = 0;
+        @is.ConstantValue = @is.ConstantValue == -1 ? -1 : 0;
         @is.HighestBinaryOp = null;
         @is.StageIndex = null;
 
@@ -1278,16 +1279,12 @@ public class Analyzer(
         bool minus;
 
         k = 0;
-        minus = false;
+        minus = value == -1;
         while (true)
         {
             if (await frontEnd.MatchAsync("+").ConfigureAwait(false))
             {
                 // already parsed
-            }
-            else if (await frontEnd.MatchAsync("-").ConfigureAwait(false))
-            {
-                minus = true;
             }
             else
             {
