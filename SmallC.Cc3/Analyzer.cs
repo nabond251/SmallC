@@ -594,7 +594,7 @@ public class Analyzer(
             }
 
             await backEnd.GenAsync(PCode.COM1, null).ConfigureAwait(false);
-            @is.ConstantValue = ~@is.ConstantValue;
+            @is.ConstantValue = (short)~@is.ConstantValue;
             @is.SymbolTableEntry = null;
             return false;
         }
@@ -622,7 +622,7 @@ public class Analyzer(
             }
 
             await backEnd.GenAsync(PCode.ANEG1, null).ConfigureAwait(false);
-            @is.ConstantValue = -@is.ConstantValue;
+            @is.ConstantValue = (short)-@is.ConstantValue;
             @is.SymbolTableEntry = null;
             return false;
         }
@@ -695,7 +695,7 @@ public class Analyzer(
             }
 
             @is.ConstantType = SymbolType.Int;
-            @is.ConstantValue = sz;
+            @is.ConstantValue = (short)sz;
             @is.AddressType = null;
             @is.IndirectType = null;
             @is.StageIndex = null;
