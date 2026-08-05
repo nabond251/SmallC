@@ -85,6 +85,8 @@ public class AnalyzerTests
     [InlineData("-0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\nNEG AX\r\n", "")]
     [InlineData("+0", false, null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null, "XOR AX,AX\r\n", "")]
     [InlineData("-1", false, null, null, null, null, null, null, null, null, SymbolType.Int, -1, null, null, "MOV AX,1\r\nNEG AX\r\n", "")]
+    [InlineData("-(1)", false, null, null, null, null, null, null, null, null, SymbolType.Int, -1, null, null, "MOV AX,1\r\nNEG AX\r\n", "")]
+    [InlineData("-(-1)", false, null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,-1\r\nNEG AX\r\n", "")]
     [InlineData("+1", false, null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
     [InlineData("01", false, null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
     [InlineData(" 1", false, null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null, "MOV AX,1\r\n", "")]
