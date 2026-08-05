@@ -918,6 +918,8 @@ public class Analyzer(
         // (subexpression)
         if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
         {
+            @is.ConstantValue = 0;
+
             do
             {
                 k = await this.Level1Async(@is).ConfigureAwait(false);
