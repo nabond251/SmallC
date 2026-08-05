@@ -913,12 +913,17 @@ public class Analyzer(
         ArgumentNullException.ThrowIfNull(@is);
 
         string? sName;
-        bool k;
+        bool minus, k;
+
+        minus = @is.ConstantValue == -1;
 
         // (subexpression)
         if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
         {
-            @is.ConstantValue = 0;
+            if (minus)
+            {
+                @is.ConstantValue = 0;
+            }
 
             do
             {
@@ -933,7 +938,7 @@ public class Analyzer(
         @is.IndirectType = null;
         @is.AddressType = null;
         @is.ConstantType = null;
-        @is.ConstantValue = @is.ConstantValue == -1 ? -1 : 0;
+        @is.ConstantValue = 0;
         @is.HighestBinaryOp = null;
         @is.StageIndex = null;
 
@@ -1009,7 +1014,7 @@ public class Analyzer(
             return false;
         }
 
-        if (!await this.ConstantAsync(@is).ConfigureAwait(false))
+        if (!await this.ConstantAsync(minus, @is).ConfigureAwait(false))
         {
             await this.ExpErrAsync().ConfigureAwait(false);
         }
@@ -1227,16 +1232,17 @@ public class Analyzer(
     /// <summary>
     /// Parses constant.
     /// </summary>
+    /// <param name="minus">A value indicating whether unary minus.</param>
     /// <param name="is">Expression analysis.</param>
     /// <returns>A value indicating whether expression is constant.</returns>
-    public async Task<bool> ConstantAsync(Expression @is)
+    public async Task<bool> ConstantAsync(bool minus, Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
         int? offset;
 
         (@is.ConstantType, @is.ConstantValue) = await this.NumberAsync(
-            @is.ConstantValue).ConfigureAwait(false);
+            minus, @is.ConstantValue).ConfigureAwait(false);
         if (@is.ConstantType.HasValue)
         {
             await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
@@ -1272,16 +1278,15 @@ public class Analyzer(
     /// <summary>
     /// Parses number constant.
     /// </summary>
+    /// <param name="minus">A value indicating whether unary minus.</param>
     /// <param name="value">Current constant value.</param>
     /// <returns>Tuple of constant type, if any, and constant.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "not quite dead")]
-    public async Task<(SymbolType? Type, int Value)> NumberAsync(int value)
+    public async Task<(SymbolType? Type, int Value)> NumberAsync(bool minus, int value)
     {
         ushort k;
-        bool minus;
 
         k = 0;
-        minus = value == -1;
         while (true)
         {
             if (await frontEnd.MatchAsync("+").ConfigureAwait(false))
