@@ -47,6 +47,7 @@ public class AnalyzerTests
     [InlineData("uca3", false, SymbolIdentity.Array, SymbolType.UChr, SymbolClass.Automatic, 3, -2, "uca3", SymbolType.UChr, SymbolType.UChr, null, 0, null, null, "LEA AX,-2[BP]\r\n", "")]
     [InlineData("ucp", true, SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, SymbolType.UChr, null, 0, null, null, "LEA AX,0[BP]\r\n", "")]
     [InlineData("i", true, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null, "LEA AX,2[BP]\r\n", "")]
+    [InlineData("i--", false, SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null, "LEA AX,2[BP]\r\nMOV BX,AX\r\nMOV AX,[BX]\r\nDEC AX\r\nMOV [BX],AX\r\nINC AX\r\n", "")]
     [InlineData("ia3", false, SymbolIdentity.Array, SymbolType.Int, SymbolClass.Automatic, 6, 4, "ia3", SymbolType.Int, SymbolType.Int, null, 0, null, null, "LEA AX,4[BP]\r\n", "")]
     [InlineData("ip", true, SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", SymbolType.UInt, SymbolType.Int, null, 0, null, null, "LEA AX,6[BP]\r\n", "")]
     [InlineData("ui", true, SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, null, null, 0, null, null, "LEA AX,8[BP]\r\n", "")]
