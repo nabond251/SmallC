@@ -46,6 +46,16 @@ public class AnalyzerTests
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null,
 @"LEA AX,-10[BP]
 ", "")]
+    [InlineData("c++", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null,
+@"LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+INC AX
+MOV [BX],AL
+DEC AX
+", "")]
     [InlineData("ca3", false,
 SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Automatic, 3, -8, "ca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"LEA AX,-8[BP]
