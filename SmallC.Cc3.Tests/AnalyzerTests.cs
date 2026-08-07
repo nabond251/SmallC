@@ -70,6 +70,12 @@ SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Automatic, 3, -8, "ca3", Symbo
 SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Automatic, 2, -6, "cp", SymbolType.UInt, SymbolType.Chr, null, 0, null, null,
 @"LEA AX,-6[BP]
 ", "")]
+    [InlineData("*cp", true,
+SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Automatic, 2, -6, "cp", SymbolType.Chr, null, null, 1, null, null,
+@"LEA AX,-6[BP]
+MOV BX,AX
+MOV AX,[BX]
+", "")]
     [InlineData("sizeof(unsigned char)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
 "", "")]
