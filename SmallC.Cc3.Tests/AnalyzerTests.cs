@@ -193,6 +193,13 @@ SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Static, 2, 0, "gip", null, S
 SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Static, 2, 0, "gip", SymbolType.Int, null, null, 1, null, null,
 @"MOV AX,_GIP
 ", "")]
+    [InlineData("-*gip", false,
+null, null, null, null, null, null, SymbolType.Int, null, null, -1, null, null,
+@"MOV AX,_GIP
+MOV BX,AX
+MOV AX,[BX]
+NEG AX
+", "")]
     [InlineData("gui", true,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "gui", null, null, null, 0, null, null,
 "", "")]
