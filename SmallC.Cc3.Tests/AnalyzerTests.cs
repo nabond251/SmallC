@@ -75,6 +75,9 @@ SymbolIdentity.Array, SymbolType.UChr, SymbolClass.Automatic, 3, -2, "uca3", Sym
     [InlineData("sizeof uca3", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 3, null, null,
 "", "")]
+    [InlineData("sizeof(uca3)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 3, null, null,
+"", "")]
     [InlineData("ucp", true,
 SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, SymbolType.UChr, null, 0, null, null,
 @"LEA AX,0[BP]
