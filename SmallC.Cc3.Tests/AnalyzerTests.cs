@@ -189,6 +189,10 @@ SymbolIdentity.Array, SymbolType.Int, SymbolClass.Static, 6, 0, "gia3", SymbolTy
     [InlineData("gip", true,
 SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Static, 2, 0, "gip", null, SymbolType.Int, null, 0, null, null,
 "", "")]
+    [InlineData("*gip", true,
+SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Static, 2, 0, "gip", SymbolType.Int, null, null, 1, null, null,
+@"MOV AX,_GIP
+", "")]
     [InlineData("gui", true,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "gui", null, null, null, 0, null, null,
 "", "")]
