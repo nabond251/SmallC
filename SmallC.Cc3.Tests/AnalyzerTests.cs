@@ -134,6 +134,13 @@ SymbolIdentity.Array, SymbolType.Int, SymbolClass.Automatic, 6, 4, "ia3", Symbol
 SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", SymbolType.UInt, SymbolType.Int, null, 0, null, null,
 @"LEA AX,6[BP]
 ", "")]
+    [InlineData("~ip", false,
+null, null, null, null, null, null, SymbolType.UInt, SymbolType.Int, null, -1, null, null,
+@"LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+NOT AX
+", "")]
     [InlineData("sizeof(unsigned)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
 "", "")]
@@ -179,6 +186,12 @@ SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "gcp", null, S
     [InlineData("guc", true,
 SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.Static, 1, 0, "guc", null, null, null, 0, null, null,
 "", "")]
+    [InlineData("~guc", false,
+null, null, null, null, null, null, null, null, null, -1, null, null,
+@"MOV AL,_GUC
+XOR AH,AH
+NOT AX
+", "")]
     [InlineData("guca3", false,
 SymbolIdentity.Array, SymbolType.UChr, SymbolClass.Static, 3, 0, "guca3", SymbolType.UChr, SymbolType.UChr, null, 0, null, null,
 @"MOV AX,OFFSET _GUCA3
@@ -455,6 +468,11 @@ NEG AX
 null, null, null, null, null, null, null, null, SymbolType.Int, 16, null, null,
 @"MOV AX,16
 ", "")]
+    [InlineData("~0x10", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, -17, null, null,
+@"MOV AX,16
+NOT AX
+", "")]
     [InlineData("0x1G", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
 @"MOV AX,1
@@ -591,7 +609,7 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
         SymbolType? expectedIndirectType,
         SymbolType? expectedAddressType,
         SymbolType? expectedConstantType,
-        int expectedConstantValue,
+        short expectedConstantValue,
         PCode? expectedHighestBinaryOp,
         int? expectedStageIndex,
         string expectedCode,
