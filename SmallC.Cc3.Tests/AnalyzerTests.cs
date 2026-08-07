@@ -299,6 +299,10 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
 null, null, null, null, null, null, null, null, SymbolType.Int, 10, null, null,
 @"MOV AX,10
 ", "")]
+    [InlineData("*10", true,
+null, null, null, null, null, null, SymbolType.Int, null, null, 1, null, null,
+@"MOV AX,10
+", "")]
     [InlineData("-32769", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 32767, null, null,
 @"MOV AX,-32767
