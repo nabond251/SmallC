@@ -284,6 +284,11 @@ CALL _BAR
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
 @"XOR AX,AX
 ", "")]
+    [InlineData("!0", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
+@"XOR AX,AX
+CALL __LNEG
+", "")]
     [InlineData("00", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
 @"XOR AX,AX
@@ -302,9 +307,20 @@ null, null, null, null, null, null, null, null, SymbolType.Int, -1, null, null,
 @"MOV AX,1
 NEG AX
 ", "")]
+    [InlineData("!-1", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
+@"MOV AX,1
+NEG AX
+CALL __LNEG
+", "")]
     [InlineData("+1", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
 @"MOV AX,1
+", "")]
+    [InlineData("!+1", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
+@"MOV AX,1
+CALL __LNEG
 ", "")]
     [InlineData("01", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
@@ -317,6 +333,11 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
     [InlineData("10", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 10, null, null,
 @"MOV AX,10
+", "")]
+    [InlineData("!10", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
+@"MOV AX,10
+CALL __LNEG
 ", "")]
     [InlineData("*10", true,
 null, null, null, null, null, null, SymbolType.Int, null, null, 1, null, null,
