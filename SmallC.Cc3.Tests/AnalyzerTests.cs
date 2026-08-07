@@ -101,6 +101,10 @@ SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", Symbo
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, null, null, 0, null, null,
 @"LEA AX,8[BP]
 ", "")]
+    [InlineData("&ui", false,
+SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, SymbolType.UInt, null, 0, null, null,
+@"LEA AX,8[BP]
+", "")]
     [InlineData("uia3", false,
 SymbolIdentity.Array, SymbolType.UInt, SymbolClass.Automatic, 6, 10, "uia3", SymbolType.UInt, SymbolType.UInt, null, 0, null, null,
 @"LEA AX,10[BP]
