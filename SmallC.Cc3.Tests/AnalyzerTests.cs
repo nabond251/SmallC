@@ -169,6 +169,15 @@ SymbolIdentity.Array, SymbolType.UInt, SymbolClass.Automatic, 6, 10, "uia3", Sym
 SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Automatic, 2, 12, "uip", SymbolType.UInt, SymbolType.UInt, null, 0, null, null,
 @"LEA AX,12[BP]
 ", "")]
+    [InlineData("--uip", false,
+SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Automatic, 2, 12, "uip", SymbolType.UInt, SymbolType.UInt, null, 0, null, null,
+@"LEA AX,12[BP]
+MOV BX,AX
+MOV AX,[BX]
+DEC AX
+DEC AX
+MOV [BX],AX
+", "")]
     [InlineData("gc", true,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null,
 "", "")]
@@ -258,6 +267,12 @@ SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.External, 2, 0, "eucp", nul
     [InlineData("ei", true,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.External, 2, 0, "ei", null, null, null, 0, null, null,
 "", "")]
+    [InlineData("++ei", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.External, 2, 0, "ei", null, null, null, 0, null, null,
+@"MOV AX,_EI
+INC AX
+MOV _EI,AX
+", "")]
     [InlineData("eia3", false,
 SymbolIdentity.Array, SymbolType.Int, SymbolClass.External, 6, 0, "eia3", SymbolType.Int, SymbolType.Int, null, 0, null, null,
 @"MOV AX,OFFSET _EIA3
