@@ -112,6 +112,10 @@ SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Automatic, 2, 12, "uip", Sy
     [InlineData("gc", true,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null,
 "", "")]
+    [InlineData("&gc", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
+@"MOV AX,OFFSET _GC
+", "")]
     [InlineData("gca3", false,
 SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Static, 3, 0, "gca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"MOV AX,OFFSET _GCA3
