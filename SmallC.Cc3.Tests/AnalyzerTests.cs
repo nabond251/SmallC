@@ -100,6 +100,13 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 3, null, null,
 SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, SymbolType.UChr, null, 0, null, null,
 @"LEA AX,0[BP]
 ", "")]
+    [InlineData("!ucp", false,
+null, null, null, null, null, null, SymbolType.UInt, SymbolType.UChr, null, 1, null, null,
+@"LEA AX,0[BP]
+MOV BX,AX
+MOV AX,[BX]
+CALL __LNEG
+", "")]
     [InlineData("sizeof(int)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
 "", "")]
@@ -203,6 +210,11 @@ NEG AX
     [InlineData("gui", true,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "gui", null, null, null, 0, null, null,
 "", "")]
+    [InlineData("!gui", false,
+null, null, null, null, null, null, null, null, null, 1, null, null,
+@"MOV AX,_GUI
+CALL __LNEG
+", "")]
     [InlineData("guia3", false,
 SymbolIdentity.Array, SymbolType.UInt, SymbolClass.Static, 6, 0, "guia3", SymbolType.UInt, SymbolType.UInt, null, 0, null, null,
 @"MOV AX,OFFSET _GUIA3
