@@ -42,6 +42,9 @@ public class AnalyzerTests
     [Theory]
 #pragma warning disable SA1118 // Parameter should not span multiple lines
 #pragma warning disable SA1117 // Parameters should be on same line or separate lines
+    [InlineData("sizeof(char)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
+"", "")]
     [InlineData("c", true,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null,
 @"LEA AX,-10[BP]
@@ -56,6 +59,9 @@ INC AX
 MOV [BX],AL
 DEC AX
 ", "")]
+    [InlineData("sizeof(char*)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
     [InlineData("ca3", false,
 SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Automatic, 3, -8, "ca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"LEA AX,-8[BP]
@@ -64,10 +70,16 @@ SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Automatic, 3, -8, "ca3", Symbo
 SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Automatic, 2, -6, "cp", SymbolType.UInt, SymbolType.Chr, null, 0, null, null,
 @"LEA AX,-6[BP]
 ", "")]
+    [InlineData("sizeof(unsigned char)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
+"", "")]
     [InlineData("uc", true,
 SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.Automatic, 1, -4, "uc", SymbolType.UChr, null, null, 0, null, null,
 @"LEA AX,-4[BP]
 ", "")]
+    [InlineData("sizeof(unsigned char*)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
     [InlineData("uca3", false,
 SymbolIdentity.Array, SymbolType.UChr, SymbolClass.Automatic, 3, -2, "uca3", SymbolType.UChr, SymbolType.UChr, null, 0, null, null,
 @"LEA AX,-2[BP]
@@ -82,6 +94,9 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 3, null, null,
 SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, SymbolType.UChr, null, 0, null, null,
 @"LEA AX,0[BP]
 ", "")]
+    [InlineData("sizeof(int)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
     [InlineData("i", true,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null,
 @"LEA AX,2[BP]
@@ -95,6 +110,9 @@ DEC AX
 MOV [BX],AX
 INC AX
 ", "")]
+    [InlineData("sizeof(int*)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
     [InlineData("ia3", false,
 SymbolIdentity.Array, SymbolType.Int, SymbolClass.Automatic, 6, 4, "ia3", SymbolType.Int, SymbolType.Int, null, 0, null, null,
 @"LEA AX,4[BP]
@@ -103,10 +121,22 @@ SymbolIdentity.Array, SymbolType.Int, SymbolClass.Automatic, 6, 4, "ia3", Symbol
 SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", SymbolType.UInt, SymbolType.Int, null, 0, null, null,
 @"LEA AX,6[BP]
 ", "")]
+    [InlineData("sizeof(unsigned)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
+    [InlineData("sizeof(unsigned int)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
     [InlineData("ui", true,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, null, null, 0, null, null,
 @"LEA AX,8[BP]
 ", "")]
+    [InlineData("sizeof(unsigned*)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
+    [InlineData("sizeof(unsigned int*)", false,
+null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
+"", "")]
     [InlineData("&ui", false,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, SymbolType.UInt, null, 0, null, null,
 @"LEA AX,8[BP]
