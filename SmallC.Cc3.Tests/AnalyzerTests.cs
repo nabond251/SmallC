@@ -18,7 +18,7 @@ using static SmallC.Cc.SymbolTableEntry;
 public class AnalyzerTests
 {
     /// <summary>
-    /// Tests that can parse primary.
+    /// Tests that can analyze lowest level of expression.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
     /// <param name="expected">Expected fetch flag.</param>
@@ -612,7 +612,7 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
 ", "abc")]
 #pragma warning restore SA1117 // Parameters should be on same line or separate lines
 #pragma warning restore SA1118 // Parameter should not span multiple lines
-    public async Task ParsesPrimaryAsync(
+    public async Task ParsesLevel1Async(
         string inputText,
         bool expected,
         SymbolIdentity? expectedSymbolIdent,
@@ -639,7 +639,7 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
         var @is = new Expression();
         var (before, start) = backEnd.SetStage();
 
-        var actual = await sut.Level13Async(@is);
+        var actual = await sut.Level1Async(@is);
         await backEnd.ClearStageAsync(before, start);
         await output.FlushAsync();
         outputStream.Position = 0;
