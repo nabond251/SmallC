@@ -44,7 +44,8 @@ public class AnalyzerTests
 #pragma warning disable SA1117 // Parameters should be on same line or separate lines
     [InlineData("sizeof(char)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
-"", "")]
+@"MOV AX,1
+", "")]
     [InlineData("c", true,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null,
 @"LEA AX,-10[BP]
@@ -61,7 +62,8 @@ DEC AX
 ", "")]
     [InlineData("sizeof(char*)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("ca3", false,
 SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Automatic, 3, -8, "ca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"LEA AX,-8[BP]
@@ -78,24 +80,28 @@ MOV AX,[BX]
 ", "")]
     [InlineData("sizeof(unsigned char)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
-"", "")]
+@"MOV AX,1
+", "")]
     [InlineData("uc", true,
 SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.Automatic, 1, -4, "uc", SymbolType.UChr, null, null, 0, null, null,
 @"LEA AX,-4[BP]
 ", "")]
     [InlineData("sizeof(unsigned char*)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("uca3", false,
 SymbolIdentity.Array, SymbolType.UChr, SymbolClass.Automatic, 3, -2, "uca3", SymbolType.UChr, SymbolType.UChr, null, 0, null, null,
 @"LEA AX,-2[BP]
 ", "")]
     [InlineData("sizeof uca3", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 3, null, null,
-"", "")]
+@"MOV AX,3
+", "")]
     [InlineData("sizeof(uca3)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 3, null, null,
-"", "")]
+@"MOV AX,3
+", "")]
     [InlineData("ucp", true,
 SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, SymbolType.UChr, null, 0, null, null,
 @"LEA AX,0[BP]
@@ -109,7 +115,8 @@ CALL __LNEG
 ", "")]
     [InlineData("sizeof(int)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("i", true,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null,
 @"LEA AX,2[BP]
@@ -125,7 +132,8 @@ INC AX
 ", "")]
     [InlineData("sizeof(int*)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("ia3", false,
 SymbolIdentity.Array, SymbolType.Int, SymbolClass.Automatic, 6, 4, "ia3", SymbolType.Int, SymbolType.Int, null, 0, null, null,
 @"LEA AX,4[BP]
@@ -143,20 +151,24 @@ NOT AX
 ", "")]
     [InlineData("sizeof(unsigned)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("sizeof(unsigned int)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("ui", true,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, null, null, 0, null, null,
 @"LEA AX,8[BP]
 ", "")]
     [InlineData("sizeof(unsigned*)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("sizeof(unsigned int*)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
-"", "")]
+@"MOV AX,2
+", "")]
     [InlineData("&ui", false,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Automatic, 2, 8, "ui", SymbolType.UInt, SymbolType.UInt, null, 0, null, null,
 @"LEA AX,8[BP]
@@ -314,8 +326,7 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
 ", "")]
     [InlineData("!0", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
-@"XOR AX,AX
-CALL __LNEG
+@"MOV AX,1
 ", "")]
     [InlineData("00", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
@@ -324,7 +335,6 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
     [InlineData("-0", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
 @"XOR AX,AX
-NEG AX
 ", "")]
     [InlineData("+0", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
@@ -332,14 +342,11 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
 ", "")]
     [InlineData("-1", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, -1, null, null,
-@"MOV AX,1
-NEG AX
+@"MOV AX,-1
 ", "")]
     [InlineData("!-1", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
-@"MOV AX,1
-NEG AX
-CALL __LNEG
+@"XOR AX,AX
 ", "")]
     [InlineData("+1", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
@@ -347,8 +354,7 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
 ", "")]
     [InlineData("!+1", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
-@"MOV AX,1
-CALL __LNEG
+@"XOR AX,AX
 ", "")]
     [InlineData("01", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
@@ -364,8 +370,7 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 10, null, null,
 ", "")]
     [InlineData("!10", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
-@"MOV AX,10
-CALL __LNEG
+@"XOR AX,AX
 ", "")]
     [InlineData("*10", true,
 null, null, null, null, null, null, SymbolType.Int, null, null, 1, null, null,
@@ -373,13 +378,11 @@ null, null, null, null, null, null, SymbolType.Int, null, null, 1, null, null,
 ", "")]
     [InlineData("-32769", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 32767, null, null,
-@"MOV AX,-32767
-NEG AX
+@"MOV AX,32767
 ", "")]
     [InlineData("-32768", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, -32768, null, null,
 @"MOV AX,-32768
-NEG AX
 ", "")]
     [InlineData("32767", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 32767, null, null,
@@ -408,12 +411,10 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
     [InlineData("-00", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
 @"XOR AX,AX
-NEG AX
 ", "")]
     [InlineData("-01", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, -1, null, null,
-@"MOV AX,1
-NEG AX
+@"MOV AX,-1
 ", "")]
     [InlineData("001", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
@@ -437,13 +438,11 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 511, null, null,
 ", "")]
     [InlineData("-0100001", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 32767, null, null,
-@"MOV AX,-32767
-NEG AX
+@"MOV AX,32767
 ", "")]
     [InlineData("-0100000", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, -32768, null, null,
 @"MOV AX,-32768
-NEG AX
 ", "")]
     [InlineData("077777", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 32767, null, null,
@@ -472,12 +471,10 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
     [InlineData("-0x00", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 0, null, null,
 @"XOR AX,AX
-NEG AX
 ", "")]
     [InlineData("-0x01", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, -1, null, null,
-@"MOV AX,1
-NEG AX
+@"MOV AX,-1
 ", "")]
     [InlineData("0x10", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 16, null, null,
@@ -485,8 +482,7 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 16, null, null,
 ", "")]
     [InlineData("~0x10", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, -17, null, null,
-@"MOV AX,16
-NOT AX
+@"MOV AX,-17
 ", "")]
     [InlineData("0x1G", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
@@ -502,13 +498,11 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 15, null, null,
 ", "")]
     [InlineData("-0x8001", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 32767, null, null,
-@"MOV AX,-32767
-NEG AX
+@"MOV AX,32767
 ", "")]
     [InlineData("-0x8000", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, -32768, null, null,
 @"MOV AX,-32768
-NEG AX
 ", "")]
     [InlineData("0x7FFF", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 32767, null, null,
