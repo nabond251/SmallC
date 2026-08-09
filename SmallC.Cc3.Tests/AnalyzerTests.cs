@@ -273,6 +273,12 @@ SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Static, 3, 0, "gca3", SymbolTy
     [InlineData("gcp", true,
 SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "gcp", null, SymbolType.Chr, null, 0, null, null,
 "", "")]
+    [InlineData("1 + gcp", false,
+SymbolIdentity.Pointer, SymbolType.Chr, SymbolClass.Static, 2, 0, "gcp", null, SymbolType.Chr, null, 1, PCode.ADD12, null,
+@"MOV AX,_GCP
+MOV BX,1
+ADD AX,BX
+", "")]
     [InlineData("guc", true,
 SymbolIdentity.Variable, SymbolType.UChr, SymbolClass.Static, 1, 0, "guc", null, null, null, 0, null, null,
 "", "")]
@@ -325,6 +331,13 @@ SymbolIdentity.Array, SymbolType.UInt, SymbolClass.Static, 6, 0, "guia3", Symbol
     [InlineData("guip", true,
 SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Static, 2, 0, "guip", null, SymbolType.UInt, null, 0, null, null,
 "", "")]
+    [InlineData("1 - guip", false,
+SymbolIdentity.Pointer, SymbolType.UInt, SymbolClass.Static, 2, 0, "guip", null, SymbolType.UInt, null, 1, PCode.SUB12, null,
+@"MOV AX,_GUIP
+MOV BX,2
+XCHG AX,BX
+SUB AX,BX
+", "")]
     [InlineData("ec", true,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.External, 1, 0, "ec", null, null, null, 0, null, null,
 "", "")]
