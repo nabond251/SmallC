@@ -121,6 +121,40 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null,
 @"LEA AX,2[BP]
 ", "")]
+    [InlineData("i * 2", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, PCode.MUL12, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+IMUL BX
+", "")]
+    [InlineData("2 / i", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", null, null, null, 2, PCode.DIV12, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,2
+XCHG AX,BX
+CWD
+IDIV BX
+", "")]
+    [InlineData("i % i", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, PCode.MOD12, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+PUSH AX
+LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+POP BX
+XCHG AX,BX
+CWD
+IDIV BX
+MOV AX,DX
+", "")]
     [InlineData("i--", false,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null,
 @"LEA AX,2[BP]
