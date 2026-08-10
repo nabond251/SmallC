@@ -121,6 +121,28 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null,
 @"LEA AX,2[BP]
 ", "")]
+    [InlineData("i << 2", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, PCode.ASL12, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+MOV CX,AX
+MOV AX,BX
+SAL AX,CL
+", "")]
+    [InlineData("i >> 2", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, PCode.ASR12, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+MOV CX,AX
+MOV AX,BX
+SAR AX,CL
+", "")]
     [InlineData("i + 2", false,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, PCode.ADD12, null,
 @"LEA AX,2[BP]
