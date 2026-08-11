@@ -106,6 +106,17 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 3, null, null,
 SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, SymbolType.UChr, null, 0, null, null,
 @"LEA AX,0[BP]
 ", "")]
+    [InlineData("ucp - &ucp", false,
+SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Automatic, 2, 0, "ucp", SymbolType.UInt, null, null, 0, PCode.SUB12, null,
+@"LEA AX,0[BP]
+MOV BX,AX
+MOV AX,[BX]
+PUSH AX
+LEA AX,0[BP]
+POP BX
+XCHG AX,BX
+SUB AX,BX
+", "")]
     [InlineData("!ucp", false,
 null, null, null, null, null, null, SymbolType.UInt, SymbolType.UChr, null, 1, null, null,
 @"LEA AX,0[BP]
@@ -349,6 +360,22 @@ SymbolIdentity.Array, SymbolType.Int, SymbolClass.Automatic, 6, 4, "ia3", Symbol
     [InlineData("ip", true,
 SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", SymbolType.UInt, SymbolType.Int, null, 0, null, null,
 @"LEA AX,6[BP]
+", "")]
+    [InlineData("ip - &ip", false,
+SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", SymbolType.UInt, null, null, 0, PCode.SUB12, null,
+@"LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+PUSH AX
+LEA AX,6[BP]
+POP BX
+XCHG AX,BX
+SUB AX,BX
+XCHG AX,BX
+MOV AX,1
+MOV CX,AX
+MOV AX,BX
+SAR AX,CL
 ", "")]
     [InlineData("~ip", false,
 null, null, null, null, null, null, SymbolType.UInt, SymbolType.Int, null, -1, null, null,
