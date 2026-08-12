@@ -132,6 +132,20 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Int, null, null, 0, null, null,
 @"LEA AX,2[BP]
 ", "")]
+    [InlineData("i ? 1 : 2", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", null, null, null, 0, null, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+MOV AX,1
+JMP _2
+_1:
+MOV AX,2
+_2:
+", "")]
     [InlineData("i || 2", false,
 null, null, null, null, null, null, null, null, null, 0, null, null,
 @"LEA AX,2[BP]
