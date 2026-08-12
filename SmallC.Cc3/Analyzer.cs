@@ -365,7 +365,8 @@ public class Analyzer(
 
         await frontEnd.NeedAsync(":").ConfigureAwait(false);
         endLab = utility.GetLabel();
-        await backEnd.GenAsync(PCode.JMPm, flab).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.JMPm, endLab).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, flab).ConfigureAwait(false);
 
         // expression 3
         if (await this.Down1Async(this.Level2Async, is3).ConfigureAwait(false))
@@ -378,7 +379,7 @@ public class Analyzer(
                 .ConfigureAwait(false);
         }
 
-        await backEnd.GenAsync(PCode.JMPm, endLab).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, endLab).ConfigureAwait(false);
         is1.ConstantValue = 0;
         is1.ConstantType = null;
 
