@@ -146,6 +146,41 @@ _1:
 MOV AX,2
 _2:
 ", "")]
+    [InlineData("i ? c : 2", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", SymbolType.Chr, null, null, 0, null, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+JMP _2
+_1:
+MOV AX,2
+_2:
+", "")]
+    [InlineData("i ? c : gc", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", null, null, null, 0, null, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+JMP _2
+_1:
+MOV AL,_GC
+CBW
+_2:
+", "")]
     [InlineData("i || 2", false,
 null, null, null, null, null, null, null, null, null, 0, null, null,
 @"LEA AX,2[BP]
