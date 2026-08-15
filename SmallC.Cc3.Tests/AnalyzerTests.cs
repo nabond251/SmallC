@@ -482,6 +482,16 @@ SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, n
 @"XOR AX,AX
 MOV _GC,AL
 ", "")]
+    [InlineData("gc = *cp", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null,
+@"LEA AX,-6[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+MOV _GC,AL
+", "")]
     [InlineData("&gc", false,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"MOV AX,OFFSET _GC
