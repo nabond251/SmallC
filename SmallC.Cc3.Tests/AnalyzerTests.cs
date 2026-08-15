@@ -477,6 +477,11 @@ MOV [BX],AX
     [InlineData("gc", true,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null,
 "", "")]
+    [InlineData("gc = 0", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, 0, null, null,
+@"XOR AX,AX
+MOV _GC,AL
+", "")]
     [InlineData("&gc", false,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"MOV AX,OFFSET _GC
