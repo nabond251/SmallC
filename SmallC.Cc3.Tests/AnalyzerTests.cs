@@ -528,6 +528,16 @@ SymbolIdentity.Pointer, SymbolType.UChr, SymbolClass.Static, 2, 0, "gucp", null,
     [InlineData("gi", true,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "gi", null, null, null, 0, null, null,
 "", "")]
+    [InlineData("gi >>= 1", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "gi", null, null, null, 0, PCode.ASR12, null,
+@"MOV AX,_GI
+MOV BX,AX
+MOV AX,1
+MOV CX,AX
+MOV AX,BX
+SAR AX,CL
+MOV _GI,AX
+", "")]
     [InlineData("gi <<= 1", false,
 SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "gi", null, null, null, 0, PCode.ASL12, null,
 @"MOV AX,_GI
