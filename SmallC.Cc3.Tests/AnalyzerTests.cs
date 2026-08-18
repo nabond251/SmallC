@@ -50,6 +50,24 @@ null, null, null, null, null, null, null, null, SymbolType.Int, 1, null, null,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null,
 @"LEA AX,-10[BP]
 ", "")]
+    [InlineData("c = 0", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, 1,
+@"LEA AX,-10[BP]
+MOV BX,AX
+XOR AX,AX
+MOV [BX],AL
+", "")]
+    [InlineData("c = *gcp", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null,
+@"LEA AX,-10[BP]
+PUSH AX
+MOV AX,_GCP
+MOV BX,AX
+MOV AL,[BX]
+CBW
+POP BX
+MOV [BX],AL
+", "")]
     [InlineData("c++", false,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", SymbolType.Chr, null, null, 0, null, null,
 @"LEA AX,-10[BP]
