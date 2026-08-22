@@ -1121,6 +1121,73 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
     [Theory]
 #pragma warning disable SA1118 // Parameter should not span multiple lines
 #pragma warning disable SA1117 // Parameters should be on same line or separate lines
+    [InlineData("i == 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JE $+5
+JMP _0
+")]
+    [InlineData("ui <= 0", false,
+@"LEA AX,8[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JE $+5
+JMP _0
+")]
+    [InlineData("i != 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _0
+")]
+    [InlineData("ui > 0", false,
+@"LEA AX,8[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _0
+")]
+    [InlineData("i > 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JG $+5
+JMP _0
+")]
+    [InlineData("i >= 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JGE $+5
+JMP _0
+")]
+    [InlineData("ui >= 0", false,
+@"LEA AX,8[BP]
+MOV BX,AX
+MOV AX,[BX]
+")]
+    [InlineData("i < 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JL $+5
+JMP _0
+")]
+    [InlineData("ui < 0", false,
+@"LEA AX,8[BP]
+MOV BX,AX
+MOV AX,[BX]
+JMP _0
+")]
     [InlineData("i <= 0", false,
 @"LEA AX,2[BP]
 MOV BX,AX
