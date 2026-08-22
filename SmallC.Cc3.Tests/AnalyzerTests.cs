@@ -1121,6 +1121,19 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
     [Theory]
 #pragma warning disable SA1118 // Parameter should not span multiple lines
 #pragma warning disable SA1117 // Parameters should be on same line or separate lines
+    [InlineData("i, 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+JMP _0
+")]
+    [InlineData("(1)", true,
+@"")]
+    [InlineData("1", false,
+@"")]
+    [InlineData("0", false,
+@"JMP _0
+")]
     [InlineData("i == 0", false,
 @"LEA AX,2[BP]
 MOV BX,AX
