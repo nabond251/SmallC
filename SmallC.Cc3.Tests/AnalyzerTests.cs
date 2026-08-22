@@ -1111,6 +1111,47 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
         });
     }
 
+    /// <summary>
+    /// Tests that can analyze test expression.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="parens">Whether parens are needed.</param>
+    /// <param name="expected">Expected generated code.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+#pragma warning disable SA1118 // Parameter should not span multiple lines
+#pragma warning disable SA1117 // Parameters should be on same line or separate lines
+    [InlineData("i <= 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JLE $+5
+JMP _0
+")]
+#pragma warning restore SA1117 // Parameters should be on same line or separate lines
+#pragma warning restore SA1118 // Parameter should not span multiple lines
+    public async Task ParsesTestAsync(
+        string inputText,
+        bool parens,
+        string expected)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, _, _) = Arrange(output: output, input: input);
+
+        await sut.TestAsync(0, parens);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actual = await reader.ReadToEndAsync();
+
+        Assert.Equal(expected, actual);
+    }
+
     private static (Analyzer Sut, BackEnd BackEnd, Storage Storage) Arrange(
         Collection<KeyValuePair<PCode, int>>? stage = null,
         char? ch = null,
