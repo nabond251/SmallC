@@ -1129,6 +1129,17 @@ OR AX,AX
 JLE $+5
 JMP _0
 ")]
+    [InlineData("i <= 1", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,1
+CALL __LE
+OR AX,AX
+JNE $+5
+JMP _0
+")]
 #pragma warning restore SA1117 // Parameters should be on same line or separate lines
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task ParsesTestAsync(
