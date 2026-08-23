@@ -78,6 +78,15 @@ INC AX
 MOV [BX],AL
 DEC AX
 ", "")]
+    [InlineData("0100000 > c", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Automatic, 1, -10, "c", null, null, null, -32768, PCode.GT12u, null,
+@"LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+MOV BX,-32768
+CALL __UGT
+", "")]
     [InlineData("sizeof(char*)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
 @"MOV AX,2
@@ -517,6 +526,14 @@ DEC AX
 MOV [BX],AX
 INC AX
 ", "")]
+    [InlineData("32768 <= i", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Automatic, 2, 2, "i", null, null, null, -32768, PCode.LE12u, null,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-32768
+CALL __ULE
+", "")]
     [InlineData("sizeof(int*)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
 @"MOV AX,2
@@ -551,6 +568,16 @@ null, null, null, null, null, null, SymbolType.UInt, SymbolType.Int, null, -1, n
 MOV BX,AX
 MOV AX,[BX]
 NOT AX
+", "")]
+    [InlineData("0x8000 * *ip", false,
+SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Automatic, 2, 6, "ip", null, null, null, -32768, PCode.MUL12u, null,
+@"LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-32768
+MUL BX
 ", "")]
     [InlineData("sizeof(unsigned)", false,
 null, null, null, null, null, null, null, null, SymbolType.Int, 2, null, null,
@@ -615,6 +642,13 @@ MOV _GC,AL
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"MOV AX,OFFSET _GC
 ", "")]
+    [InlineData("0177777 < gc", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.Static, 1, 0, "gc", null, null, null, -1, PCode.LT12u, null,
+@"MOV AL,_GC
+CBW
+MOV BX,-1
+CALL __ULT
+", "")]
     [InlineData("gca3", false,
 SymbolIdentity.Array, SymbolType.Chr, SymbolClass.Static, 3, 0, "gca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"MOV AX,OFFSET _GCA3
@@ -667,6 +701,12 @@ MOV AX,BX
 SAL AX,CL
 MOV _GI,AX
 ", "")]
+    [InlineData("65535 >= gi", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.Static, 2, 0, "gi", null, null, null, -1, PCode.GE12u, null,
+@"MOV AX,_GI
+MOV BX,-1
+CALL __UGE
+", "")]
     [InlineData("gia3", false,
 SymbolIdentity.Array, SymbolType.Int, SymbolClass.Static, 6, 0, "gia3", SymbolType.Int, SymbolType.Int, null, 0, null, null,
 @"MOV AX,OFFSET _GIA3
@@ -684,6 +724,16 @@ null, null, null, null, null, null, SymbolType.Int, null, null, -1, null, null,
 MOV BX,AX
 MOV AX,[BX]
 NEG AX
+", "")]
+    [InlineData("0xFFFF / *gip", false,
+SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.Static, 2, 0, "gip", null, null, null, -1, PCode.DIV12u, null,
+@"MOV AX,_GIP
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-1
+XCHG AX,BX
+XOR DX,DX
+DIV BX
 ", "")]
     [InlineData("gui", true,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.Static, 2, 0, "gui", null, null, null, 0, null, null,
@@ -710,6 +760,13 @@ SUB AX,BX
     [InlineData("ec", true,
 SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.External, 1, 0, "ec", null, null, null, 0, null, null,
 "", "")]
+    [InlineData("0377777 > ec", false,
+SymbolIdentity.Variable, SymbolType.Chr, SymbolClass.External, 1, 0, "ec", null, null, null, -1, PCode.GT12u, null,
+@"MOV AL,_EC
+CBW
+MOV BX,-1
+CALL __UGT
+", "")]
     [InlineData("eca3", false,
 SymbolIdentity.Array, SymbolType.Chr, SymbolClass.External, 3, 0, "eca3", SymbolType.Chr, SymbolType.Chr, null, 0, null, null,
 @"MOV AX,OFFSET _ECA3
@@ -736,6 +793,12 @@ SymbolIdentity.Variable, SymbolType.Int, SymbolClass.External, 2, 0, "ei", null,
 INC AX
 MOV _EI,AX
 ", "")]
+    [InlineData("131071 <= ei", false,
+SymbolIdentity.Variable, SymbolType.Int, SymbolClass.External, 2, 0, "ei", null, null, null, -1, PCode.LE12u, null,
+@"MOV AX,_EI
+MOV BX,-1
+CALL __ULE
+", "")]
     [InlineData("eia3", false,
 SymbolIdentity.Array, SymbolType.Int, SymbolClass.External, 6, 0, "eia3", SymbolType.Int, SymbolType.Int, null, 0, null, null,
 @"MOV AX,OFFSET _EIA3
@@ -743,6 +806,17 @@ SymbolIdentity.Array, SymbolType.Int, SymbolClass.External, 6, 0, "eia3", Symbol
     [InlineData("eip", true,
 SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.External, 2, 0, "eip", null, SymbolType.Int, null, 0, null, null,
 "", "")]
+    [InlineData("0x1FFFF % *eip", false,
+SymbolIdentity.Pointer, SymbolType.Int, SymbolClass.External, 2, 0, "eip", null, null, null, -1, PCode.MOD12u, null,
+@"MOV AX,_EIP
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-1
+XCHG AX,BX
+XOR DX,DX
+DIV BX
+MOV AX,DX
+", "")]
     [InlineData("eui", true,
 SymbolIdentity.Variable, SymbolType.UInt, SymbolClass.External, 2, 0, "eui", null, null, null, 0, null, null,
 "", "")]
