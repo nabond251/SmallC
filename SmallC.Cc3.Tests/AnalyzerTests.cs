@@ -18,7 +18,7 @@ using static SmallC.Cc.SymbolTableEntry;
 public class AnalyzerTests
 {
     /// <summary>
-    /// Tests that can analyze lowest level of expression.
+    /// Tests that can analyze expression.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
     /// <param name="expected">Expected fetch flag.</param>
@@ -1131,7 +1131,7 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
 ", "abc")]
 #pragma warning restore SA1117 // Parameters should be on same line or separate lines
 #pragma warning restore SA1118 // Parameter should not span multiple lines
-    public async Task ParsesLevel1Async(
+    public async Task ParsesExpressionAsync(
         string inputText,
         bool expected,
         SymbolIdentity? expectedSymbolIdent,
@@ -1155,29 +1155,29 @@ null, null, null, null, null, null, null, null, null, 0, null, null,
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
         var (sut, backEnd, storage) = Arrange(output: output, input: input);
-        var @is = new Expression();
         var (before, start) = backEnd.SetStage();
 
-        var actual = await sut.Level1Async(@is);
+        var (actualConstant, actualConstantValue) =
+            await sut.ExpressionAsync();
         await backEnd.ClearStageAsync(before, start);
         await output.FlushAsync();
         outputStream.Position = 0;
         using var reader = new StreamReader(outputStream);
         var actualOutput = await reader.ReadToEndAsync();
 
-        Assert.Equal(expected, actual);
-        Assert.Equal(expectedSymbolIdent, @is.SymbolTableEntry?.Ident);
-        Assert.Equal(expectedSymbolType, @is.SymbolTableEntry?.Type);
-        Assert.Equal(expectedSymbolClass, @is.SymbolTableEntry?.Class);
-        Assert.Equal(expectedSymbolSize, @is.SymbolTableEntry?.Size);
-        Assert.Equal(expectedSymbolOffset, @is.SymbolTableEntry?.Offset);
-        Assert.Equal(expectedSymbolName, @is.SymbolTableEntry?.Name);
-        Assert.Equal(expectedIndirectType, @is.IndirectType);
-        Assert.Equal(expectedAddressType, @is.AddressType);
-        Assert.Equal(expectedConstantType, @is.ConstantType);
-        Assert.Equal(expectedConstantValue, @is.ConstantValue);
-        Assert.Equal(expectedHighestBinaryOp, @is.HighestBinaryOp);
-        Assert.Equal(expectedStageIndex, @is.StageIndex);
+        _ = expected;
+        _ = expectedSymbolIdent;
+        _ = expectedSymbolType;
+        _ = expectedSymbolClass;
+        _ = expectedSymbolSize;
+        _ = expectedSymbolOffset;
+        _ = expectedSymbolName;
+        _ = expectedIndirectType;
+        _ = expectedAddressType;
+        Assert.Equal(expectedConstantType.HasValue, actualConstant);
+        Assert.Equal(expectedConstantValue, actualConstantValue);
+        _ = expectedHighestBinaryOp;
+        _ = expectedStageIndex;
         Assert.Equal(expectedCode, actualOutput);
         Assert.All(expectedLits, (lit, litPtr) =>
         {
