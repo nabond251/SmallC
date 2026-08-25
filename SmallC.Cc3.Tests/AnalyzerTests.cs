@@ -18,6 +18,992 @@ using static SmallC.Cc.SymbolTableEntry;
 public class AnalyzerTests
 {
     /// <summary>
+    /// Tests that can analyze constant.
+    /// </summary>
+    /// <param name="inputText">Input stream text.</param>
+    /// <param name="expectedConstant">Expected constant type.</param>
+    /// <param name="expectedConstantValue">Expected constant value.</param>
+    /// <param name="expectedCode">Expected generated code.</param>
+    /// <param name="expectedLits">String of expected lit pool bytes.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+#pragma warning disable SA1118 // Parameter should not span multiple lines
+#pragma warning disable SA1117 // Parameters should be on same line or separate lines
+    [InlineData("sizeof(char)", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("c", false, 0,
+@"LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+", "")]
+    [InlineData("c = 0", false, 0,
+@"LEA AX,-10[BP]
+MOV BX,AX
+XOR AX,AX
+MOV [BX],AL
+", "")]
+    [InlineData("c = *gcp", false, 0,
+@"LEA AX,-10[BP]
+PUSH AX
+MOV AX,_GCP
+MOV BX,AX
+MOV AL,[BX]
+CBW
+POP BX
+MOV [BX],AL
+", "")]
+    [InlineData("c++", false, 0,
+@"LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+INC AX
+MOV [BX],AL
+DEC AX
+", "")]
+    [InlineData("0100000 > c", false, -32768,
+@"LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+MOV BX,-32768
+CALL __UGT
+", "")]
+    [InlineData("sizeof(char*)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("ca3", false, 0,
+@"LEA AX,-8[BP]
+", "")]
+    [InlineData("cp", false, 0,
+@"LEA AX,-6[BP]
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("*cp", false, 1,
+@"LEA AX,-6[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+", "")]
+    [InlineData("sizeof(unsigned char)", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("uc", false, 0,
+@"LEA AX,-4[BP]
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+", "")]
+    [InlineData("sizeof(unsigned char*)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("uca3", false, 0,
+@"LEA AX,-2[BP]
+", "")]
+    [InlineData("sizeof uca3", true, 3,
+@"MOV AX,3
+", "")]
+    [InlineData("sizeof(uca3)", true, 3,
+@"MOV AX,3
+", "")]
+    [InlineData("ucp", false, 0,
+@"LEA AX,0[BP]
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("ucp - &ucp", false, 0,
+@"LEA AX,0[BP]
+MOV BX,AX
+MOV AX,[BX]
+PUSH AX
+LEA AX,0[BP]
+POP BX
+XCHG AX,BX
+SUB AX,BX
+", "")]
+    [InlineData("!ucp", false, 1,
+@"LEA AX,0[BP]
+MOV BX,AX
+MOV AX,[BX]
+CALL __LNEG
+", "")]
+    [InlineData("sizeof(int)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("i", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("i |= 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+OR AX,BX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i ^= 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+XOR AX,BX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i &= 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+AND AX,BX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i += 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,2
+ADD AX,BX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i -= 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+XCHG AX,BX
+SUB AX,BX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i *= 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+IMUL BX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i /= 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+XCHG AX,BX
+CWD
+IDIV BX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i %= 2", false, 0,
+@"LEA AX,2[BP]
+PUSH AX
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+XCHG AX,BX
+CWD
+IDIV BX
+MOV AX,DX
+POP BX
+MOV [BX],AX
+", "")]
+    [InlineData("i ? 1 : 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+MOV AX,1
+JMP _2
+_1:
+MOV AX,2
+_2:
+", "")]
+    [InlineData("i ? c : 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+JMP _2
+_1:
+MOV AX,2
+_2:
+", "")]
+    [InlineData("i ? c : gc", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+JMP _2
+_1:
+MOV AL,_GC
+CBW
+_2:
+", "")]
+    [InlineData("i || 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JE $+5
+JMP _1
+MOV AX,2
+OR AX,AX
+JE $+5
+JMP _1
+XOR AX,AX
+JMP _2
+_1:
+MOV AX,1
+_2:
+", "")]
+    [InlineData("i && 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+MOV AX,2
+OR AX,AX
+JNE $+5
+JMP _1
+MOV AX,1
+JMP _2
+_1:
+XOR AX,AX
+_2:
+", "")]
+    [InlineData("i | 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+OR AX,BX
+", "")]
+    [InlineData("i ^ 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+XOR AX,BX
+", "")]
+    [InlineData("i & 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+AND AX,BX
+", "")]
+    [InlineData("i == 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+CALL __EQ
+", "")]
+    [InlineData("i != 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+CALL __NE
+", "")]
+    [InlineData("i <= 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+CALL __LE
+", "")]
+    [InlineData("i < 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+CALL __LT
+", "")]
+    [InlineData("i > 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+CALL __GT
+", "")]
+    [InlineData("i >= 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+CALL __GE
+", "")]
+    [InlineData("i << 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+MOV CX,AX
+MOV AX,BX
+SAL AX,CL
+", "")]
+    [InlineData("i >> 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+MOV CX,AX
+MOV AX,BX
+SAR AX,CL
+", "")]
+    [InlineData("i + 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,2
+ADD AX,BX
+", "")]
+    [InlineData("2 + i", false, 2,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,2
+ADD AX,BX
+", "")]
+    [InlineData("i - 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+XCHG AX,BX
+SUB AX,BX
+", "")]
+    [InlineData("2 - i", false, 2,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,2
+XCHG AX,BX
+SUB AX,BX
+", "")]
+    [InlineData("i * 2", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,2
+IMUL BX
+", "")]
+    [InlineData("2 / i", false, 2,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,2
+XCHG AX,BX
+CWD
+IDIV BX
+", "")]
+    [InlineData("i % i", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+PUSH AX
+LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+POP BX
+XCHG AX,BX
+CWD
+IDIV BX
+MOV AX,DX
+", "")]
+    [InlineData("i--", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+DEC AX
+MOV [BX],AX
+INC AX
+", "")]
+    [InlineData("32768 <= i", false, -32768,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-32768
+CALL __ULE
+", "")]
+    [InlineData("sizeof(int*)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("ia3", false, 0,
+@"LEA AX,4[BP]
+", "")]
+    [InlineData("ip", false, 0,
+@"LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("ip - &ip", false, 0,
+@"LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+PUSH AX
+LEA AX,6[BP]
+POP BX
+XCHG AX,BX
+SUB AX,BX
+XCHG AX,BX
+MOV AX,1
+MOV CX,AX
+MOV AX,BX
+SAR AX,CL
+", "")]
+    [InlineData("~ip", false, -1,
+@"LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+NOT AX
+", "")]
+    [InlineData("0x8000 * *ip", false, -32768,
+@"LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-32768
+MUL BX
+", "")]
+    [InlineData("sizeof(unsigned)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("sizeof(unsigned int)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("ui", false, 0,
+@"LEA AX,8[BP]
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("sizeof(unsigned*)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("sizeof(unsigned int*)", true, 2,
+@"MOV AX,2
+", "")]
+    [InlineData("&ui", false, 0,
+@"LEA AX,8[BP]
+", "")]
+    [InlineData("uia3", false, 0,
+@"LEA AX,10[BP]
+", "")]
+    [InlineData("uip", false, 0,
+@"LEA AX,12[BP]
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("--uip", false, 0,
+@"LEA AX,12[BP]
+MOV BX,AX
+MOV AX,[BX]
+DEC AX
+DEC AX
+MOV [BX],AX
+", "")]
+    [InlineData("gc", false, 0,
+@"MOV AL,_GC
+CBW
+", "")]
+    [InlineData("gc = 0", false, 0,
+@"XOR AX,AX
+MOV _GC,AL
+", "")]
+    [InlineData("gc = *cp", false, 0,
+@"LEA AX,-6[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+MOV _GC,AL
+", "")]
+    [InlineData("&gc", false, 0,
+@"MOV AX,OFFSET _GC
+", "")]
+    [InlineData("0177777 < gc", false, -1,
+@"MOV AL,_GC
+CBW
+MOV BX,-1
+CALL __ULT
+", "")]
+    [InlineData("gca3", false, 0,
+@"MOV AX,OFFSET _GCA3
+", "")]
+    [InlineData("gcp", false, 0,
+@"MOV AX,_GCP
+", "")]
+    [InlineData("1 + gcp", false, 1,
+@"MOV AX,_GCP
+MOV BX,1
+ADD AX,BX
+", "")]
+    [InlineData("guc", false, 0,
+@"MOV AL,_GUC
+XOR AH,AH
+", "")]
+    [InlineData("~guc", false, -1,
+@"MOV AL,_GUC
+XOR AH,AH
+NOT AX
+", "")]
+    [InlineData("guca3", false, 0,
+@"MOV AX,OFFSET _GUCA3
+", "")]
+    [InlineData("gucp", false, 0,
+@"MOV AX,_GUCP
+", "")]
+    [InlineData("gi", false, 0,
+@"MOV AX,_GI
+", "")]
+    [InlineData("gi >>= 1", false, 0,
+@"MOV AX,_GI
+MOV BX,AX
+MOV AX,1
+MOV CX,AX
+MOV AX,BX
+SAR AX,CL
+MOV _GI,AX
+", "")]
+    [InlineData("gi <<= 1", false, 0,
+@"MOV AX,_GI
+MOV BX,AX
+MOV AX,1
+MOV CX,AX
+MOV AX,BX
+SAL AX,CL
+MOV _GI,AX
+", "")]
+    [InlineData("65535 >= gi", false, -1,
+@"MOV AX,_GI
+MOV BX,-1
+CALL __UGE
+", "")]
+    [InlineData("gia3", false, 0,
+@"MOV AX,OFFSET _GIA3
+", "")]
+    [InlineData("gip", false, 0,
+@"MOV AX,_GIP
+", "")]
+    [InlineData("*gip", false, 1,
+@"MOV AX,_GIP
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("-*gip", false, -1,
+@"MOV AX,_GIP
+MOV BX,AX
+MOV AX,[BX]
+NEG AX
+", "")]
+    [InlineData("0xFFFF / *gip", false, -1,
+@"MOV AX,_GIP
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-1
+XCHG AX,BX
+XOR DX,DX
+DIV BX
+", "")]
+    [InlineData("gui", false, 0,
+@"MOV AX,_GUI
+", "")]
+    [InlineData("!gui", false, 1,
+@"MOV AX,_GUI
+CALL __LNEG
+", "")]
+    [InlineData("guia3", false, 0,
+@"MOV AX,OFFSET _GUIA3
+", "")]
+    [InlineData("guip", false, 0,
+@"MOV AX,_GUIP
+", "")]
+    [InlineData("1 - guip", false, 1,
+@"MOV AX,_GUIP
+MOV BX,2
+XCHG AX,BX
+SUB AX,BX
+", "")]
+    [InlineData("ec", false, 0,
+@"MOV AL,_EC
+CBW
+", "")]
+    [InlineData("0377777 > ec", false, -1,
+@"MOV AL,_EC
+CBW
+MOV BX,-1
+CALL __UGT
+", "")]
+    [InlineData("eca3", false, 0,
+@"MOV AX,OFFSET _ECA3
+", "")]
+    [InlineData("ecp", false, 0,
+@"MOV AX,_ECP
+", "")]
+    [InlineData("euc", false, 0,
+@"MOV AL,_EUC
+XOR AH,AH
+", "")]
+    [InlineData("euca3", false, 0,
+@"MOV AX,OFFSET _EUCA3
+", "")]
+    [InlineData("eucp", false, 0,
+@"MOV AX,_EUCP
+", "")]
+    [InlineData("ei", false, 0,
+@"MOV AX,_EI
+", "")]
+    [InlineData("++ei", false, 0,
+@"MOV AX,_EI
+INC AX
+MOV _EI,AX
+", "")]
+    [InlineData("131071 <= ei", false, -1,
+@"MOV AX,_EI
+MOV BX,-1
+CALL __ULE
+", "")]
+    [InlineData("eia3", false, 0,
+@"MOV AX,OFFSET _EIA3
+", "")]
+    [InlineData("eip", false, 0,
+@"MOV AX,_EIP
+", "")]
+    [InlineData("0x1FFFF % *eip", false, -1,
+@"MOV AX,_EIP
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,-1
+XCHG AX,BX
+XOR DX,DX
+DIV BX
+MOV AX,DX
+", "")]
+    [InlineData("eui", false, 0,
+@"MOV AX,_EUI
+", "")]
+    [InlineData("euia3", false, 0,
+@"MOV AX,OFFSET _EUIA3
+", "")]
+    [InlineData("euip", false, 0,
+@"MOV AX,_EUIP
+", "")]
+    [InlineData("foo", false, 0,
+@"MOV AX,OFFSET _FOO
+", "")]
+    [InlineData("foo()", false, 0,
+@"XOR CL,CL
+CALL _FOO
+", "")]
+    [InlineData("bar", false, 0,
+@"MOV AX,OFFSET _BAR
+", "")]
+    [InlineData("bar()", false, 0,
+@"XOR CL,CL
+CALL _BAR
+", "")]
+    [InlineData("0", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("!0", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("00", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("-0", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("+0", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("-1", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("!-1", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("+1", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("!+1", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("01", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData(" 1", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("10", true, 10,
+@"MOV AX,10
+", "")]
+    [InlineData("!10", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("-32769", true, 32767,
+@"MOV AX,32767
+", "")]
+    [InlineData("-32768", true, -32768,
+@"MOV AX,-32768
+", "")]
+    [InlineData("32767", true, 32767,
+@"MOV AX,32767
+", "")]
+    [InlineData("32768", true, -32768,
+@"MOV AX,-32768
+", "")]
+    [InlineData("65535", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("65536", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("131071", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("000", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("-00", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("-01", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("001", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("010", true, 8,
+@"MOV AX,8
+", "")]
+    [InlineData("018", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("077", true, 63,
+@"MOV AX,63
+", "")]
+    [InlineData("0777", true, 511,
+@"MOV AX,511
+", "")]
+    [InlineData("-0100001", true, 32767,
+@"MOV AX,32767
+", "")]
+    [InlineData("-0100000", true, -32768,
+@"MOV AX,-32768
+", "")]
+    [InlineData("077777", true, 32767,
+@"MOV AX,32767
+", "")]
+    [InlineData("0100000", true, -32768,
+@"MOV AX,-32768
+", "")]
+    [InlineData("0177777", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("0200000", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("0377777", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("00x0", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("-0x00", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("-0x01", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("0x10", true, 16,
+@"MOV AX,16
+", "")]
+    [InlineData("~0x10", true, -17,
+@"MOV AX,-17
+", "")]
+    [InlineData("0x1G", true, 1,
+@"MOV AX,1
+", "")]
+    [InlineData("0xFF", true, 255,
+@"MOV AX,255
+", "")]
+    [InlineData("0xFG", true, 15,
+@"MOV AX,15
+", "")]
+    [InlineData("-0x8001", true, 32767,
+@"MOV AX,32767
+", "")]
+    [InlineData("-0x8000", true, -32768,
+@"MOV AX,-32768
+", "")]
+    [InlineData("0x7FFF", true, 32767,
+@"MOV AX,32767
+", "")]
+    [InlineData("0x8000", true, -32768,
+@"MOV AX,-32768
+", "")]
+    [InlineData("0xFFFF", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("0x10000", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("0x1FFFF", true, -1,
+@"MOV AX,-1
+", "")]
+    [InlineData("''", true, 0,
+@"XOR AX,AX
+", "")]
+    [InlineData("'a'", true, 'a',
+@"MOV AX,97
+", "")]
+    [InlineData(" 'a'", true, 'a',
+@"MOV AX,97
+", "")]
+    [InlineData("'\\\\'", true, '\\',
+@"MOV AX,92
+", "")]
+    [InlineData("'\\n'", true, '\n',
+@"MOV AX,10
+", "")]
+    [InlineData("'\\t'", true, '\t',
+@"MOV AX,9
+", "")]
+    [InlineData("'\\b'", true, '\b',
+@"MOV AX,8
+", "")]
+    [InlineData("'\\f'", true, '\f',
+@"MOV AX,12
+", "")]
+    [InlineData("'\\0'", true, '\0',
+@"XOR AX,AX
+", "")]
+    [InlineData("'\\1'", true, (char)1,
+@"MOV AX,1
+", "")]
+    [InlineData("'\\9'", true, '9',
+@"MOV AX,57
+", "")]
+    [InlineData("'\\12'", true, (char)10,
+@"MOV AX,10
+", "")]
+    [InlineData("'\\123'", true, (char)83,
+@"MOV AX,83
+", "")]
+    [InlineData("'\\1234'", true, ((char)83 << 8) + '4',
+@"MOV AX,21300
+", "")]
+    [InlineData("'12'", true, ('1' << 8) + '2',
+@"MOV AX,12594
+", "")]
+    [InlineData("'123'", true, ('2' << 8) + '3',
+@"MOV AX,12851
+", "")]
+    [InlineData("\"\"", false, 0,
+@"MOV AX,OFFSET _0+0
+", "")]
+    [InlineData("\"a\"", false, 0,
+@"MOV AX,OFFSET _0+0
+", "a")]
+    [InlineData(" \"a\"", false, 0,
+@"MOV AX,OFFSET _0+0
+", "a")]
+    [InlineData("\"abc\"", false, 0,
+@"MOV AX,OFFSET _0+0
+", "abc")]
+#pragma warning restore SA1117 // Parameters should be on same line or separate lines
+#pragma warning restore SA1118 // Parameter should not span multiple lines
+    public async Task ParsesConstantAsync(
+        string inputText,
+        bool expectedConstant,
+        short expectedConstantValue,
+        string expectedCode,
+        string expectedLits)
+    {
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var inputStream = new MemoryStream(byteArray);
+        using var input = new StreamReader(inputStream);
+        var (sut, backEnd, storage) = Arrange(output: output, input: input);
+        var (before, start) = backEnd.SetStage();
+
+        var actual = await sut.ConstExprAsync();
+        await backEnd.ClearStageAsync(before, start);
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actualOutput = await reader.ReadToEndAsync();
+
+        _ = expectedConstant;
+        Assert.Equal(expectedConstantValue, actual);
+        Assert.Equal(expectedCode, actualOutput);
+        Assert.All(expectedLits, (lit, litPtr) =>
+        {
+            Assert.Equal((sbyte)lit, storage.LitQ[litPtr]);
+        });
+    }
+
+    /// <summary>
     /// Tests that can analyze expression.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
