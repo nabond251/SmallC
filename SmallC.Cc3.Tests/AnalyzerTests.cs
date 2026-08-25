@@ -21,256 +21,90 @@ public class AnalyzerTests
     /// Tests that can analyze constant.
     /// </summary>
     /// <param name="inputText">Input stream text.</param>
-    /// <param name="expectedConstant">Expected constant type.</param>
-    /// <param name="expectedConstantValue">Expected constant value.</param>
-    /// <param name="expectedCode">Expected generated code.</param>
-    /// <param name="expectedLits">String of expected lit pool bytes.</param>
+    /// <param name="expected">Expected constant value.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
-#pragma warning disable SA1118 // Parameter should not span multiple lines
-#pragma warning disable SA1117 // Parameters should be on same line or separate lines
-    [InlineData("sizeof(char)", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("sizeof(char*)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("sizeof(unsigned char)", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("sizeof(unsigned char*)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("sizeof uca3", true, 3,
-@"MOV AX,3
-", "")]
-    [InlineData("sizeof(uca3)", true, 3,
-@"MOV AX,3
-", "")]
-    [InlineData("sizeof(int)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("sizeof(int*)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("sizeof(unsigned)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("sizeof(unsigned int)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("sizeof(unsigned*)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("sizeof(unsigned int*)", true, 2,
-@"MOV AX,2
-", "")]
-    [InlineData("0", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("!0", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("00", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("-0", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("+0", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("-1", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("!-1", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("+1", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("!+1", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("01", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData(" 1", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("10", true, 10,
-@"MOV AX,10
-", "")]
-    [InlineData("!10", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("-32769", true, 32767,
-@"MOV AX,32767
-", "")]
-    [InlineData("-32768", true, -32768,
-@"MOV AX,-32768
-", "")]
-    [InlineData("32767", true, 32767,
-@"MOV AX,32767
-", "")]
-    [InlineData("32768", true, -32768,
-@"MOV AX,-32768
-", "")]
-    [InlineData("65535", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("65536", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("131071", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("000", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("-00", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("-01", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("001", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("010", true, 8,
-@"MOV AX,8
-", "")]
-    [InlineData("018", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("077", true, 63,
-@"MOV AX,63
-", "")]
-    [InlineData("0777", true, 511,
-@"MOV AX,511
-", "")]
-    [InlineData("-0100001", true, 32767,
-@"MOV AX,32767
-", "")]
-    [InlineData("-0100000", true, -32768,
-@"MOV AX,-32768
-", "")]
-    [InlineData("077777", true, 32767,
-@"MOV AX,32767
-", "")]
-    [InlineData("0100000", true, -32768,
-@"MOV AX,-32768
-", "")]
-    [InlineData("0177777", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("0200000", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("0377777", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("00x0", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("-0x00", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("-0x01", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("0x10", true, 16,
-@"MOV AX,16
-", "")]
-    [InlineData("~0x10", true, -17,
-@"MOV AX,-17
-", "")]
-    [InlineData("0x1G", true, 1,
-@"MOV AX,1
-", "")]
-    [InlineData("0xFF", true, 255,
-@"MOV AX,255
-", "")]
-    [InlineData("0xFG", true, 15,
-@"MOV AX,15
-", "")]
-    [InlineData("-0x8001", true, 32767,
-@"MOV AX,32767
-", "")]
-    [InlineData("-0x8000", true, -32768,
-@"MOV AX,-32768
-", "")]
-    [InlineData("0x7FFF", true, 32767,
-@"MOV AX,32767
-", "")]
-    [InlineData("0x8000", true, -32768,
-@"MOV AX,-32768
-", "")]
-    [InlineData("0xFFFF", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("0x10000", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("0x1FFFF", true, -1,
-@"MOV AX,-1
-", "")]
-    [InlineData("''", true, 0,
-@"XOR AX,AX
-", "")]
-    [InlineData("'a'", true, 'a',
-@"MOV AX,97
-", "")]
-    [InlineData(" 'a'", true, 'a',
-@"MOV AX,97
-", "")]
-    [InlineData("'\\\\'", true, '\\',
-@"MOV AX,92
-", "")]
-    [InlineData("'\\n'", true, '\n',
-@"MOV AX,10
-", "")]
-    [InlineData("'\\t'", true, '\t',
-@"MOV AX,9
-", "")]
-    [InlineData("'\\b'", true, '\b',
-@"MOV AX,8
-", "")]
-    [InlineData("'\\f'", true, '\f',
-@"MOV AX,12
-", "")]
-    [InlineData("'\\0'", true, '\0',
-@"XOR AX,AX
-", "")]
-    [InlineData("'\\1'", true, (char)1,
-@"MOV AX,1
-", "")]
-    [InlineData("'\\9'", true, '9',
-@"MOV AX,57
-", "")]
-    [InlineData("'\\12'", true, (char)10,
-@"MOV AX,10
-", "")]
-    [InlineData("'\\123'", true, (char)83,
-@"MOV AX,83
-", "")]
-    [InlineData("'\\1234'", true, ((char)83 << 8) + '4',
-@"MOV AX,21300
-", "")]
-    [InlineData("'12'", true, ('1' << 8) + '2',
-@"MOV AX,12594
-", "")]
-    [InlineData("'123'", true, ('2' << 8) + '3',
-@"MOV AX,12851
-", "")]
-#pragma warning restore SA1117 // Parameters should be on same line or separate lines
-#pragma warning restore SA1118 // Parameter should not span multiple lines
+    [InlineData("sizeof(char)", 1)]
+    [InlineData("sizeof(char*)", 2)]
+    [InlineData("sizeof(unsigned char)", 1)]
+    [InlineData("sizeof(unsigned char*)", 2)]
+    [InlineData("sizeof uca3", 3)]
+    [InlineData("sizeof(uca3)", 3)]
+    [InlineData("sizeof(int)", 2)]
+    [InlineData("sizeof(int*)", 2)]
+    [InlineData("sizeof(unsigned)", 2)]
+    [InlineData("sizeof(unsigned int)", 2)]
+    [InlineData("sizeof(unsigned*)", 2)]
+    [InlineData("sizeof(unsigned int*)", 2)]
+    [InlineData("0", 0)]
+    [InlineData("!0", 1)]
+    [InlineData("00", 0)]
+    [InlineData("-0", 0)]
+    [InlineData("+0", 0)]
+    [InlineData("-1", -1)]
+    [InlineData("!-1", 0)]
+    [InlineData("+1", 1)]
+    [InlineData("!+1", 0)]
+    [InlineData("01", 1)]
+    [InlineData(" 1", 1)]
+    [InlineData("10", 10)]
+    [InlineData("!10", 0)]
+    [InlineData("-32769", 32767)]
+    [InlineData("-32768", -32768)]
+    [InlineData("32767", 32767)]
+    [InlineData("32768", -32768)]
+    [InlineData("65535", -1)]
+    [InlineData("65536", 0)]
+    [InlineData("131071", -1)]
+    [InlineData("000", 0)]
+    [InlineData("-00", 0)]
+    [InlineData("-01", -1)]
+    [InlineData("001", 1)]
+    [InlineData("010", 8)]
+    [InlineData("018", 1)]
+    [InlineData("077", 63)]
+    [InlineData("0777", 511)]
+    [InlineData("-0100001", 32767)]
+    [InlineData("-0100000", -32768)]
+    [InlineData("077777", 32767)]
+    [InlineData("0100000", -32768)]
+    [InlineData("0177777", -1)]
+    [InlineData("0200000", 0)]
+    [InlineData("0377777", -1)]
+    [InlineData("00x0", 0)]
+    [InlineData("-0x00", 0)]
+    [InlineData("-0x01", -1)]
+    [InlineData("0x10", 16)]
+    [InlineData("~0x10", -17)]
+    [InlineData("0x1G", 1)]
+    [InlineData("0xFF", 255)]
+    [InlineData("0xFG", 15)]
+    [InlineData("-0x8001", 32767)]
+    [InlineData("-0x8000", -32768)]
+    [InlineData("0x7FFF", 32767)]
+    [InlineData("0x8000", -32768)]
+    [InlineData("0xFFFF", -1)]
+    [InlineData("0x10000", 0)]
+    [InlineData("0x1FFFF", -1)]
+    [InlineData("''", 0)]
+    [InlineData("'a'", 'a')]
+    [InlineData(" 'a'", 'a')]
+    [InlineData("'\\\\'", '\\')]
+    [InlineData("'\\n'", '\n')]
+    [InlineData("'\\t'", '\t')]
+    [InlineData("'\\b'", '\b')]
+    [InlineData("'\\f'", '\f')]
+    [InlineData("'\\0'", '\0')]
+    [InlineData("'\\1'", (char)1)]
+    [InlineData("'\\9'", '9')]
+    [InlineData("'\\12'", (char)10)]
+    [InlineData("'\\123'", (char)83)]
+    [InlineData("'\\1234'", ((char)83 << 8) + '4')]
+    [InlineData("'12'", ('1' << 8) + '2')]
+    [InlineData("'123'", ('2' << 8) + '3')]
     public async Task ParsesConstantAsync(
         string inputText,
-        bool expectedConstant,
-        short expectedConstantValue,
-        string expectedCode,
-        string expectedLits)
+        short expected)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
@@ -287,14 +121,9 @@ public class AnalyzerTests
         using var reader = new StreamReader(outputStream);
         var actualOutput = await reader.ReadToEndAsync();
 
-        _ = expectedConstant;
-        Assert.Equal(expectedConstantValue, actual);
-        _ = expectedCode;
+        Assert.Equal(expected, actual);
         Assert.Empty(actualOutput);
-        Assert.All(expectedLits, (lit, litPtr) =>
-        {
-            Assert.Equal((sbyte)lit, storage.LitQ[litPtr]);
-        });
+        Assert.Empty(storage.LitQ);
     }
 
     /// <summary>
