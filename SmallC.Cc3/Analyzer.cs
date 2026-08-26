@@ -1564,13 +1564,13 @@ public class Analyzer(
                 return (int)(left / right);
             case PCode.MOD12u:
                 return (int)(left % right);
-            case PCode.LE12:
+            case PCode.LE12u:
                 return left <= right ? 1 : 0;
-            case PCode.GE12:
+            case PCode.GE12u:
                 return left >= right ? 1 : 0;
-            case PCode.LT12:
+            case PCode.LT12u:
                 return left < right ? 1 : 0;
-            case PCode.GT12:
+            case PCode.GT12u:
                 return left > right ? 1 : 0;
         }
 #pragma warning restore IDE0010 // Add missing cases
