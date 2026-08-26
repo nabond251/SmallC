@@ -1547,31 +1547,31 @@ public class Analyzer(
         }
 #pragma warning restore IDE0010 // Add missing cases
 
-        return Calc2((uint)left, oper, (uint)right);
+        return Calc2((ushort)left, oper, (ushort)right);
     }
 
     /// <summary>
     /// Calculate unsigned constant result.
     /// </summary>
-    private static int Calc2(uint left, PCode? oper, uint right)
+    private static short Calc2(ushort left, PCode? oper, ushort right)
     {
 #pragma warning disable IDE0010 // Add missing cases
         switch (oper)
         {
             case PCode.MUL12u:
-                return (int)(left * right);
+                return (short)(left * right);
             case PCode.DIV12u:
-                return (int)(left / right);
+                return (short)(left / right);
             case PCode.MOD12u:
-                return (int)(left % right);
+                return (short)(left % right);
             case PCode.LE12u:
-                return left <= right ? 1 : 0;
+                return (short)(left <= right ? 1 : 0);
             case PCode.GE12u:
-                return left >= right ? 1 : 0;
+                return (short)(left >= right ? 1 : 0);
             case PCode.LT12u:
-                return left < right ? 1 : 0;
+                return (short)(left < right ? 1 : 0);
             case PCode.GT12u:
-                return left > right ? 1 : 0;
+                return (short)(left > right ? 1 : 0);
         }
 #pragma warning restore IDE0010 // Add missing cases
 
