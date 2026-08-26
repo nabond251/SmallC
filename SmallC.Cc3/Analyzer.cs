@@ -1507,43 +1507,43 @@ public class Analyzer(
     /// <summary>
     /// Calculate signed constant result.
     /// </summary>
-    private static int Calc(int left, PCode? oper, int right)
+    private static short Calc(short left, PCode? oper, short right)
     {
 #pragma warning disable IDE0010 // Add missing cases
         switch (oper)
         {
             case PCode.ADD12:
-                return left + right;
+                return (short)(left + right);
             case PCode.SUB12:
-                return left - right;
+                return (short)(left - right);
             case PCode.MUL12:
-                return left * right;
+                return (short)(left * right);
             case PCode.DIV12:
-                return left / right;
+                return (short)(left / right);
             case PCode.MOD12:
-                return left % right;
+                return (short)(left % right);
             case PCode.EQ12:
-                return left == right ? 1 : 0;
+                return (short)(left == right ? 1 : 0);
             case PCode.NE12:
-                return left != right ? 1 : 0;
+                return (short)(left != right ? 1 : 0);
             case PCode.LE12:
-                return left <= right ? 1 : 0;
+                return (short)(left <= right ? 1 : 0);
             case PCode.GE12:
-                return left >= right ? 1 : 0;
+                return (short)(left >= right ? 1 : 0);
             case PCode.LT12:
-                return left < right ? 1 : 0;
+                return (short)(left < right ? 1 : 0);
             case PCode.GT12:
-                return left > right ? 1 : 0;
+                return (short)(left > right ? 1 : 0);
             case PCode.AND12:
-                return left & right;
+                return (short)(left & right);
             case PCode.OR12:
-                return left | right;
+                return (short)(left | right);
             case PCode.XOR12:
-                return left ^ right;
+                return (short)(left ^ right);
             case PCode.ASR12:
-                return left >> right;
+                return (short)(left >> right);
             case PCode.ASL12:
-                return left << right;
+                return (short)(left << right);
         }
 #pragma warning restore IDE0010 // Add missing cases
 
@@ -1830,7 +1830,7 @@ public class Analyzer(
             if (@is.ConstantType.HasValue)
             {
                 @is.ConstantValue = Calc(
-                    @is.ConstantValue, oper, is2.ConstantValue);
+                    (short)@is.ConstantValue, oper, (short)is2.ConstantValue);
                 await backEnd.ClearStageAsync(before, null)
                     .ConfigureAwait(false);
                 if (is2.ConstantType == SymbolType.UInt)
