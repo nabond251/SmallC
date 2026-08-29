@@ -38,17 +38,24 @@ public class AnalyzerTests
     [InlineData("89 ^ 2", 91)]
     [InlineData("144 & 2", 0)]
     [InlineData("233 == 2", 0)]
+    [InlineData("233 == 233", 1)]
     [InlineData("377 != 2", 1)]
+    [InlineData("377 != 377", 0)]
     [InlineData("610 <= 2", 0)]
+    [InlineData("2 >= 610", 0)]
     [InlineData("987 < 2", 0)]
+    [InlineData("2 > 987", 0)]
     [InlineData("1597 > 2", 1)]
+    [InlineData("2 < 1597", 1)]
     [InlineData("2584 >= 2", 1)]
+    [InlineData("2 <= 2584", 1)]
     [InlineData("4181 << 2", 16724)]
     [InlineData("6765 >> 2", 1691)]
     [InlineData("10946 + 2", 10948)]
     [InlineData("17711 - 2", 17709)]
     [InlineData("28657 * 2", -8222)]
     [InlineData("2 / -19168", 0)]
+    [InlineData("-19168 % 2", 0)]
     [InlineData("32768 <= 9489", 0)]
     [InlineData("sizeof(int*)", 2)]
     [InlineData("~-9679", 9678)]
@@ -58,10 +65,14 @@ public class AnalyzerTests
     [InlineData("sizeof(unsigned*)", 2)]
     [InlineData("sizeof(unsigned int*)", 2)]
     [InlineData("0177777 < -9869", 0)]
+    [InlineData("-9869 > 0177777", 0)]
     [InlineData("65535 >= -10059", 1)]
+    [InlineData("-10059 <= 65535", 1)]
     [InlineData("0xFFFF / -19928", 1)]
     [InlineData("0377777 > -29987", 1)]
+    [InlineData("-29987 < 0377777", 1)]
     [InlineData("131071 <= 15621", 0)]
+    [InlineData("15621 >= 131071", 0)]
     [InlineData("0x1FFFF % -14366", 14365)]
     [InlineData("0", 0)]
     [InlineData("!0", 1)]
@@ -624,6 +635,29 @@ CALL __ULE
     [InlineData("ia3", false, 0,
 @"LEA AX,4[BP]
 ", "")]
+    [InlineData("ia3 - uc", false, 0,
+@"LEA AX,4[BP]
+PUSH AX
+LEA AX,-4[BP]
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+POP BX
+SHL AX,1
+XCHG AX,BX
+SUB AX,BX
+", "")]
+    [InlineData("uc + ia3", false, 0,
+@"LEA AX,-4[BP]
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+PUSH AX
+LEA AX,4[BP]
+POP BX
+SHL BX,1
+ADD AX,BX
+", "")]
     [InlineData("ip", false, 0,
 @"LEA AX,6[BP]
 MOV BX,AX
@@ -862,6 +896,14 @@ CALL __ULE
 ", "")]
     [InlineData("eip", false, 0,
 @"MOV AX,_EIP
+", "")]
+    [InlineData("eip++", false, 0,
+@"MOV AX,_EIP
+INC AX
+INC AX
+MOV _EIP,AX
+DEC AX
+DEC AX
 ", "")]
     [InlineData("0x1FFFF % *eip", false, -1,
 @"MOV AX,_EIP
@@ -1164,6 +1206,14 @@ JMP _0
 @"JMP _0
 ")]
     [InlineData("i == 0", false,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JE $+5
+JMP _0
+")]
+    [InlineData("0 == i", false,
 @"LEA AX,2[BP]
 MOV BX,AX
 MOV AX,[BX]
