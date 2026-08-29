@@ -237,6 +237,13 @@ MOV BX,AX
 MOV AL,[BX]
 CBW
 ", "")]
+    [InlineData("cp()", false, 0,
+@"LEA AX,-6[BP]
+MOV BX,AX
+MOV AX,[BX]
+XOR CL,CL
+CALL AX
+", "")]
     [InlineData("sizeof(unsigned char)", true, 1,
 @"MOV AX,1
 ", "")]
@@ -780,6 +787,26 @@ NOT AX
 ", "")]
     [InlineData("gucp", false, 0,
 @"MOV AX,_GUCP
+", "")]
+    [InlineData("(*gucp)()", false, 0,
+@"MOV AX,_GUCP
+XOR CL,CL
+CALL AX
+", "")]
+    [InlineData("(*2)()", false, 0,
+@"MOV AX,2
+XOR CL,CL
+CALL AX
+", "")]
+    [InlineData("(*gucp + 2)()", false, 0,
+@"MOV AX,_GUCP
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+MOV BX,2
+ADD AX,BX
+XOR CL,CL
+CALL AX
 ", "")]
     [InlineData("gi", false, 0,
 @"MOV AX,_GI
