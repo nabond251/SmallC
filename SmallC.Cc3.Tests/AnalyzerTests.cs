@@ -970,6 +970,19 @@ ADD AX,BX
 MOV BX,AX
 MOV AX,[BX]
 ", "")]
+    [InlineData("eia3[uc]", false, 0,
+@"MOV AX,OFFSET _EIA3
+PUSH AX
+LEA AX,-4[BP]
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+POP BX
+SHL AX,1
+ADD AX,BX
+MOV BX,AX
+MOV AX,[BX]
+", "")]
     [InlineData("eip", false, 0,
 @"MOV AX,_EIP
 ", "")]
