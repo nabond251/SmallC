@@ -432,6 +432,22 @@ _1:
 MOV AX,2
 _2:
 ", "")]
+    [InlineData("i ? 2 : c", false, 0,
+@"LEA AX,2[BP]
+MOV BX,AX
+MOV AX,[BX]
+OR AX,AX
+JNE $+5
+JMP _1
+MOV AX,2
+JMP _2
+_1:
+LEA AX,-10[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+_2:
+", "")]
     [InlineData("i ? c : gc", false, 0,
 @"LEA AX,2[BP]
 MOV BX,AX
