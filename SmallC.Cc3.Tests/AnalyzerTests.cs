@@ -267,6 +267,20 @@ XOR AH,AH
     [InlineData("sizeof(uca3)", true, 3,
 @"MOV AX,3
 ", "")]
+    [InlineData("uca3[0]", false, 0,
+@"LEA AX,-2[BP]
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+", "")]
+    [InlineData("uca3[1]", false, 0,
+@"LEA AX,-2[BP]
+MOV BX,1
+ADD AX,BX
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+", "")]
     [InlineData("ucp", false, 0,
 @"LEA AX,0[BP]
 MOV BX,AX
@@ -943,6 +957,18 @@ CALL __ULE
 ", "")]
     [InlineData("eia3", false, 0,
 @"MOV AX,OFFSET _EIA3
+", "")]
+    [InlineData("eia3[0]", false, 0,
+@"MOV AX,OFFSET _EIA3
+MOV BX,AX
+MOV AX,[BX]
+", "")]
+    [InlineData("eia3[2]", false, 0,
+@"MOV AX,OFFSET _EIA3
+MOV BX,4
+ADD AX,BX
+MOV BX,AX
+MOV AX,[BX]
 ", "")]
     [InlineData("eip", false, 0,
 @"MOV AX,_EIP
