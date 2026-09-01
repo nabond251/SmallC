@@ -958,12 +958,31 @@ MOV AX,DX
 @"XOR CL,CL
 CALL _FOO
 ", "")]
+    [InlineData("foo(eip)", false, 0,
+@"MOV AX,_EIP
+PUSH AX
+MOV CL,1
+CALL _FOO
+ADD SP,2
+", "")]
     [InlineData("bar", false, 0,
 @"MOV AX,OFFSET _BAR
 ", "")]
     [InlineData("bar()", false, 0,
 @"XOR CL,CL
 CALL _BAR
+", "")]
+    [InlineData("bar(uc,2)", false, 0,
+@"LEA AX,-4[BP]
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+PUSH AX
+MOV AX,2
+PUSH AX
+MOV CL,2
+CALL _BAR
+ADD SP,4
 ", "")]
     [InlineData("0", true, 0,
 @"XOR AX,AX
