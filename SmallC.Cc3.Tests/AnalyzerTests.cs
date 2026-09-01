@@ -808,6 +808,27 @@ ADD AX,BX
 XOR CL,CL
 CALL AX
 ", "")]
+    [InlineData("(*gucp + 2)(*cp)", false, 0,
+@"MOV AX,_GUCP
+MOV BX,AX
+MOV AL,[BX]
+XOR AH,AH
+MOV BX,2
+ADD AX,BX
+PUSH AX
+LEA AX,-6[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+POP BX
+XCHG AX,BX
+PUSH BX
+MOV CL,1
+CALL AX
+ADD SP,2
+", "")]
     [InlineData("gi", false, 0,
 @"MOV AX,_GI
 ", "")]
