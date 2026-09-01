@@ -44,7 +44,7 @@ public class Analyzer(
     /// <returns>Constant value, if any.</returns>
     public async Task<(bool Con, int Val)> ExpressionAsync()
     {
-        var @is = new Expression(null, null, null, null, 0, null, null);
+        var @is = new Expression();
 
         if (await this.Level1Async(@is).ConfigureAwait(false))
         {
@@ -62,7 +62,7 @@ public class Analyzer(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TestAsync(int label, bool parens)
     {
-        var @is = new Expression(null, null, null, null, 0, null, null);
+        var @is = new Expression();
         int? before, start;
 
         if (parens)
@@ -192,8 +192,8 @@ public class Analyzer(
         ArgumentNullException.ThrowIfNull(@is);
 
         bool k;
-        var is2 = new Expression(null, null, null, null, 0, null, null);
-        var is3 = new Expression(null, null, null, null, 0, null, null);
+        var is2 = new Expression();
+        var is3 = new Expression();
         PCode? oper, oper2;
 
         k = await this.Down1Async(this.Level2Async, @is).ConfigureAwait(false);
@@ -336,8 +336,8 @@ public class Analyzer(
     {
         ArgumentNullException.ThrowIfNull(is1);
 
-        var is2 = new Expression(null, null, null, null, 0, null, null);
-        var is3 = new Expression(null, null, null, null, 0, null, null);
+        var is2 = new Expression();
+        var is3 = new Expression();
         bool k;
         int flab, endLab;
 
@@ -782,8 +782,7 @@ public class Analyzer(
         if (storage.Ch is '[' or '(')
         {
             // allocate only if needed
-            var is2 = new Expression(
-                null, null, null, null, 0, null, null);
+            var is2 = new Expression();
 
             while (true)
             {
@@ -1682,8 +1681,7 @@ public class Analyzer(
             if (await frontEnd.NextOpAsync(ops).ConfigureAwait(false))
             {
                 // allocate only if needed
-                var is2 = new Expression(
-                    null, null, null, null, 0, null, null);
+                var is2 = new Expression();
                 frontEnd.Bump(storage.OpSize);
                 storage.OpIndex += opOff;
                 await this.Down2Async(
