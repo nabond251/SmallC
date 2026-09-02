@@ -15,7 +15,7 @@ public class Expression(
     SymbolType? indirectType,
     SymbolType? addressType,
     SymbolType? constantType,
-    int constantValue,
+    short constantValue,
     PCode? highestBinaryOp,
     int? stageIndex)
 {
@@ -50,7 +50,7 @@ public class Expression(
     /// <summary>
     /// Gets or sets constant value.
     /// </summary>
-    public int ConstantValue { get; set; } = constantValue;
+    public short ConstantValue { get; set; } = constantValue;
 
     /// <summary>
     /// Gets or sets p-code of highest binary operator.

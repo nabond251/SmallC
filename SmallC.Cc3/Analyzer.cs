@@ -42,7 +42,7 @@ public class Analyzer(
     /// Analyzes expression.
     /// </summary>
     /// <returns>Constant value, if any.</returns>
-    public async Task<(bool Con, int Val)> ExpressionAsync()
+    public async Task<(bool Con, short Val)> ExpressionAsync()
     {
         var @is = new Expression();
 
@@ -609,7 +609,7 @@ public class Analyzer(
             }
 
             await backEnd.GenAsync(PCode.LNEG1, null).ConfigureAwait(false);
-            @is.ConstantValue = @is.ConstantValue == 0 ? 1 : 0;
+            @is.ConstantValue = (short)(@is.ConstantValue == 0 ? 1 : 0);
             @is.SymbolTableEntry = null;
             return false;
         }
@@ -1282,9 +1282,9 @@ public class Analyzer(
     /// <param name="value">Current constant value.</param>
     /// <returns>Tuple of constant type, if any, and constant.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "not quite dead")]
-    public async Task<(SymbolType? Type, int Value)> NumberAsync(bool minus, int value)
+    public async Task<(SymbolType? Type, short Value)> NumberAsync(bool minus, short value)
     {
-        ushort k;
+        short k;
 
         k = 0;
         while (true)
@@ -1319,14 +1319,14 @@ public class Analyzer(
                     if (char.IsDigit(chex) && await frontEnd.InByteAsync()
                             .ConfigureAwait(false) is char chexIn)
                     {
-                        k = (ushort)((k * 16) + chexIn - '0');
+                        k = (short)((k * 16) + chexIn - '0');
                     }
                     else
                     {
                         var chx = await frontEnd.InByteAsync()
                             .ConfigureAwait(false) ??
                             throw new InvalidOperationException();
-                        k = (ushort)((k * 16) + 10 + (char
+                        k = (short)((k * 16) + 10 + (char
                             .ToUpperInvariant(chx) - 'A'));
                     }
                 }
@@ -1337,7 +1337,7 @@ public class Analyzer(
                     await frontEnd.InByteAsync().ConfigureAwait(false)
                     is char chin)
                 {
-                    k = (ushort)((k * 8) + chin - '0');
+                    k = (short)((k * 8) + chin - '0');
                 }
             }
         }
@@ -1347,24 +1347,24 @@ public class Analyzer(
                 await frontEnd.InByteAsync().ConfigureAwait(false)
                 is char chin)
             {
-                k = (ushort)((k * 10) + chin - '0');
+                k = (short)((k * 10) + chin - '0');
             }
         }
 
         if (minus)
         {
-            value = (short)k;
+            value = k;
             return (SymbolType.Int, value);
         }
 
         value = k;
-        if (value > 0x7FFF)
+        if (value < 0)
         {
-            return (SymbolType.UInt, (short)value);
+            return (SymbolType.UInt, value);
         }
         else
         {
-            return (SymbolType.Int, (short)value);
+            return (SymbolType.Int, value);
         }
     }
 
@@ -1373,7 +1373,7 @@ public class Analyzer(
     /// </summary>
     /// <param name="value">Current constant value.</param>
     /// <returns>Tuple of constant type, if any, and constant.</returns>
-    public async Task<(SymbolType? Type, int Value)> ChrConAsync(int value)
+    public async Task<(SymbolType? Type, short Value)> ChrConAsync(short value)
     {
         short k;
 
@@ -1828,7 +1828,7 @@ public class Analyzer(
             if (@is.ConstantType.HasValue)
             {
                 @is.ConstantValue = Calc(
-                    (short)@is.ConstantValue, oper, (short)is2.ConstantValue);
+                    @is.ConstantValue, oper, is2.ConstantValue);
                 await backEnd.ClearStageAsync(before, null)
                     .ConfigureAwait(false);
                 if (is2.ConstantType == SymbolType.UInt)
