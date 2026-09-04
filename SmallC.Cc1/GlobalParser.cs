@@ -274,7 +274,7 @@ public class GlobalParser(
             }
         }
         else if (await analyzer.ConstExprAsync().ConfigureAwait(false)
-            is int value)
+            is short value)
         {
             if (ident == SymbolIdentity.Pointer)
             {

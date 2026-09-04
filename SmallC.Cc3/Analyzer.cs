@@ -24,7 +24,7 @@ public class Analyzer(
     /// Gets constant expression, if any.
     /// </summary>
     /// <returns>Constant expression from next tokens, if any.</returns>
-    public async Task<int?> ConstExprAsync()
+    public async Task<short?> ConstExprAsync()
     {
         int? before;
 
