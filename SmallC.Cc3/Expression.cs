@@ -15,10 +15,18 @@ public class Expression(
     SymbolType? indirectType,
     SymbolType? addressType,
     SymbolType? constantType,
-    int constantValue,
+    short constantValue,
     PCode? highestBinaryOp,
     int? stageIndex)
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Expression"/> class.
+    /// </summary>
+    public Expression()
+        : this(null, null, null, null, 0, null, null)
+    {
+    }
+
     /// <summary>
     /// Gets or sets symbol table entry, if any.
     /// </summary>
@@ -42,7 +50,7 @@ public class Expression(
     /// <summary>
     /// Gets or sets constant value.
     /// </summary>
-    public int ConstantValue { get; set; } = constantValue;
+    public short ConstantValue { get; set; } = constantValue;
 
     /// <summary>
     /// Gets or sets p-code of highest binary operator.

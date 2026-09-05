@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallC.Cc1", "SmallC.Cc1\Sm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallC.Cc3", "SmallC.Cc3\SmallC.Cc3.csproj", "{602E905A-0B23-4C95-BC2C-160A3EDF301B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallC.Cc3.Tests", "SmallC.Cc3.Tests\SmallC.Cc3.Tests.csproj", "{EF203DFD-0045-43D4-B587-86F12792F63E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{602E905A-0B23-4C95-BC2C-160A3EDF301B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{602E905A-0B23-4C95-BC2C-160A3EDF301B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{602E905A-0B23-4C95-BC2C-160A3EDF301B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF203DFD-0045-43D4-B587-86F12792F63E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF203DFD-0045-43D4-B587-86F12792F63E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF203DFD-0045-43D4-B587-86F12792F63E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF203DFD-0045-43D4-B587-86F12792F63E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -24,7 +24,7 @@ public class Analyzer(
     /// Gets constant expression, if any.
     /// </summary>
     /// <returns>Constant expression from next tokens, if any.</returns>
-    public async Task<int?> ConstExprAsync()
+    public async Task<short?> ConstExprAsync()
     {
         int? before;
 
@@ -42,9 +42,9 @@ public class Analyzer(
     /// Analyzes expression.
     /// </summary>
     /// <returns>Constant value, if any.</returns>
-    public async Task<(bool Con, int Val)> ExpressionAsync()
+    public async Task<(bool Con, short Val)> ExpressionAsync()
     {
-        var @is = new Expression(null, null, null, null, 0, null, null);
+        var @is = new Expression();
 
         if (await this.Level1Async(@is).ConfigureAwait(false))
         {
@@ -62,7 +62,7 @@ public class Analyzer(
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task TestAsync(int label, bool parens)
     {
-        var @is = new Expression(null, null, null, null, 0, null, null);
+        var @is = new Expression();
         int? before, start;
 
         if (parens)
@@ -192,8 +192,8 @@ public class Analyzer(
         ArgumentNullException.ThrowIfNull(@is);
 
         bool k;
-        var is2 = new Expression(null, null, null, null, 0, null, null);
-        var is3 = new Expression(null, null, null, null, 0, null, null);
+        var is2 = new Expression();
+        var is3 = new Expression();
         PCode? oper, oper2;
 
         k = await this.Down1Async(this.Level2Async, @is).ConfigureAwait(false);
@@ -336,8 +336,8 @@ public class Analyzer(
     {
         ArgumentNullException.ThrowIfNull(is1);
 
-        var is2 = new Expression(null, null, null, null, 0, null, null);
-        var is3 = new Expression(null, null, null, null, 0, null, null);
+        var is2 = new Expression();
+        var is3 = new Expression();
         bool k;
         int flab, endLab;
 
@@ -365,7 +365,8 @@ public class Analyzer(
 
         await frontEnd.NeedAsync(":").ConfigureAwait(false);
         endLab = utility.GetLabel();
-        await backEnd.GenAsync(PCode.JMPm, flab).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.JMPm, endLab).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, flab).ConfigureAwait(false);
 
         // expression 3
         if (await this.Down1Async(this.Level2Async, is3).ConfigureAwait(false))
@@ -378,7 +379,7 @@ public class Analyzer(
                 .ConfigureAwait(false);
         }
 
-        await backEnd.GenAsync(PCode.JMPm, endLab).ConfigureAwait(false);
+        await backEnd.GenAsync(PCode.LABm, endLab).ConfigureAwait(false);
         is1.ConstantValue = 0;
         is1.ConstantType = null;
 
@@ -572,7 +573,7 @@ public class Analyzer(
             return false;
         }
 
-        // ++lval
+        // --lval
         else if (await frontEnd.MatchAsync("--").ConfigureAwait(false))
         {
             if (!await this.Level13Async(@is).ConfigureAwait(false))
@@ -594,7 +595,7 @@ public class Analyzer(
             }
 
             await backEnd.GenAsync(PCode.COM1, null).ConfigureAwait(false);
-            @is.ConstantValue = ~@is.ConstantValue;
+            @is.ConstantValue = (short)~@is.ConstantValue;
             @is.SymbolTableEntry = null;
             return false;
         }
@@ -608,7 +609,7 @@ public class Analyzer(
             }
 
             await backEnd.GenAsync(PCode.LNEG1, null).ConfigureAwait(false);
-            @is.ConstantValue = @is.ConstantValue == 0 ? 1 : 0;
+            @is.ConstantValue = (short)(@is.ConstantValue == 0 ? 1 : 0);
             @is.SymbolTableEntry = null;
             return false;
         }
@@ -616,13 +617,14 @@ public class Analyzer(
         // unary -
         else if (await frontEnd.MatchAsync("-").ConfigureAwait(false))
         {
+            @is.ConstantValue = -1;
             if (await this.Level13Async(@is).ConfigureAwait(false))
             {
                 await this.FetchAsync(@is).ConfigureAwait(false);
             }
 
             await backEnd.GenAsync(PCode.ANEG1, null).ConfigureAwait(false);
-            @is.ConstantValue = -@is.ConstantValue;
+            @is.ConstantValue = (short)-@is.ConstantValue;
             @is.SymbolTableEntry = null;
             return false;
         }
@@ -695,7 +697,7 @@ public class Analyzer(
             }
 
             @is.ConstantType = SymbolType.Int;
-            @is.ConstantValue = sz;
+            @is.ConstantValue = (short)sz;
             @is.AddressType = null;
             @is.IndirectType = null;
             @is.StageIndex = null;
@@ -780,8 +782,7 @@ public class Analyzer(
         if (storage.Ch is '[' or '(')
         {
             // allocate only if needed
-            var is2 = new Expression(
-                null, null, null, null, 0, null, null);
+            var is2 = new Expression();
 
             while (true)
             {
@@ -912,11 +913,18 @@ public class Analyzer(
         ArgumentNullException.ThrowIfNull(@is);
 
         string? sName;
-        bool k;
+        bool minus, k;
+
+        minus = @is.ConstantValue == -1;
 
         // (subexpression)
         if (await frontEnd.MatchAsync("(").ConfigureAwait(false))
         {
+            if (minus)
+            {
+                @is.ConstantValue = 0;
+            }
+
             do
             {
                 k = await this.Level1Async(@is).ConfigureAwait(false);
@@ -1006,7 +1014,7 @@ public class Analyzer(
             return false;
         }
 
-        if (!await this.ConstantAsync(@is).ConfigureAwait(false))
+        if (!await this.ConstantAsync(minus, @is).ConfigureAwait(false))
         {
             await this.ExpErrAsync().ConfigureAwait(false);
         }
@@ -1224,16 +1232,17 @@ public class Analyzer(
     /// <summary>
     /// Parses constant.
     /// </summary>
+    /// <param name="minus">A value indicating whether unary minus.</param>
     /// <param name="is">Expression analysis.</param>
     /// <returns>A value indicating whether expression is constant.</returns>
-    public async Task<bool> ConstantAsync(Expression @is)
+    public async Task<bool> ConstantAsync(bool minus, Expression @is)
     {
         ArgumentNullException.ThrowIfNull(@is);
 
         int? offset;
 
         (@is.ConstantType, @is.ConstantValue) = await this.NumberAsync(
-            @is.ConstantValue).ConfigureAwait(false);
+            minus, @is.ConstantValue).ConfigureAwait(false);
         if (@is.ConstantType.HasValue)
         {
             await backEnd.GenAsync(PCode.GETw1n, @is.ConstantValue)
@@ -1269,25 +1278,20 @@ public class Analyzer(
     /// <summary>
     /// Parses number constant.
     /// </summary>
+    /// <param name="minus">A value indicating whether unary minus.</param>
     /// <param name="value">Current constant value.</param>
     /// <returns>Tuple of constant type, if any, and constant.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "not quite dead")]
-    public async Task<(SymbolType? Type, int Value)> NumberAsync(int value)
+    public async Task<(SymbolType? Type, short Value)> NumberAsync(bool minus, short value)
     {
-        int k;
-        bool minus;
+        short k;
 
         k = 0;
-        minus = false;
         while (true)
         {
             if (await frontEnd.MatchAsync("+").ConfigureAwait(false))
             {
                 // already parsed
-            }
-            else if (await frontEnd.MatchAsync("-").ConfigureAwait(false))
-            {
-                minus = true;
             }
             else
             {
@@ -1307,51 +1311,54 @@ public class Analyzer(
                 _ = await frontEnd.InByteAsync().ConfigureAwait(false);
             }
 
-            if (char.ToUpperInvariant(storage.Ch.Value) == 'X')
+            if (storage.Ch is char ch && char.ToUpperInvariant(ch) == 'X')
             {
                 _ = await frontEnd.InByteAsync().ConfigureAwait(false);
-                while (storage.Ch is char ch && char.IsAsciiHexDigit(ch))
+                while (storage.Ch is char chex && char.IsAsciiHexDigit(chex))
                 {
-                    if (char.IsDigit(storage.Ch.Value))
+                    if (char.IsDigit(chex) && await frontEnd.InByteAsync()
+                            .ConfigureAwait(false) is char chexIn)
                     {
-                        k = (k * 16) + (await frontEnd.InByteAsync()
-                            .ConfigureAwait(false) - '0').Value;
+                        k = (short)((k * 16) + chexIn - '0');
                     }
                     else
                     {
-                        ch = await frontEnd.InByteAsync()
+                        var chx = await frontEnd.InByteAsync()
                             .ConfigureAwait(false) ??
                             throw new InvalidOperationException();
-                        k = (k * 16) + 10 + (char.ToUpperInvariant(ch) - 'A');
+                        k = (short)((k * 16) + 10 + (char
+                            .ToUpperInvariant(chx) - 'A'));
                     }
                 }
             }
             else
             {
-                while (storage.Ch is >= '0' and <= '7')
+                while (storage.Ch is >= '0' and <= '7' &&
+                    await frontEnd.InByteAsync().ConfigureAwait(false)
+                    is char chin)
                 {
-                    k = (k * 8) + (await frontEnd.InByteAsync()
-                        .ConfigureAwait(false) - '0').Value;
+                    k = (short)((k * 8) + chin - '0');
                 }
             }
         }
         else
         {
-            while (char.IsDigit(storage.Ch.Value))
+            while (storage.Ch is char ch && char.IsDigit(ch) &&
+                await frontEnd.InByteAsync().ConfigureAwait(false)
+                is char chin)
             {
-                k = (k * 10) + (await frontEnd.InByteAsync()
-                    .ConfigureAwait(false) - '0').Value;
+                k = (short)((k * 10) + chin - '0');
             }
         }
 
         if (minus)
         {
-            value = -k;
+            value = k;
             return (SymbolType.Int, value);
         }
 
         value = k;
-        if (value > 0x7FFF)
+        if (value < 0)
         {
             return (SymbolType.UInt, value);
         }
@@ -1366,9 +1373,9 @@ public class Analyzer(
     /// </summary>
     /// <param name="value">Current constant value.</param>
     /// <returns>Tuple of constant type, if any, and constant.</returns>
-    public async Task<(SymbolType? Type, int Value)> ChrConAsync(int value)
+    public async Task<(SymbolType? Type, short Value)> ChrConAsync(short value)
     {
-        int k;
+        short k;
 
         k = 0;
         if (!await frontEnd.MatchAsync("'").ConfigureAwait(false))
@@ -1378,7 +1385,7 @@ public class Analyzer(
 
         while (storage.Ch != '\'')
         {
-            k = (k << 8) + ((this.LitChar() ?? 0) & 255);
+            k = (short)((k << 8) + ((this.LitChar() ?? 0) & 255));
         }
 
         _ = frontEnd.Gch();
@@ -1432,13 +1439,13 @@ public class Analyzer(
     /// Parses character literal.
     /// </summary>
     /// <returns>Parsed literal.</returns>
-    public int? LitChar()
+    public short? LitChar()
     {
-        int i, oct;
+        short i, oct;
 
         if (storage.Ch != '\\' || !storage.NCh.HasValue)
         {
-            return frontEnd.Gch();
+            return (short?)frontEnd.Gch();
         }
 
         _ = frontEnd.Gch();
@@ -1446,7 +1453,7 @@ public class Analyzer(
         {
             case 'n':
                 _ = frontEnd.Gch();
-                return '\n';
+                return (short)'\n';
             case 't':
                 _ = frontEnd.Gch();
                 return 9; // HT
@@ -1464,10 +1471,10 @@ public class Analyzer(
         oct = 0;
         while (i-- > 0 && storage.Ch >= '0' && storage.Ch <= '7')
         {
-            oct = (oct << 3) + (frontEnd.Gch() ?? 0) - '0';
+            oct = (short)((oct << 3) + (frontEnd.Gch() ?? 0) - '0');
         }
 
-        return i == 2 ? frontEnd.Gch() : oct;
+        return i == 2 ? (short?)frontEnd.Gch() : oct;
     }
 
     /// <summary>
@@ -1499,71 +1506,71 @@ public class Analyzer(
     /// <summary>
     /// Calculate signed constant result.
     /// </summary>
-    private static int Calc(int left, PCode? oper, int right)
+    private static short Calc(short left, PCode? oper, short right)
     {
 #pragma warning disable IDE0010 // Add missing cases
         switch (oper)
         {
             case PCode.ADD12:
-                return left + right;
+                return (short)(left + right);
             case PCode.SUB12:
-                return left - right;
+                return (short)(left - right);
             case PCode.MUL12:
-                return left * right;
+                return (short)(left * right);
             case PCode.DIV12:
-                return left / right;
+                return (short)(left / right);
             case PCode.MOD12:
-                return left % right;
+                return (short)(left % right);
             case PCode.EQ12:
-                return left == right ? 1 : 0;
+                return (short)(left == right ? 1 : 0);
             case PCode.NE12:
-                return left != right ? 1 : 0;
+                return (short)(left != right ? 1 : 0);
             case PCode.LE12:
-                return left <= right ? 1 : 0;
+                return (short)(left <= right ? 1 : 0);
             case PCode.GE12:
-                return left >= right ? 1 : 0;
+                return (short)(left >= right ? 1 : 0);
             case PCode.LT12:
-                return left < right ? 1 : 0;
+                return (short)(left < right ? 1 : 0);
             case PCode.GT12:
-                return left > right ? 1 : 0;
+                return (short)(left > right ? 1 : 0);
             case PCode.AND12:
-                return left & right;
+                return (short)(left & right);
             case PCode.OR12:
-                return left | right;
+                return (short)(left | right);
             case PCode.XOR12:
-                return left ^ right;
+                return (short)(left ^ right);
             case PCode.ASR12:
-                return left >> right;
+                return (short)(left >> right);
             case PCode.ASL12:
-                return left << right;
+                return (short)(left << right);
         }
 #pragma warning restore IDE0010 // Add missing cases
 
-        return Calc2((uint)left, oper, (uint)right);
+        return Calc2((ushort)left, oper, (ushort)right);
     }
 
     /// <summary>
     /// Calculate unsigned constant result.
     /// </summary>
-    private static int Calc2(uint left, PCode? oper, uint right)
+    private static short Calc2(ushort left, PCode? oper, ushort right)
     {
 #pragma warning disable IDE0010 // Add missing cases
         switch (oper)
         {
             case PCode.MUL12u:
-                return (int)(left * right);
+                return (short)(left * right);
             case PCode.DIV12u:
-                return (int)(left / right);
+                return (short)(left / right);
             case PCode.MOD12u:
-                return (int)(left % right);
-            case PCode.LE12:
-                return left <= right ? 1 : 0;
-            case PCode.GE12:
-                return left >= right ? 1 : 0;
-            case PCode.LT12:
-                return left < right ? 1 : 0;
-            case PCode.GT12:
-                return left > right ? 1 : 0;
+                return (short)(left % right);
+            case PCode.LE12u:
+                return (short)(left <= right ? 1 : 0);
+            case PCode.GE12u:
+                return (short)(left >= right ? 1 : 0);
+            case PCode.LT12u:
+                return (short)(left < right ? 1 : 0);
+            case PCode.GT12u:
+                return (short)(left > right ? 1 : 0);
         }
 #pragma warning restore IDE0010 // Add missing cases
 
@@ -1674,8 +1681,7 @@ public class Analyzer(
             if (await frontEnd.NextOpAsync(ops).ConfigureAwait(false))
             {
                 // allocate only if needed
-                var is2 = new Expression(
-                    null, null, null, null, 0, null, null);
+                var is2 = new Expression();
                 frontEnd.Bump(storage.OpSize);
                 storage.OpIndex += opOff;
                 await this.Down2Async(
