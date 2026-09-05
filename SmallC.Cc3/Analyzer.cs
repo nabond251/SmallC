@@ -573,7 +573,7 @@ public class Analyzer(
             return false;
         }
 
-        // ++lval
+        // --lval
         else if (await frontEnd.MatchAsync("--").ConfigureAwait(false))
         {
             if (!await this.Level13Async(@is).ConfigureAwait(false))
