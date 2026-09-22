@@ -42,6 +42,23 @@ _GIA DW 1,2,3
 PUBLIC _GIP
 _GIP DW 0
 ")]
+    [InlineData(
+@"char
+ gc,
+ gc2 = 'a',
+ gca[10] = ""abc"",
+ *gcp;",
+@"DATA SEGMENT PUBLIC
+PUBLIC _GC
+_GC DB 1 DUP(0)
+PUBLIC _GC2
+_GC2 DB 97
+PUBLIC _GCA
+_GCA DB 97,98,99,0
+ DB 6 DUP(0)
+PUBLIC _GCP
+_GCP DW 0
+")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanParseAsync(
         string inputText, string? expected)
