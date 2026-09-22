@@ -59,6 +59,22 @@ _GCA DB 97,98,99,0
 PUBLIC _GCP
 _GCP DW 0
 ")]
+    [InlineData(
+@"extern int
+ ei,
+ eia[10];",
+@"DATA SEGMENT PUBLIC
+EXTRN _EI:WORD
+EXTRN _EIA:WORD
+")]
+    [InlineData(
+@"extern char
+ ec,
+ eca[10];",
+@"DATA SEGMENT PUBLIC
+EXTRN _EC:BYTE
+EXTRN _ECA:BYTE
+")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanParseAsync(
         string inputText, string? expected)
