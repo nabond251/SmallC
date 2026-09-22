@@ -27,10 +27,20 @@ public class GlobalParserTests
 #pragma warning disable SA1118 // Parameter should not span multiple lines
     [InlineData(
 @"int
- gi;",
+ gi,
+ gi2 = 123,
+ gia[10] = {1, 2, 3},
+ *gip;",
 @"DATA SEGMENT PUBLIC
 PUBLIC _GI
 _GI DW 1 DUP(0)
+PUBLIC _GI2
+_GI2 DW 123
+PUBLIC _GIA
+_GIA DW 1,2,3
+ DW 7 DUP(0)
+PUBLIC _GIP
+_GIP DW 0
 ")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanParseAsync(
