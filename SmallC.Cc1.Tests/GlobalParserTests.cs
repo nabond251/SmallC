@@ -75,6 +75,14 @@ EXTRN _EIA:WORD
 EXTRN _EC:BYTE
 EXTRN _ECA:BYTE
 ")]
+    [InlineData(
+@"#asm
+_getc:  jmp     _fgetc
+        public  _getc;
+#endasm",
+@"_getc:  jmp     _fgetc
+        public  _getc;
+")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanParseAsync(
         string inputText, string? expected)
