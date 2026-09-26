@@ -44,4 +44,13 @@
         <Using Include="Xunit" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="CLIB.H">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="STDIO.H">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

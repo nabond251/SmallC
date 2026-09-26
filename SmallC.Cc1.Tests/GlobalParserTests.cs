@@ -83,6 +83,20 @@ _getc:  jmp     _fgetc
 @"_getc:  jmp     _fgetc
         public  _getc;
 ")]
+    [InlineData(
+@"#include <stdio.h>
+char gc = YES;",
+@"DATA SEGMENT PUBLIC
+PUBLIC _GC
+_GC DB 1
+")]
+    [InlineData(
+@"#include ""clib.h""
+char gc = PAUSE;",
+@"DATA SEGMENT PUBLIC
+PUBLIC _GC
+_GC DB 19
+")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanParseAsync(
         string inputText, string? expected)
