@@ -31,13 +31,13 @@ public class GlobalParserTests
   123 + 321;
   ""abc"";
   ""def"";
-}
+  }
 
 func2() {
   'a';
   '\1\1';
   ""ghi"";
-}",
+  }",
 @"CODE SEGMENT PUBLIC
 ASSUME CS:CODE, SS:DATA, DS:DATA
 PUBLIC _FUNC1
@@ -118,6 +118,51 @@ EXTRN _EIA:WORD
 @"DATA SEGMENT PUBLIC
 EXTRN _EC:BYTE
 EXTRN _ECA:BYTE
+")]
+    [InlineData(
+@"
+func(ai, aia, aip, ac, aca, acp) int  ai, aia[], *aip;
+                                 char ac, aca[], *acp; {
+  ai;
+  aia;
+  aia[5];
+  aip;
+  *aip;
+  ac;
+  aca;
+  aca[5];
+  acp;
+  *acp;
+  return (gi1);
+  }",
+@"CODE SEGMENT PUBLIC
+ASSUME CS:CODE, SS:DATA, DS:DATA
+PUBLIC _FUNC
+_FUNC:
+PUSH BP
+MOV BP,SP
+MOV AX,14[BP]
+MOV AX,12[BP]
+MOV BX,12[BP]
+ADD BX,10
+MOV AX,[BX]
+MOV AX,10[BP]
+MOV BX,10[BP]
+MOV AX,[BX]
+MOV AL,8[BP]
+CBW
+MOV AX,6[BP]
+MOV BX,6[BP]
+ADD BX,5
+MOV AL,[BX]
+CBW
+MOV AX,4[BP]
+MOV BX,4[BP]
+MOV AL,[BX]
+CBW
+MOV AX,_GI1
+POP BP
+RET
 ")]
     [InlineData(
 @"#asm
