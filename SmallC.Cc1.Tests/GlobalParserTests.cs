@@ -8,9 +8,7 @@ using SmallC.Cc;
 using SmallC.Cc2;
 using SmallC.Cc3;
 using SmallC.Cc4;
-using System.Collections.ObjectModel;
 using System.Text;
-using static SmallC.Cc.Storage;
 
 /// <summary>
 /// Tests the global parser.
@@ -273,13 +271,7 @@ _GC DB 19
         var byteArray = Encoding.ASCII.GetBytes(inputText);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
-        var mac = new Dictionary<string, string>
-        {
-            { "FOO", "BAR" },
-            { "FOOBARBA", "QUUX" },
-        };
-        var (sut, _, _) = Arrange(
-            output: output, input: input, mac: mac);
+        var sut = Arrange(output: output, input: input);
 
         await sut.ParseAsync();
         await output.FlushAsync();
@@ -290,38 +282,14 @@ _GC DB 19
         Assert.Equal(expected, actual);
     }
 
-    private static (GlobalParser Sut, BackEnd BackEnd, Storage Storage) Arrange(
-        Collection<KeyValuePair<PCode, int>>? stage = null,
-        char? ch = null,
-        char? nCh = null,
+    private static GlobalParser Arrange(
         StreamWriter? output = null,
-        StreamReader? input = null,
-        bool cCode = true,
-        SegmentType oldSeg = SegmentType.None,
-        SymbolTable? symTab = null,
-        Collection<sbyte>? litQ = null,
-        Dictionary<string, string>? mac = null,
-        string? pLine = null,
-        BufferLineType? lineType = null,
-        int? lPtr = null,
-        string? ssName = null)
+        StreamReader? input = null)
     {
         var storage = new Storage(
-            stage: stage,
-            ch: ch,
-            nCh: nCh,
             output: output,
             files: input != null,
-            input: input,
-            cCode: cCode,
-            oldSeg: oldSeg,
-            symTab: symTab ?? new([], []),
-            litQ: litQ ?? [],
-            mac: mac ?? [],
-            pLine: pLine,
-            lineType: lineType ?? BufferLineType.Parsing,
-            lPtr: lPtr,
-            ssName: ssName);
+            input: input);
 
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
@@ -337,6 +305,6 @@ _GC DB 19
         var sut = new GlobalParser(
             symTabMgmt, utility, frontEnd, localParser, analyzer, backEnd, storage);
 
-        return (sut, backEnd, storage);
+        return sut;
     }
 }
