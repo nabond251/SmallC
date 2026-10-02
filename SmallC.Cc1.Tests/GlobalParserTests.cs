@@ -87,6 +87,23 @@ PUBLIC _GIP
 _GIP DW 0
 ")]
     [InlineData(
+@"unsigned int
+ ugi,
+ ugi2 = 123,
+ ugia[10] = {1, 2, 3},
+ *ugip;",
+@"DATA SEGMENT PUBLIC
+PUBLIC _UGI
+_UGI DW 1 DUP(0)
+PUBLIC _UGI2
+_UGI2 DW 123
+PUBLIC _UGIA
+_UGIA DW 1,2,3
+ DW 7 DUP(0)
+PUBLIC _UGIP
+_UGIP DW 0
+")]
+    [InlineData(
 @"char
  gc,
  gc2 = 'a',
@@ -104,6 +121,23 @@ PUBLIC _GCP
 _GCP DW 0
 ")]
     [InlineData(
+@"unsigned char
+ guc,
+ guc2 = 'a',
+ guca[10] = ""abc"",
+ *gucp;",
+@"DATA SEGMENT PUBLIC
+PUBLIC _GUC
+_GUC DB 1 DUP(0)
+PUBLIC _GUC2
+_GUC2 DB 97
+PUBLIC _GUCA
+_GUCA DB 97,98,99,0
+ DB 6 DUP(0)
+PUBLIC _GUCP
+_GUCP DW 0
+")]
+    [InlineData(
 @"extern int
  ei,
  eia[10];",
@@ -112,12 +146,28 @@ EXTRN _EI:WORD
 EXTRN _EIA:WORD
 ")]
     [InlineData(
+@"extern unsigned int
+ eui,
+ euia[10];",
+@"DATA SEGMENT PUBLIC
+EXTRN _EUI:WORD
+EXTRN _EUIA:WORD
+")]
+    [InlineData(
 @"extern char
  ec,
  eca[10];",
 @"DATA SEGMENT PUBLIC
 EXTRN _EC:BYTE
 EXTRN _ECA:BYTE
+")]
+    [InlineData(
+@"extern unsigned char
+ euc,
+ euca[10];",
+@"DATA SEGMENT PUBLIC
+EXTRN _EUC:BYTE
+EXTRN _EUCA:BYTE
 ")]
     [InlineData(
 @"
@@ -137,6 +187,27 @@ _FUNC:
 PUSH BP
 MOV BP,SP
 MOV AX,_GI1
+POP BP
+RET
+")]
+    [InlineData(
+@"
+unsigned int gui1;
+func(aui, auia, auip, auc, auca, aucp) unsigned int  aui, auia[], *auip;
+                                       unsigned char auc, auca[], *aucp; {
+  return (gui1);
+  }",
+@"DATA SEGMENT PUBLIC
+PUBLIC _GUI1
+_GUI1 DW 1 DUP(0)
+DATA ENDS
+CODE SEGMENT PUBLIC
+ASSUME CS:CODE, SS:DATA, DS:DATA
+PUBLIC _FUNC
+_FUNC:
+PUSH BP
+MOV BP,SP
+MOV AX,_GUI1
 POP BP
 RET
 ")]
