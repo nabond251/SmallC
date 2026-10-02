@@ -121,6 +121,13 @@ PUBLIC _GCP
 _GCP DW 0
 ")]
     [InlineData(
+@"char *gcp = ""def"";",
+@"DATA SEGMENT PUBLIC
+PUBLIC _GCP
+_GCP DW $+2
+ DB 100,101,102,0
+")]
+    [InlineData(
 @"unsigned char
  guc,
  guc2 = 'a',
@@ -168,6 +175,30 @@ EXTRN _ECA:BYTE
 @"DATA SEGMENT PUBLIC
 EXTRN _EUC:BYTE
 EXTRN _EUCA:BYTE
+")]
+    [InlineData(
+@"
+void foo() {
+  bar();
+  }
+void bar() {
+  }",
+@"CODE SEGMENT PUBLIC
+ASSUME CS:CODE, SS:DATA, DS:DATA
+PUBLIC _FOO
+_FOO:
+PUSH BP
+MOV BP,SP
+XOR CL,CL
+CALL _BAR
+POP BP
+RET
+PUBLIC _BAR
+_BAR:
+PUSH BP
+MOV BP,SP
+POP BP
+RET
 ")]
     [InlineData(
 @"
