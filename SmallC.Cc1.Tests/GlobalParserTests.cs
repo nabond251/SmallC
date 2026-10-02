@@ -26,6 +26,50 @@ public class GlobalParserTests
     [Theory]
 #pragma warning disable SA1118 // Parameter should not span multiple lines
     [InlineData(
+@"func1() {
+  123;
+  123 + 321;
+  ""abc"";
+  ""def"";
+}
+
+func2() {
+  'a';
+  '\1\1';
+  ""ghi"";
+}",
+@"CODE SEGMENT PUBLIC
+ASSUME CS:CODE, SS:DATA, DS:DATA
+PUBLIC _FUNC1
+_FUNC1:
+PUSH BP
+MOV BP,SP
+MOV AX,123
+MOV AX,444
+MOV AX,OFFSET _1+0
+MOV AX,OFFSET _1+4
+POP BP
+RET
+CODE ENDS
+DATA SEGMENT PUBLIC
+_1 DB 97,98,99,0,100,101,102,0
+DATA ENDS
+CODE SEGMENT PUBLIC
+ASSUME CS:CODE, SS:DATA, DS:DATA
+PUBLIC _FUNC2
+_FUNC2:
+PUSH BP
+MOV BP,SP
+MOV AX,97
+MOV AX,257
+MOV AX,OFFSET _2+0
+POP BP
+RET
+CODE ENDS
+DATA SEGMENT PUBLIC
+_2 DB 103,104,105,0
+")]
+    [InlineData(
 @"int
  gi,
  gi2 = 123,
