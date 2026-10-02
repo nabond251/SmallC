@@ -121,11 +121,16 @@ EXTRN _ECA:BYTE
 ")]
     [InlineData(
 @"
+int gi1;
 func(ai, aia, aip, ac, aca, acp) int  ai, aia[], *aip;
                                  char ac, aca[], *acp; {
   return (gi1);
   }",
-@"CODE SEGMENT PUBLIC
+@"DATA SEGMENT PUBLIC
+PUBLIC _GI1
+_GI1 DW 1 DUP(0)
+DATA ENDS
+CODE SEGMENT PUBLIC
 ASSUME CS:CODE, SS:DATA, DS:DATA
 PUBLIC _FUNC
 _FUNC:
