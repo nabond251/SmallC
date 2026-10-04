@@ -318,7 +318,8 @@ _GC DB 19
         var storage = new Storage(
             output: output,
             files: input != null,
-            input: input);
+            input: input,
+            optimize: true);
 
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);

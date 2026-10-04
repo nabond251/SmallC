@@ -80,6 +80,9 @@ public class Storage(
     /// <param name="cCode">A value indicating whether parsing C code.</param>
     /// <param name="sLast">Last index in stage.</param>
     /// <param name="oldSeg">Current <see cref="SegmentType"/>.</param>
+    /// <param name="optimize">
+    /// A value indicating whether to optimize output of staging buffer.
+    /// </param>
     /// <param name="symTab">Symbol table.</param>
     /// <param name="litQ">Literal pool.</param>
     /// <param name="mac">Macro name/string buffer.</param>
@@ -106,6 +109,7 @@ public class Storage(
         bool? cCode = null,
         int? sLast = null,
         SegmentType? oldSeg = null,
+        bool? optimize = null,
         SymbolTable? symTab = null,
         Collection<sbyte>? litQ = null,
         Dictionary<string, string>? mac = null,
@@ -150,7 +154,7 @@ public class Storage(
             listFp: null,
             lastSt: StatementType.None,
             oldSeg: oldSeg ?? SegmentType.None,
-            optimize: false,
+            optimize: optimize ?? false,
             alarm: false,
             monitor: false,
             pause: false,
