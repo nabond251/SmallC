@@ -20,20 +20,29 @@ public class BackEnd(
 {
     // Optimizer command definitions
 
-    /*                                --     p-codes must not overlap these */
+    /*                                  --     p-codes must not overlap these */
+    private const int Any = /*...*/ 0x00FF; // matches any p-code
+    private const int XPop = /*..*/ 0x00FE; // matches if corresponding POP2 exists
+    private const int PFree = /*.*/ 0x00FD; // matches if pri register free
+    private const int SFree = /*.*/ 0x00FC; // matches if sec register free
+    private const int Comm = /*..*/ 0x00FB; // matches if registers are commutative
 
-    /*                                --     these digits are reserved for n */
-    private const int Go = /*..*/ 0x0100; // go n entries
-    private const int IfE = /*.*/ 0x0600; // if value == n do commands to next 0
-    private const int IfL = /*.*/ 0x0700; // if value <  n do commands to next 0
-    private const int Neg = /*.*/ 0x0500; // negate the value
+    /*                                  --     these digits are reserved for n */
+    private const int Go = /*....*/ 0x0100; // go n entries
+    private const int IfE = /*...*/ 0x0600; // if value == n do commands to next 0
+    private const int IfL = /*...*/ 0x0700; // if value <  n do commands to next 0
+    private const int Neg = /*...*/ 0x0500; // negate the value
 
-    private const int P1 = /*..*/ 0x0001; // plus 1
-    private const int P2 = /*..*/ 0x0001; // plus 2
-    private const int P3 = /*..*/ 0x0003; // plus 3
-    private const int M2 = /*..*/ 0x00FE; // minus 2
+    private const int P1 = /*....*/ 0x0001; // plus 1
+    private const int P2 = /*....*/ 0x0001; // plus 2
+    private const int P3 = /*....*/ 0x0003; // plus 3
+    private const int M2 = /*....*/ 0x00FE; // minus 2
 
-    private const int HighSeq = 49;
+    private const int Pri = /*......*/ 0x18; // primary register bits
+    private const int Sec = /*......*/ 0x03; // secondary register bits
+    private const int Commutes = /*.*/ 0x80; // commutative p-code
+
+    private const int HighSeq = 4;
 
     /// <summary>
     /// ADD21.
@@ -648,9 +657,94 @@ public class BackEnd(
 
     private bool Peep(int[] seq)
     {
+        int next, count, seqIndex;
+        int? pop;
+        bool reply;
+
+        next = 0;
+        count = seq[0];
+        seqIndex = 1;
+        while (seq[seqIndex] != 0)
+        {
+            switch (seq[seqIndex])
+            {
+                case Any:
+                    if (next < storage.SNext)
+                    {
+                        break;
+                    }
+
+                    return false;
+
+                case PFree:
+                    if (this.IsFree(Pri, next))
+                    {
+                        break;
+                    }
+
+                    return false;
+
+                case SFree:
+                    if (this.IsFree(Sec, next))
+                    {
+                        break;
+                    }
+
+                    return false;
+
+                case Comm:
+                    if (storage.Stage?[next].Key is PCode pCode &&
+                        ((int)pCode & Commutes) != 0)
+                    {
+                        break;
+                    }
+
+                    return false;
+
+                case XPop:
+                    pop = this.GetPop(next);
+                    if (pop.HasValue)
+                    {
+                        break;
+                    }
+
+                    return false;
+
+                default:
+                    if (next >= storage.SNext ||
+                        (int?)storage.Stage?[next].Key != seq[seqIndex])
+                    {
+                        return false;
+                    }
+
+                    break;
+            }
+
+            next++;
+            seqIndex++;
+        }
+
+        // have a match, now optimize it
+        count++;
+        seq[0] = count;
+        reply = false;
+
+        return reply;
+    }
+
+    private bool IsFree(int sec, int next)
+    {
         _ = storage;
-        _ = seq;
+        _ = sec;
+        _ = next;
         return false;
+    }
+
+    private int? GetPop(int next)
+    {
+        _ = storage;
+        _ = next;
+        return null;
     }
 
     private async Task ColonAsync()
