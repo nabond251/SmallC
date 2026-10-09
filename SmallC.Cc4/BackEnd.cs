@@ -731,6 +731,11 @@ public class BackEnd(
         }
 
         // have a match, now optimize it
+        if (storage.Stage is null)
+        {
+            throw new InvalidOperationException();
+        }
+
         count++;
         seq[0] = count;
         next = 0;
@@ -775,50 +780,71 @@ public class BackEnd(
                         break;
 
                     case Gc:
-                        storage.Stage[next].Key = storage.Stage[n].Key;
+                        SetCode(next, storage.Stage[n].Key);
+#pragma warning disable S907 // "goto" statement should not be used
                         goto done;
 
                     case Gv:
-                        storage.Stage[next].Value = storage.Stage[n].Value;
+                        SetValue(next, storage.Stage[n].Value);
                         goto done;
 
                     case Sum:
-                        storage.Stage[next].Value += storage.Stage[n].Value;
+                        SetValue(
+                            next,
+                            storage.Stage[next].Value + storage.Stage[n].Value);
                         goto done;
 
                     case Neg:
-                        storage.Stage[next].Value = -storage.Stage[next].Value;
+                        SetValue(next, -storage.Stage[next].Value);
                         goto done;
 
                     case ToPop:
-                        storage.Stage[
-                            pop ?? throw new InvalidOperationException()].Key =
-                            n;
-                        storage.Stage[pop.Value].Value = storage.Stage[n].Value;
+                        SetCode(
+                            pop ?? throw new InvalidOperationException(),
+                            (PCode)n);
+                        SetValue(
+                            pop.Value,
+                            storage.Stage[n].Value);
                         goto done;
+#pragma warning restore S907 // "goto" statement should not be used
 
                     case Swv:
                         tmp = storage.Stage[next].Value;
-                        storage.Stage[next].Value = storage.Stage[n].Value;
-                        storage.Stage[n].Value = tmp;
+                        SetValue(next, storage.Stage[n].Value);
+                        SetValue(n, tmp);
 
                     done:
                         reply = true;
+                        break;
+
+                    default:
                         break;
                 }
             }
             else
             {
-                storage.Stage[next].Key = seq[seqIndex]; // set p-code
+                SetCode(next, (PCode)seq[seqIndex]); // set p-code
             }
         }
 
         for (var i = 0; i < next; i++)
         {
-            storage.Stage?.RemoveAt(0);
+            storage.Stage.RemoveAt(0);
         }
 
         return reply;
+
+        void SetCode(int index, PCode code)
+        {
+            var entry = storage.Stage[index];
+            storage.Stage[index] = new(code, entry.Value);
+        }
+
+        void SetValue(int index, int value)
+        {
+            var entry = storage.Stage[index];
+            storage.Stage[index] = new(entry.Key, value);
+        }
     }
 
     private bool IsFree(int sec, int next)
