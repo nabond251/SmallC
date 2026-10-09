@@ -29,9 +29,14 @@ public class BackEnd(
 
     /*                                  --     these digits are reserved for n */
     private const int Go = /*....*/ 0x0100; // go n entries
+    private const int Gc = /*....*/ 0x0200; // get code from n entries away
+    private const int Gv = /*....*/ 0x0300; // get value from n entries away
+    private const int Sum = /*...*/ 0x0400; // add value from nth entry away
+    private const int Neg = /*...*/ 0x0500; // negate the value
     private const int IfE = /*...*/ 0x0600; // if value == n do commands to next 0
     private const int IfL = /*...*/ 0x0700; // if value <  n do commands to next 0
-    private const int Neg = /*...*/ 0x0500; // negate the value
+    private const int Swv = /*...*/ 0x0800; // swap value with value n entries away
+    private const int ToPop = /*.*/ 0x0900; // move code and current value to POP2
 
     private const int P1 = /*....*/ 0x0001; // plus 1
     private const int P2 = /*....*/ 0x0001; // plus 2
@@ -657,9 +662,10 @@ public class BackEnd(
 
     private bool Peep(int[] seq)
     {
-        int next, count, seqIndex;
-        int? pop;
-        bool reply;
+        int next, count, seqIndex, n, tmp;
+        int? pop = null;
+        bool skip, reply;
+        char c;
 
         next = 0;
         count = seq[0];
@@ -727,7 +733,90 @@ public class BackEnd(
         // have a match, now optimize it
         count++;
         seq[0] = count;
+        next = 0;
+        skip = false;
         reply = false;
+        while (seq[seqIndex] != 0 || skip)
+        {
+            if (skip)
+            {
+                if (seq[seqIndex] == 0)
+                {
+                    skip = false;
+                }
+
+                continue;
+            }
+
+            if (seq[seqIndex] >= (int)PCode.PCODES)
+            {
+                c = (char)(seq[seqIndex] & 0xFF); // get low byte of command
+                n = c; // and sign extend into n
+                switch (seq[seqIndex] & 0xFF00)
+                {
+                    case IfE:
+                        if (storage.Stage[next].Value != n)
+                        {
+                            skip = true;
+                        }
+
+                        break;
+
+                    case IfL:
+                        if (storage.Stage[next].Value >= n)
+                        {
+                            skip = true;
+                        }
+
+                        break;
+
+                    case Go:
+                        next += n;
+                        break;
+
+                    case Gc:
+                        storage.Stage[next].Key = storage.Stage[n].Key;
+                        goto done;
+
+                    case Gv:
+                        storage.Stage[next].Value = storage.Stage[n].Value;
+                        goto done;
+
+                    case Sum:
+                        storage.Stage[next].Value += storage.Stage[n].Value;
+                        goto done;
+
+                    case Neg:
+                        storage.Stage[next].Value = -storage.Stage[next].Value;
+                        goto done;
+
+                    case ToPop:
+                        storage.Stage[
+                            pop ?? throw new InvalidOperationException()].Key =
+                            n;
+                        storage.Stage[pop.Value].Value = storage.Stage[n].Value;
+                        goto done;
+
+                    case Swv:
+                        tmp = storage.Stage[next].Value;
+                        storage.Stage[next].Value = storage.Stage[n].Value;
+                        storage.Stage[n].Value = tmp;
+
+                    done:
+                        reply = true;
+                        break;
+                }
+            }
+            else
+            {
+                storage.Stage[next].Key = seq[seqIndex]; // set p-code
+            }
+        }
+
+        for (var i = 0; i < next; i++)
+        {
+            storage.Stage?.RemoveAt(0);
+        }
 
         return reply;
     }
