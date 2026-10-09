@@ -50,7 +50,7 @@ public class BackEnd(
     private const int Zaps = /*.....*/ 0x12; // zap register contents
     private const int Commutes = /*.*/ 0x80; // commutative p-code
 
-    private const int HighSeq = 7;
+    private const int HighSeq = 8;
 
     /// <summary>
     /// ADD21.
@@ -95,16 +95,23 @@ public class BackEnd(
         Go | P3, (int)PCode.ADD2n, Gv | M2, Go | M1, (int)PCode.GETw2s, Gv | M2, 0];
 
     /// <summary>
-    /// 36 - POINT2s.
+    /// 18 - GETw2s.
     /// </summary>
     private static readonly int[] Seq06 = [
+        0, (int)PCode.GETw1s, (int)PCode.MOVE21, 0,
+        Go | P1, (int)PCode.GETw2s, Gv | M1, 0];
+
+    /// <summary>
+    /// 36 - POINT2s.
+    /// </summary>
+    private static readonly int[] Seq07 = [
         0, (int)PCode.POINT1s, (int)PCode.MOVE21, 0,
         Go | P1, (int)PCode.POINT2s, Gv | M1, 0];
 
     /// <summary>
     /// 44 - GETw1s.
     /// </summary>
-    private static readonly int[] Seq07 = [
+    private static readonly int[] Seq08 = [
         0, (int)PCode.POINT2s, (int)PCode.GETw1p, SFree, 0,
         Sum | P1, Go | P1, (int)PCode.GETw1s, Gv | M1, 0];
 
@@ -126,6 +133,7 @@ public class BackEnd(
         this.seq[5] = Seq05;
         this.seq[6] = Seq06;
         this.seq[7] = Seq07;
+        this.seq[8] = Seq08;
     }
 
     /// <summary>
