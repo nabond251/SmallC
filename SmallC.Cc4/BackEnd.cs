@@ -741,6 +741,7 @@ public class BackEnd(
         next = 0;
         skip = false;
         reply = false;
+        seqIndex++;
         while (seq[seqIndex] != 0 || skip)
         {
             if (skip)
@@ -750,6 +751,7 @@ public class BackEnd(
                     skip = false;
                 }
 
+                seqIndex++;
                 continue;
             }
 
@@ -825,6 +827,8 @@ public class BackEnd(
             {
                 SetCode(next, (PCode)seq[seqIndex]); // set p-code
             }
+
+            seqIndex++;
         }
 
         for (var i = 0; i < next; i++)
