@@ -674,7 +674,7 @@ public class BackEnd(
         int next, count, seqIndex, n, tmp;
         int? pop = null;
         bool skip, reply;
-        char c;
+        sbyte c;
 
         next = 0;
         count = seq[0];
@@ -766,7 +766,7 @@ public class BackEnd(
 
             if (seq[seqIndex] >= (int)PCode.PCODES)
             {
-                c = (char)(seq[seqIndex] & 0xFF); // get low byte of command
+                c = (sbyte)(seq[seqIndex] & 0xFF); // get low byte of command
                 n = c; // and sign extend into n
                 switch (seq[seqIndex] & 0xFF00)
                 {
