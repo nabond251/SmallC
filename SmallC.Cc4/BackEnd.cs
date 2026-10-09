@@ -48,7 +48,7 @@ public class BackEnd(
     private const int Sec = /*......*/ 0x03; // secondary register bits
     private const int Commutes = /*.*/ 0x80; // commutative p-code
 
-    private const int HighSeq = 5;
+    private const int HighSeq = 6;
 
     /// <summary>
     /// ADD21.
@@ -92,6 +92,13 @@ public class BackEnd(
         0, (int)PCode.POINT1s, (int)PCode.MOVE21, 0,
         Go | P1, (int)PCode.POINT2s, Gv | M1, 0];
 
+    /// <summary>
+    /// GETw1s.
+    /// </summary>
+    private static readonly int[] Seq06 = [
+        0, (int)PCode.POINT2s, (int)PCode.GETw1p, SFree, 0,
+        Sum | P1, Go | P1, (int)PCode.GETw1s, Gv | M1, 0];
+
     private readonly int[][] seq = new int[HighSeq + 1][];
 
     // Assembly-code strings
@@ -108,6 +115,7 @@ public class BackEnd(
         this.seq[3] = Seq03;
         this.seq[4] = Seq04;
         this.seq[5] = Seq05;
+        this.seq[6] = Seq06;
     }
 
     /// <summary>
