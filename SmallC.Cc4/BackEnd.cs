@@ -46,6 +46,8 @@ public class BackEnd(
 
     private const int Pri = /*......*/ 0x18; // primary register bits
     private const int Sec = /*......*/ 0x03; // secondary register bits
+    private const int Uses = /*.....*/ 0x09; // use register contents
+    private const int Zaps = /*.....*/ 0x12; // zap register contents
     private const int Commutes = /*.*/ 0x80; // commutative p-code
 
     private const int HighSeq = 6;
@@ -869,12 +871,40 @@ public class BackEnd(
         }
     }
 
-    private bool IsFree(int sec, int next)
+    /// <summary>
+    /// Is the primary or secondary register free?
+    /// Is it zapped or unused by the p-code at pp
+    /// or a successor?  If the primary register is
+    /// unused by it still may not be free if the
+    /// context uses the value of the expression.
+    /// </summary>
+    private bool IsFree(int reg, int pp)
     {
-        _ = storage;
-        _ = sec;
-        _ = next;
-        return false;
+        Code cp;
+        while (pp < storage.Stage?.Count)
+        {
+            cp = this.code[storage.Stage[pp].Key];
+            if ((cp.Property & Uses & reg) != 0)
+            {
+                return false;
+            }
+
+            if ((cp.Property & Zaps & reg) != 0)
+            {
+                return true;
+            }
+
+            pp++;
+        }
+
+        if (storage.UseXpr)
+        {
+            return (reg & 0x01) != 0; // PRI => NO, SEC => YES at end
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private int? GetPop(int next)
