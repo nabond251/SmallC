@@ -791,18 +791,19 @@ public class BackEnd(
                         break;
 
                     case Gc:
-                        SetCode(next, storage.Stage[n].Key);
+                        SetCode(next, storage.Stage[next + n].Key);
 #pragma warning disable S907 // "goto" statement should not be used
                         goto done;
 
                     case Gv:
-                        SetValue(next, storage.Stage[n].Value);
+                        SetValue(next, storage.Stage[next + n].Value);
                         goto done;
 
                     case Sum:
-                        SetValue(
-                            next,
-                            storage.Stage[next].Value + storage.Stage[n].Value);
+                        var sum =
+                            storage.Stage[next].Value +
+                            storage.Stage[next + n].Value;
+                        SetValue(next, sum);
                         goto done;
 
                     case Neg:
@@ -815,14 +816,14 @@ public class BackEnd(
                             (PCode)n);
                         SetValue(
                             pop.Value,
-                            storage.Stage[n].Value);
+                            storage.Stage[next + n].Value);
                         goto done;
 #pragma warning restore S907 // "goto" statement should not be used
 
                     case Swv:
                         tmp = storage.Stage[next].Value;
-                        SetValue(next, storage.Stage[n].Value);
-                        SetValue(n, tmp);
+                        SetValue(next, storage.Stage[next + n].Value);
+                        SetValue(next + n, tmp);
 
                     done:
                         reply = true;
