@@ -17,39 +17,61 @@ public class OptimizerTests
     /// <summary>
     /// Tests optimizer.
     /// </summary>
-    /// <param name="inputText">Input stream text.</param>
+    /// <param name="unoptimized">Input stream text.</param>
     /// <param name="expected">Expected parsing line.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
 #pragma warning disable SA1118 // Parameter should not span multiple lines
     [InlineData(
-@"
-int gi1;
-func(ai, aia, aip, ac, aca, acp) int  ai, aia[], *aip;
-                                 char ac, aca[], *acp; {
-  ai;
-  aia;
-  aia[5];
-  aip;
-  *aip;
-  ac;
-  aca;
-  aca[5];
-  acp;
-  *acp;
-  return (gi1);
-  }",
-@"DATA SEGMENT PUBLIC
-PUBLIC _GI1
-_GI1 DW 1 DUP(0)
-DATA ENDS
-CODE SEGMENT PUBLIC
-ASSUME CS:CODE, SS:DATA, DS:DATA
-PUBLIC _FUNC
-_FUNC:
-PUSH BP
-MOV BP,SP
-MOV AX,14[BP]
+@"",
+@"")]
+    [InlineData(
+@"LEA AX,14[BP]
+MOV BX,AX
+MOV AX,[BX]
+LEA AX,12[BP]
+MOV BX,AX
+MOV AX,[BX]
+LEA AX,12[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,10
+ADD AX,BX
+MOV BX,AX
+MOV AX,[BX]
+LEA AX,10[BP]
+MOV BX,AX
+MOV AX,[BX]
+LEA AX,10[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AX,[BX]
+LEA AX,8[BP]
+MOV BX,AX
+MOV AL,[BX]
+CBW
+LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+LEA AX,6[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,5
+ADD AX,BX
+MOV BX,AX
+MOV AL,[BX]
+CBW
+LEA AX,4[BP]
+MOV BX,AX
+MOV AX,[BX]
+LEA AX,4[BP]
+MOV BX,AX
+MOV AX,[BX]
+MOV BX,AX
+MOV AL,[BX]
+CBW",
+@"MOV AX,14[BP]
 MOV AX,12[BP]
 MOV BX,12[BP]
 ADD BX,10
@@ -67,39 +89,14 @@ CBW
 MOV AX,4[BP]
 MOV BX,4[BP]
 MOV AL,[BX]
-CBW
-MOV AX,_GI1
-POP BP
-RET
-")]
-    [InlineData(
-@"
-unsigned int gui1;
-func(aui, auia, auip, auc, auca, aucp) unsigned int  aui, auia[], *auip;
-                                       unsigned char auc, auca[], *aucp; {
-  return (gui1);
-  }",
-@"DATA SEGMENT PUBLIC
-PUBLIC _GUI1
-_GUI1 DW 1 DUP(0)
-DATA ENDS
-CODE SEGMENT PUBLIC
-ASSUME CS:CODE, SS:DATA, DS:DATA
-PUBLIC _FUNC
-_FUNC:
-PUSH BP
-MOV BP,SP
-MOV AX,_GUI1
-POP BP
-RET
-")]
+CBW")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanOptimizeAsync(
-        string inputText, string? expected)
+        string unoptimized, string? expected)
     {
         using var outputStream = new MemoryStream();
         using var output = new StreamWriter(outputStream);
-        var byteArray = Encoding.ASCII.GetBytes(inputText);
+        var byteArray = Encoding.ASCII.GetBytes(unoptimized);
         var inputStream = new MemoryStream(byteArray);
         using var input = new StreamReader(inputStream);
         var sut = Arrange(output: output, input: input);
