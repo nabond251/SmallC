@@ -19,7 +19,7 @@ public class OptimizerTests
     /// Tests optimizer.
     /// </summary>
     /// <param name="unoptimized">Unoptimized p-codes.</param>
-    /// <param name="optimized">Optimized p-codes.</param>
+    /// <param name="expected">Optimized code.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Theory]
 #pragma warning disable SA1118 // Parameter should not span multiple lines
@@ -69,40 +69,48 @@ MOVE21,0
 GETw1p,0
 MOVE21,0
 GETb1m,0",
-@"GETw1s,14
-GETw1s,12
-GETw2s,12
-ADD2n,10
-GETw1p,0
-GETw1s,10
-GETw2s,10
-GETw1p,0
-GETb1s,8
-GETw1s,6
-GETw2s,6
-ADD2n,5
-GETb1m,0
-GETw1s,4
-GETw2s,4
-GETb1m,0")]
+@"MOV AX,14[BP]
+MOV AX,12[BP]
+MOV BX,12[BP]
+ADD BX,10
+MOV AX,[BX]
+MOV AX,10[BP]
+MOV BX,10[BP]
+MOV AX,[BX]
+MOV AL,8[BP]
+CBW
+MOV AX,6[BP]
+MOV BX,6[BP]
+ADD BX,5
+MOV AL,[BX]
+CBW
+MOV AX,4[BP]
+MOV BX,4[BP]
+MOV AL,[BX]
+CBW
+")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanOptimizeAsync(
-        string unoptimized, string optimized)
+        string unoptimized, string expected)
     {
         ArgumentNullException.ThrowIfNull(unoptimized);
-        ArgumentNullException.ThrowIfNull(optimized);
-        var (sut, storage) = Arrange(unoptimized);
+        using var outputStream = new MemoryStream();
+        using var output = new StreamWriter(outputStream);
+        var sut = Arrange(output, unoptimized);
 
         await sut.DumpStageAsync();
-        var actual = storage.Stage;
+        await output.FlushAsync();
+        outputStream.Position = 0;
+        using var reader = new StreamReader(outputStream);
+        var actual = await reader.ReadToEndAsync();
 
-        var expected = ParsePCodes(optimized);
         Assert.Equal(expected, actual);
     }
 
-    private static (BackEnd Sut, Storage Storage) Arrange(string unoptimized)
+    private static BackEnd Arrange(
+        StreamWriter output, string unoptimized)
     {
-        var storage = new Storage(optimize: true);
+        var storage = new Storage(output: output, optimize: true);
 
         var symTabMgmt = new SymbolTableUseCases(storage);
         var utility = new UtilityUseCases(storage);
@@ -409,7 +417,7 @@ GETb1m,0")]
         var stage = storage.Stage ?? throw new InvalidOperationException();
         ParsePCodes(unoptimized).ForEach(stage.Add);
 
-        return (sut, storage);
+        return sut;
     }
 
     private static List<KeyValuePair<PCode, int>> ParsePCodes(string pCodes)
