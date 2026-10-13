@@ -253,6 +253,16 @@ RET
 unsigned int gui1;
 func(aui, auia, auip, auc, auca, aucp) unsigned int  aui, auia[], *auip;
                                        unsigned char auc, auca[], *aucp; {
+  aui;
+  auia;
+  auia[5];
+  auip;
+  *auip;
+  auc;
+  auca;
+  auca[5];
+  aucp;
+  *aucp;
   return (gui1);
   }",
 @"DATA SEGMENT PUBLIC
@@ -265,6 +275,25 @@ PUBLIC _FUNC
 _FUNC:
 PUSH BP
 MOV BP,SP
+MOV AX,14[BP]
+MOV AX,12[BP]
+MOV BX,12[BP]
+ADD BX,10
+MOV AX,[BX]
+MOV AX,10[BP]
+MOV BX,10[BP]
+MOV AX,[BX]
+MOV AL,8[BP]
+XOR AH,AH
+MOV AX,6[BP]
+MOV BX,6[BP]
+ADD BX,5
+MOV AL,[BX]
+XOR AH,AH
+MOV AX,4[BP]
+MOV BX,4[BP]
+MOV AL,[BX]
+XOR AH,AH
 MOV AX,_GUI1
 POP BP
 RET
