@@ -89,6 +89,69 @@ MOV BX,4[BP]
 MOV AL,[BX]
 CBW
 ")]
+    [InlineData(
+@"POINT1s,14
+MOVE21,0
+GETw1p,0
+POINT1s,12
+MOVE21,0
+GETw1p,0
+POINT1s,12
+MOVE21,0
+GETw1p,0
+GETw2n,10
+ADD12,0
+MOVE21,0
+GETw1p,0
+POINT1s,10
+MOVE21,0
+GETw1p,0
+POINT1s,10
+MOVE21,0
+GETw1p,0
+MOVE21,0
+GETw1p,0
+POINT1s,8
+MOVE21,0
+GETb1pu,0
+POINT1s,6
+MOVE21,0
+GETw1p,0
+POINT1s,6
+MOVE21,0
+GETw1p,0
+GETw2n,5
+ADD12,0
+MOVE21,0
+GETb1pu,0
+POINT1s,4
+MOVE21,0
+GETw1p,0
+POINT1s,4
+MOVE21,0
+GETw1p,0
+MOVE21,0
+GETb1pu,0",
+@"MOV AX,14[BP]
+MOV AX,12[BP]
+MOV BX,12[BP]
+ADD BX,10
+MOV AX,[BX]
+MOV AX,10[BP]
+MOV BX,10[BP]
+MOV AX,[BX]
+MOV AL,8[BP]
+XOR AH,AH
+MOV AX,6[BP]
+MOV BX,6[BP]
+ADD BX,5
+MOV AL,[BX]
+XOR AH,AH
+MOV AX,4[BP]
+MOV BX,4[BP]
+MOV AL,[BX]
+XOR AH,AH
+")]
 #pragma warning restore SA1118 // Parameter should not span multiple lines
     public async Task CanOptimizeAsync(
         string unoptimized, string expected)
