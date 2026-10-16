@@ -146,6 +146,27 @@ MOV AL,12[BX]
 XOR AH,AH
 ")]
     [InlineData(
+@"GETw1m,6
+GETw2n,12
+ADD12,0
+MOVE21,0
+GETw1p,4",
+@"MOV BX,_I
+MOV AX,12[BX]
+")]
+    [InlineData(
+@"GETw1m,6
+GETw2m,9
+SWAP12,0",
+@"MOV BX,_I
+MOV AX,_UI
+")]
+    [InlineData(
+@"GETw1m,6
+MOVE21,0",
+@"MOV BX,_I
+")]
+    [InlineData(
 @"POINT1s,14
 MOVE21,0
 GETw1p,0
