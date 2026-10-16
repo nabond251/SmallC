@@ -90,6 +90,30 @@ INC BX
 @"ADD BX,3
 ")]
     [InlineData(
+@"rDEC1,1
+PUTbp1,0
+rINC1,1",
+@"DEC BYTE PTR [BX]
+")]
+    [InlineData(
+@"rDEC1,2
+PUTbp1,0
+rINC1,2",
+@"SUB BYTE PTR [BX],2
+")]
+    [InlineData(
+@"rDEC1,1
+PUTwp1,0
+rINC1,1",
+@"DEC WORD PTR [BX]
+")]
+    [InlineData(
+@"rDEC1,2
+PUTwp1,0
+rINC1,2",
+@"SUB WORD PTR [BX],2
+")]
+    [InlineData(
 @"POINT1s,14
 MOVE21,0
 GETw1p,0
