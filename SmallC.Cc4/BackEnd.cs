@@ -39,7 +39,7 @@ public class BackEnd(
     private const int ToPop = /*.*/ 0x0900; // move code and current value to POP2
 
     private const int P1 = /*....*/ 0x0001; // plus 1
-    private const int P2 = /*....*/ 0x0001; // plus 2
+    private const int P2 = /*....*/ 0x0002; // plus 2
     private const int P3 = /*....*/ 0x0003; // plus 3
     private const int M1 = /*....*/ 0x00FF; // minus 1
     private const int M2 = /*....*/ 0x00FE; // minus 2
