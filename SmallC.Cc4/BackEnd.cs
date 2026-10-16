@@ -41,8 +41,10 @@ public class BackEnd(
     private const int P1 = /*....*/ 0x0001; // plus 1
     private const int P2 = /*....*/ 0x0002; // plus 2
     private const int P3 = /*....*/ 0x0003; // plus 3
+    private const int P4 = /*....*/ 0x0004; // plus 4
     private const int M1 = /*....*/ 0x00FF; // minus 1
     private const int M2 = /*....*/ 0x00FE; // minus 2
+    private const int M3 = /*....*/ 0x00FD; // minus 3
 
     private const int Pri = /*......*/ 0x18; // primary register bits
     private const int Sec = /*......*/ 0x03; // secondary register bits
@@ -50,7 +52,7 @@ public class BackEnd(
     private const int Zaps = /*.....*/ 0x12; // zap register contents
     private const int Commutes = /*.*/ 0x80; // commutative p-code
 
-    private const int HighSeq = 12;
+    private const int HighSeq = 14;
 
     /// <summary>
     /// ADD21.
@@ -102,44 +104,58 @@ public class BackEnd(
         Go | P1, (int)PCode.SUB_m_, Go | P1, (int)PCode.COMMAn, Go | M1, 0];
 
     /// <summary>
-    /// 16 - GETw2s ADD2n.
+    /// GETw2m GETb1p.
     /// </summary>
     private static readonly int[] Seq07 = [
+        0, (int)PCode.GETw1m, (int)PCode.GETw2n, (int)PCode.ADD12, (int)PCode.MOVE21, (int)PCode.GETb1p, 0,
+        Go | P4, Gv | M3, Go | M1, (int)PCode.GETw2m, Gv | M3, 0];
+
+    /// <summary>
+    /// GETw2m GETb1pu.
+    /// </summary>
+    private static readonly int[] Seq08 = [
+        0, (int)PCode.GETw1m, (int)PCode.GETw2n, (int)PCode.ADD12, (int)PCode.MOVE21, (int)PCode.GETb1pu, 0,
+        Go | P4, Gv | M3, Go | M1, (int)PCode.GETw2m, Gv | M3, 0];
+
+    /// <summary>
+    /// 16 - GETw2s ADD2n.
+    /// </summary>
+    private static readonly int[] Seq09 = [
         0, (int)PCode.GETw1s, (int)PCode.GETw2n, (int)PCode.ADD12, (int)PCode.MOVE21, 0,
         Go | P3, (int)PCode.ADD2n, Gv | M2, Go | M1, (int)PCode.GETw2s, Gv | M2, 0];
 
     /// <summary>
     /// 18 - GETw2s.
     /// </summary>
-    private static readonly int[] Seq08 = [
+    private static readonly int[] Seq10 = [
         0, (int)PCode.GETw1s, (int)PCode.MOVE21, 0,
         Go | P1, (int)PCode.GETw2s, Gv | M1, 0];
 
     /// <summary>
     /// 36 - POINT2s.
     /// </summary>
-    private static readonly int[] Seq09 = [
+    private static readonly int[] Seq11 = [
         0, (int)PCode.POINT1s, (int)PCode.MOVE21, 0,
         Go | P1, (int)PCode.POINT2s, Gv | M1, 0];
 
     /// <summary>
     /// 41 - GETb1s.
     /// </summary>
-    private static readonly int[] Seq10 = [
+    private static readonly int[] Seq12 = [
         0, (int)PCode.POINT2s, (int)PCode.GETb1p, SFree, 0,
         Sum | P1, Go | P1, (int)PCode.GETb1s, Gv | M1, 0];
 
     /// <summary>
     /// 42 - GETb1su.
     /// </summary>
-    private static readonly int[] Seq11 = [
+    private static readonly int[] Seq13 = [
         0, (int)PCode.POINT2s, (int)PCode.GETb1pu, SFree, 0,
         Sum | P1, Go | P1, (int)PCode.GETb1su, Gv | M1, 0];
 
     /// <summary>
     /// 44 - GETw1s.
     /// </summary>
-    private static readonly int[] Seq12 = [
+    private static readonly int[] Seq14 = [
         0, (int)PCode.POINT2s, (int)PCode.GETw1p, SFree, 0,
         Sum | P1, Go | P1, (int)PCode.GETw1s, Gv | M1, 0];
 
@@ -166,6 +182,8 @@ public class BackEnd(
         this.seq[10] = Seq10;
         this.seq[11] = Seq11;
         this.seq[12] = Seq12;
+        this.seq[13] = Seq13;
+        this.seq[14] = Seq14;
     }
 
     /// <summary>
