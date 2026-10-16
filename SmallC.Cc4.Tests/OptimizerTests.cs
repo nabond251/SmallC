@@ -126,6 +126,26 @@ rINC1,2",
 @"SUB _I,2
 ")]
     [InlineData(
+@"GETw1m,6
+GETw2n,12
+ADD12,0
+MOVE21,0
+GETb1p,4",
+@"MOV BX,_I
+MOV AL,12[BX]
+CBW
+")]
+    [InlineData(
+@"GETw1m,6
+GETw2n,12
+ADD12,0
+MOVE21,0
+GETb1pu,4",
+@"MOV BX,_I
+MOV AL,12[BX]
+XOR AH,AH
+")]
+    [InlineData(
 @"POINT1s,14
 MOVE21,0
 GETw1p,0
