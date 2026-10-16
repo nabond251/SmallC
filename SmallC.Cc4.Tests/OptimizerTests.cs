@@ -114,6 +114,18 @@ rINC1,2",
 @"SUB WORD PTR [BX],2
 ")]
     [InlineData(
+@"rDEC1,1
+PUTbm1,0
+rINC1,1",
+@"SUB _C,1
+")]
+    [InlineData(
+@"rDEC1,2
+PUTwm1,6
+rINC1,2",
+@"SUB _I,2
+")]
+    [InlineData(
 @"POINT1s,14
 MOVE21,0
 GETw1p,0
