@@ -27,6 +27,69 @@ public class OptimizerTests
 @"",
 @"")]
     [InlineData(
+@"ADD12,0
+MOVE21,0",
+@"ADD BX,AX
+")]
+    [InlineData(
+@"ADD1n,-3",
+@"ADD AX,-3
+")]
+    [InlineData(
+@"ADD1n,-2",
+@"DEC AX
+DEC AX
+")]
+    [InlineData(
+@"ADD1n,-1",
+@"DEC AX
+")]
+    [InlineData(
+@"ADD1n,0",
+@"")]
+    [InlineData(
+@"ADD1n,1",
+@"INC AX
+")]
+    [InlineData(
+@"ADD1n,2",
+@"INC AX
+INC AX
+")]
+    [InlineData(
+@"ADD1n,3",
+@"ADD AX,3
+")]
+    [InlineData(
+@"ADD2n,-3",
+@"ADD BX,-3
+")]
+    [InlineData(
+@"ADD2n,-2",
+@"DEC BX
+DEC BX
+")]
+    [InlineData(
+@"ADD2n,-1",
+@"DEC BX
+")]
+    [InlineData(
+@"ADD2n,0",
+@"")]
+    [InlineData(
+@"ADD2n,1",
+@"INC BX
+")]
+    [InlineData(
+@"ADD2n,2",
+@"INC BX
+INC BX
+")]
+    [InlineData(
+@"ADD2n,3",
+@"ADD BX,3
+")]
+    [InlineData(
 @"POINT1s,14
 MOVE21,0
 GETw1p,0
