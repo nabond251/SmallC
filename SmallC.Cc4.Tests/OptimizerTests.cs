@@ -167,6 +167,19 @@ MOVE21,0",
 @"MOV BX,_I
 ")]
     [InlineData(
+@"GETw1m,6
+PUSH1,0",
+@"PUSH _I
+")]
+    [InlineData(
+@"GETw1m,6
+PUSH1,0
+MOVE21,0",
+@"MOV AX,_I
+PUSH AX
+MOV BX,AX
+")]
+    [InlineData(
 @"POINT1s,14
 MOVE21,0
 GETw1p,0
