@@ -52,7 +52,7 @@ public class BackEnd(
     private const int Zaps = /*.....*/ 0x12; // zap register contents
     private const int Commutes = /*.*/ 0x80; // commutative p-code
 
-    private const int HighSeq = 17;
+    private const int HighSeq = 18;
 
     /// <summary>
     /// ADD21.
@@ -139,44 +139,51 @@ public class BackEnd(
         Go | P1, (int)PCode.GETw2m, Gv | M1, 0];
 
     /// <summary>
-    /// 16 - GETw2s ADD2n.
+    /// PUSHm.
     /// </summary>
     private static readonly int[] Seq12 = [
+        0, (int)PCode.GETw1m, (int)PCode.PUSH1, PFree, 0,
+        Go | P1, (int)PCode.PUSHm, Gv | M1, 0];
+
+    /// <summary>
+    /// 16 - GETw2s ADD2n.
+    /// </summary>
+    private static readonly int[] Seq13 = [
         0, (int)PCode.GETw1s, (int)PCode.GETw2n, (int)PCode.ADD12, (int)PCode.MOVE21, 0,
         Go | P3, (int)PCode.ADD2n, Gv | M2, Go | M1, (int)PCode.GETw2s, Gv | M2, 0];
 
     /// <summary>
     /// 18 - GETw2s.
     /// </summary>
-    private static readonly int[] Seq13 = [
+    private static readonly int[] Seq14 = [
         0, (int)PCode.GETw1s, (int)PCode.MOVE21, 0,
         Go | P1, (int)PCode.GETw2s, Gv | M1, 0];
 
     /// <summary>
     /// 36 - POINT2s.
     /// </summary>
-    private static readonly int[] Seq14 = [
+    private static readonly int[] Seq15 = [
         0, (int)PCode.POINT1s, (int)PCode.MOVE21, 0,
         Go | P1, (int)PCode.POINT2s, Gv | M1, 0];
 
     /// <summary>
     /// 41 - GETb1s.
     /// </summary>
-    private static readonly int[] Seq15 = [
+    private static readonly int[] Seq16 = [
         0, (int)PCode.POINT2s, (int)PCode.GETb1p, SFree, 0,
         Sum | P1, Go | P1, (int)PCode.GETb1s, Gv | M1, 0];
 
     /// <summary>
     /// 42 - GETb1su.
     /// </summary>
-    private static readonly int[] Seq16 = [
+    private static readonly int[] Seq17 = [
         0, (int)PCode.POINT2s, (int)PCode.GETb1pu, SFree, 0,
         Sum | P1, Go | P1, (int)PCode.GETb1su, Gv | M1, 0];
 
     /// <summary>
     /// 44 - GETw1s.
     /// </summary>
-    private static readonly int[] Seq17 = [
+    private static readonly int[] Seq18 = [
         0, (int)PCode.POINT2s, (int)PCode.GETw1p, SFree, 0,
         Sum | P1, Go | P1, (int)PCode.GETw1s, Gv | M1, 0];
 
@@ -208,6 +215,7 @@ public class BackEnd(
         this.seq[15] = Seq15;
         this.seq[16] = Seq16;
         this.seq[17] = Seq17;
+        this.seq[18] = Seq18;
     }
 
     /// <summary>
